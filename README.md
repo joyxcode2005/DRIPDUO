@@ -1,1 +1,4 @@
 # DRIPDUO
+
+
+## Database Schema
