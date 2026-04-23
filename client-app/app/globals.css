@@ -1,8 +1,10 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #0a0a0a;
+  --foreground: #ededed;
+  --brand-red: #e63946;
+  --brand-blue: #1d3557;
 }
 
 @theme inline {
@@ -12,15 +14,112 @@
   --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
-
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
 }
+
+/* --- SEAMLESS INFINITE MARQUEE --- */
+.marquee-container {
+  display: flex;
+  width: max-content;
+  animation: scroll-x 15s linear infinite;
+}
+@keyframes scroll-x {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
+/* --- FLIP CARD ELEVATED --- */
+.flip-card {
+  background: transparent;
+  width: 320px;
+  height: 450px;
+  perspective: 1500px;
+}
+.flip-card-inner {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  transition: transform 0.8s cubic-bezier(0.77, 0, 0.18, 1);
+  transform-style: preserve-3d;
+}
+.flip-card:hover .flip-card-inner {
+  transform: rotateY(180deg);
+}
+.flip-card-front, .flip-card-back {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  backface-visibility: hidden;
+  border-radius: 1rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  text-align: center;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+  border: 1px solid rgba(255,255,255,0.1);
+}
+.flip-card-front {
+  background: #111;
+  background-image: linear-gradient(to bottom right, #1a1a1a, #0a0a0a);
+}
+.flip-card-back {
+  background: var(--brand-red);
+  transform: rotateY(180deg);
+}
+
+/* --- ROTATING BADGE --- */
+.rotate-svg {
+  animation: rotate360 8s linear infinite;
+  transform-origin: center;
+}
+@keyframes rotate360 {
+  100% { transform: rotate(360deg); }
+}
+
+/* --- PARALLAX HORIZONTAL SCROLL --- */
+.parallax-scroll {
+  display: flex;
+  width: max-content;
+  animation: parallax-x 25s linear infinite;
+}
+.parallax-scroll:hover {
+  animation-play-state: paused;
+}
+@keyframes parallax-x {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
+/* --- HAND-DRAWN PENCIL EFFECTS --- */
+.pencil-underline-path {
+  stroke-dasharray: 1000;
+  stroke-dashoffset: 1000;
+  animation: draw 1.5s cubic-bezier(0.77, 0, 0.18, 1) 0.5s forwards;
+}
+.pencil-circle-ellipse {
+  stroke-dasharray: 500;
+  stroke-dashoffset: 500;
+  animation: draw 1.2s cubic-bezier(0.77, 0, 0.18, 1) 1s forwards;
+}
+@keyframes draw {
+  to { stroke-dashoffset: 0; }
+}
+.pencil-underline-target {
+  position: relative;
+  display: inline-block;
+}
+.pencil-circle-target {
+  position: relative;
+  display: inline-block;
+  padding: 0 0.2em;
+}
+
+/* HIDE SCROLLBARS */
+.scrollbar-hide::-webkit-scrollbar { display: none; }
+.scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
