@@ -1,10 +1,16 @@
-/* eslint-disable @next/next/no-img-element */
-/* eslint-disable react/jsx-no-comment-textnodes */
-import React from "react";
+ 
+ 
+"use client";
+
+import Link from "next/link";
+import { ArrowRight } from "lucide-react";
+import { AnimatedTestimonials } from "@/components/ui/animated-testimonials";
+import Image from "next/image";
+import { testimonials } from "@/constants";
 
 export default function Home() {
   return (
-    <main className="dripduo-landing min-h-screen w-full bg-[#0a0a0a] text-white font-sans selection:bg-[#e63946] selection:text-white">
+    <main className="dripduo-landing min-h-screen w-full bg-[#0a0a0a] text-white font-sans selection:bg-[#e63946] selection:text-white overflow-x-hidden">
       
       {/* HERO SECTION */}
       <section className="relative flex min-h-screen items-center justify-center overflow-hidden px-4">
@@ -34,11 +40,19 @@ export default function Home() {
               </svg>
             </span>.
           </h2>
+
+          {/* THE EXPLORE BUTTON */}
+          <Link href="/products" className="mt-10 group relative inline-flex items-center justify-center px-10 py-5 font-black text-white bg-[#e63946] overflow-hidden uppercase tracking-widest text-xl md:text-2xl border-2 border-transparent hover:border-white transition-all duration-300">
+            <span className="absolute w-0 h-0 transition-all duration-500 ease-out bg-white rounded-full group-hover:w-[150%] group-hover:h-75"></span>
+            <span className="relative group-hover:text-black flex items-center gap-3">
+              Explore The Drop <ArrowRight className="w-6 h-6 group-hover:translate-x-2 transition-transform" />
+            </span>
+          </Link>
         </div>
 
         {/* Floating Rotating Badge */}
         <div className="absolute bottom-10 right-10 md:bottom-20 md:right-20">
-          <div className="relative flex items-center justify-center w-32 h-32">
+          <div className="relative items-center justify-center w-32 h-32 hidden md:flex">
             <svg className="rotate-svg absolute inset-0 w-full h-full" viewBox="0 0 120 120" fill="none">
               <path id="curve" d="M 60, 60 m -40, 0 a 40,40 0 1,1 80,0 a 40,40 0 1,1 -80,0" fill="transparent" />
               <text fill="#ffffff" fontSize="11" className="font-mono tracking-widest uppercase font-bold">
@@ -77,10 +91,12 @@ export default function Home() {
             {[1, 2, 3, 4, 5, 1, 2, 3, 4, 5].map((i, index) => (
               <div key={index} className="shrink-0 w-72 h-96 md:w-96 md:h-120 rounded-2xl bg-zinc-900 border border-zinc-800 overflow-hidden group relative cursor-pointer">
                 <div className="absolute inset-0 bg-linear-to-t from-black/80 to-transparent z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-                // eslint-disable-next-line @next/next/no-img-element
-                <img 
+                { }
+                <Image
                   src={`https://images.unsplash.com/photo-1550614000-4b95d4ed141b?w=600&q=80`} 
                   alt="Streetwear Look" 
+                  width={1}
+                  height={10}
                   className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-700 group-hover:scale-110"
                 />
                 <div className="absolute bottom-6 left-6 z-20 translate-y-4 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-500">
@@ -114,12 +130,20 @@ export default function Home() {
             <div className="flip-card-back">
               <span className="text-3xl font-black text-white uppercase leading-tight">Defy<br/>Expectations.</span>
               <p className="text-white/90 text-sm mt-6 font-medium">Join the underground. Wear the rebellion.</p>
-              <button className="mt-8 bg-white text-[#e63946] font-bold px-6 py-3 rounded-full hover:bg-black hover:text-white transition-colors uppercase text-sm cursor-pointer">
+              <Link href="/products" className="mt-8 bg-white text-[#e63946] font-bold px-6 py-3 rounded-full hover:bg-black hover:text-white transition-colors uppercase text-sm cursor-pointer inline-block">
                 Shop Now
-              </button>
+              </Link>
             </div>
           </div>
         </div>
+      </section>
+
+      {/* TESTIMONIALS SECTION */}
+      <section className="py-32 bg-zinc-950 px-4">
+        <div className="max-w-7xl mx-auto mb-16 text-center">
+          <h3 className="text-4xl md:text-6xl font-black uppercase tracking-tight text-white">The Cult <span className="text-[#e63946]">Speaks</span></h3>
+        </div>
+        <AnimatedTestimonials testimonials={testimonials} />
       </section>
 
       {/* NATIVE SVG LIQUID FOOTER TRANSITION */}
