@@ -1,81 +1,114 @@
-/* eslint-disable react/jsx-no-comment-textnodes */
-/* eslint-disable @next/next/no-img-element */
 "use client";
 import React, { useState } from "react";
 import Link from "next/link";
-import { ArrowLeft, Filter, Search } from "lucide-react";
-import { CATEGORIES, MOCK_PRODUCTS, PRODUCT_TYPES } from "@/constants";
+import { ArrowLeft, Filter, Search, X } from "lucide-react";
 
+// 1. Import the Modal and CartItem type
+import { QuickViewModal } from "@/components/ui/quick-view-modal";
+import { CartItem } from "@/lib/CartContext";
+
+const CATEGORIES = ["All", "Trending memes", "Bong", "States", "Gym", "Spiritual", "Anime", "Abstract", "Gothic", "Corporate", "Kpop"];
+const PRODUCT_TYPES = ["All", "T-Shirt", "Oversized", "Hoodies", "Accessories", "Others"];
+
+const MOCK_PRODUCTS = [
+  { id: 1, name: "Gothic Skull Premium", price: 145, type: "Oversized", category: "Gothic", image: "https://images.unsplash.com/photo-1583743814966-8936f5b7be1a?w=800&q=80" },
+  { id: 2, name: "Tokyo Drift Silk Tee", price: 130, type: "T-Shirt", category: "Anime", image: "https://images.unsplash.com/photo-1529374255404-311a2a4f1fd9?w=800&q=80" },
+  { id: 3, name: "Corporate Archive", price: 125, type: "T-Shirt", category: "Corporate", image: "https://images.unsplash.com/photo-1618517351616-38fb9c52ce37?w=800&q=80" },
+  { id: 4, name: "Heavyweight Pump", price: 150, type: "Oversized", category: "Gym", image: "https://images.unsplash.com/photo-1571945153237-4929e783af4a?w=800&q=80" },
+  { id: 5, name: "Bengal Heritage", price: 135, type: "T-Shirt", category: "Bong", image: "https://images.unsplash.com/photo-1503342217505-b0a15ec3261c?w=800&q=80" },
+  // States specific data for Bento
+  { id: 6, name: "Kashmir Cashmere", price: 240, type: "Hoodies", category: "States", image: "https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=800&q=80" },
+  { id: 7, name: "Goa Linen Blend", price: 110, type: "T-Shirt", category: "States", image: "https://images.unsplash.com/photo-1550614000-4b95d4ed141b?w=800&q=80" },
+  { id: 8, name: "Punjab Heavyweight", price: 160, type: "Oversized", category: "States", image: "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=800&q=80" },
+  { id: 9, name: "Kerala Loom Tee", price: 120, type: "T-Shirt", category: "States", image: "https://images.unsplash.com/photo-1576566588028-4147f3842f27?w=800&q=80" },
+];
 
 export default function ProductsPage() {
   const [activeType, setActiveType] = useState("All");
   const [activeCategory, setActiveCategory] = useState("All");
+  const [isMobileFiltersOpen, setIsMobileFiltersOpen] = useState(false);
+
+  // 2. Add Quick View State
+  const [selectedProduct, setSelectedProduct] = useState<CartItem | null>(null);
+  const [isQuickViewOpen, setIsQuickViewOpen] = useState(false);
 
   // Filtering Logic
   const filteredProducts = MOCK_PRODUCTS.filter((product) => {
-    const matchType = activeType === "All" || product.type === activeType;
-    const matchCategory = activeCategory === "All" || product.category === activeCategory;
-    return matchType && matchCategory;
+    return (activeType === "All" || product.type === activeType) &&
+           (activeCategory === "All" || product.category === activeCategory);
   });
 
+  // 3. Quick View Handler
+  const handleQuickView = (product: any, e: React.MouseEvent) => {
+    e.stopPropagation(); // Prevents navigating away if the card is ever wrapped in a Link
+    setSelectedProduct({ ...product, quantity: 1 });
+    setIsQuickViewOpen(true);
+  };
+
   return (
-    <div className="min-h-screen bg-[#0a0a0a] text-white flex flex-col md:flex-row font-sans selection:bg-[#e63946] selection:text-white">
+    <div className="min-h-screen bg-[#050505] text-[#f8f8f8] flex flex-col md:flex-row font-sans selection:bg-[#C5A059] selection:text-black">
       
-      {/* LEFT SIDEBAR (Desktop) */}
-      <aside className="w-full md:w-64 lg:w-80 shrink-0 border-b md:border-b-0 md:border-r border-zinc-800 bg-[#111] p-6 sticky top-0 md:h-screen md:overflow-y-auto z-20">
-        <Link href="/" className="flex items-center gap-2 text-zinc-400 hover:text-white mb-10 transition-colors uppercase font-bold tracking-widest text-sm">
-          <ArrowLeft className="w-4 h-4" /> Back to Home
-        </Link>
+      {/* MOBILE FILTERS TOGGLE */}
+      <div className="md:hidden p-4 border-b border-white/10 flex justify-between items-center sticky top-0 bg-[#050505]/90 backdrop-blur z-30 mt-[68px]">
+        <span className="font-black tracking-widest uppercase text-[#C5A059]">Dripduo</span>
+        <button onClick={() => setIsMobileFiltersOpen(true)} className="flex items-center gap-2 text-xs tracking-widest uppercase border border-white/20 px-4 py-2 hover:bg-white/5 transition-colors">
+          <Filter className="w-4 h-4" /> Filters
+        </button>
+      </div>
 
-        <h2 className="text-3xl font-black uppercase tracking-tighter mb-8 text-[#e63946]">DRIPDUO <br/><span className="text-white">Store.</span></h2>
+      {/* SIDEBAR (Responsive) */}
+      <aside className={`fixed inset-y-0 left-0 z-50 w-full sm:w-80 bg-[#0a0a0a] border-r border-white/5 p-8 transform transition-transform duration-500 ease-[cubic-bezier(0.25,1,0.5,1)] md:relative md:translate-x-0 md:h-screen md:sticky md:top-0 md:overflow-y-auto md:pt-32 ${isMobileFiltersOpen ? 'translate-x-0' : '-translate-x-full'}`}>
+        <div className="flex justify-between items-center mb-12">
+          <Link href="/" className="flex items-center gap-2 text-zinc-500 hover:text-white transition-colors uppercase font-medium tracking-widest text-xs">
+            <ArrowLeft className="w-4 h-4" /> Home
+          </Link>
+          <button onClick={() => setIsMobileFiltersOpen(false)} className="md:hidden text-zinc-500 hover:text-white">
+            <X className="w-6 h-6" />
+          </button>
+        </div>
 
-        <div className="mb-8">
-          <div className="flex items-center gap-2 bg-zinc-900 border border-zinc-800 px-4 py-3 rounded-none focus-within:border-[#e63946] transition-colors">
-            <Search className="w-5 h-5 text-zinc-500" />
-            <input type="text" placeholder="SEARCH DROP..." className="bg-transparent border-none outline-none w-full text-sm font-mono uppercase" />
+        <h2 className="text-2xl font-black uppercase tracking-widest mb-10 text-white">The <br/><span className="text-[#C5A059]">Collection.</span></h2>
+
+        <div className="mb-10">
+          <div className="flex items-center gap-3 border-b border-white/10 pb-2 focus-within:border-[#C5A059] transition-colors">
+            <Search className="w-4 h-4 text-zinc-600" />
+            <input type="text" placeholder="Search archive..." className="bg-transparent border-none outline-none w-full text-xs font-mono uppercase text-white placeholder-zinc-600" />
           </div>
         </div>
 
-        <div className="space-y-6">
-          <div>
-            <h3 className="text-sm font-bold uppercase tracking-widest text-zinc-500 mb-4 flex items-center gap-2">
-              <Filter className="w-4 h-4"/> Product Type
-            </h3>
-            <ul className="space-y-2">
-              {PRODUCT_TYPES.map((type) => (
-                <li key={type}>
-                  <button 
-                    onClick={() => setActiveType(type)}
-                    className={`w-full text-left px-4 py-3 font-bold uppercase tracking-wide text-sm transition-all duration-200 border-l-4 ${
-                      activeType === type 
-                        ? "border-[#e63946] bg-zinc-900 text-white" 
-                        : "border-transparent text-zinc-400 hover:text-white hover:bg-zinc-900/50"
-                    }`}
-                  >
-                    {type}
-                  </button>
-                </li>
-              ))}
-            </ul>
-          </div>
+        <div>
+          <h3 className="text-xs font-medium uppercase tracking-[0.2em] text-zinc-600 mb-6 flex items-center gap-2">Silhouette</h3>
+          <ul className="space-y-4">
+            {PRODUCT_TYPES.map((type) => (
+              <li key={type}>
+                <button 
+                  onClick={() => { setActiveType(type); setIsMobileFiltersOpen(false); }}
+                  className={`w-full text-left text-xs uppercase tracking-widest transition-colors duration-300 ${
+                    activeType === type ? "text-[#C5A059]" : "text-zinc-500 hover:text-white"
+                  }`}
+                >
+                  {type}
+                </button>
+              </li>
+            ))}
+          </ul>
         </div>
       </aside>
 
       {/* MAIN CONTENT AREA */}
-      <main className="flex-1 flex flex-col min-h-screen">
+      <main className="flex-1 flex flex-col min-h-screen pt-0 md:pt-[68px]">
         
-        {/* TOP CATEGORIES SCROLL BAR */}
-        <div className="sticky top-0 z-10 bg-[#0a0a0a]/90 backdrop-blur-md border-b border-zinc-800 p-4">
-          <div className="flex overflow-x-auto scrollbar-hide gap-3 pb-2 items-center">
-            <span className="text-xs font-mono text-zinc-500 uppercase tracking-widest mr-2 shrink-0">Vibe Check:</span>
+        {/* LUXURY TOP CATEGORIES BAR */}
+        <div className="sticky top-0 md:top-[68px] z-20 bg-[#050505]/80 backdrop-blur-xl border-b border-white/5 px-6 py-4 md:py-6">
+          <div className="flex overflow-x-auto scrollbar-hide gap-6 items-center">
             {CATEGORIES.map((category) => (
               <button
                 key={category}
                 onClick={() => setActiveCategory(category)}
-                className={`whitespace-nowrap px-5 py-2.5 rounded-full text-xs font-bold uppercase tracking-wider transition-all duration-300 border ${
+                className={`whitespace-nowrap pb-1 text-xs uppercase tracking-widest transition-all duration-500 border-b ${
                   activeCategory === category
-                    ? "bg-[#e63946] text-white border-[#e63946] shadow-[0_0_15px_rgba(230,57,70,0.4)]"
-                    : "bg-zinc-900/50 text-zinc-400 border-zinc-800 hover:border-zinc-600 hover:text-white"
+                    ? "text-[#C5A059] border-[#C5A059]"
+                    : "text-zinc-600 border-transparent hover:text-white"
                 }`}
               >
                 {category}
@@ -84,62 +117,93 @@ export default function ProductsPage() {
           </div>
         </div>
 
-        {/* PRODUCTS GRID */}
-        <div className="p-6 md:p-10 flex-1">
-          <div className="mb-8 flex justify-between items-end">
-            <h1 className="text-4xl md:text-5xl font-black uppercase tracking-tight">
-              {activeCategory === "All" ? "Latest Drops" : activeCategory}
+        {/* PRODUCTS GRID (Standard vs Bento) */}
+        <div className="p-6 md:p-12 flex-1">
+          <div className="mb-12 flex justify-between items-end border-b border-white/5 pb-6">
+            <h1 className="text-3xl md:text-4xl font-light uppercase tracking-[0.1em]">
+              {activeCategory === "All" ? "Latest Archive" : activeCategory}
             </h1>
-            <span className="text-zinc-500 font-mono text-sm">{filteredProducts.length} Items</span>
+            <span className="text-zinc-600 font-mono text-xs tracking-widest">{filteredProducts.length} Pieces</span>
           </div>
 
           {filteredProducts.length > 0 ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-8">
-              {filteredProducts.map((product) => (
-                <div key={product.id} className="group cursor-pointer">
-                  {/* Product Image Box */}
-                  <div className="relative aspect-4/5 bg-zinc-900 overflow-hidden border border-zinc-800 group-hover:border-[#e63946] transition-colors duration-300">
-                    <img 
-                      src={product.image} 
-                      alt={product.name} 
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 grayscale-[0.2] group-hover:grayscale-0"
-                    />
-                    {/* Hover Overlay Button */}
-                    <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                      <span className="bg-white text-black font-black uppercase tracking-widest px-6 py-3 text-sm hover:bg-[#e63946] hover:text-white transition-colors">
-                        Quick Add
-                      </span>
+            activeCategory === "States" ? (
+              /* --- BENTO BOX LAYOUT (For States) --- */
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-4 md:auto-rows-[300px]">
+                {filteredProducts.map((product, i) => {
+                  const isLarge = i === 0;
+                  return (
+                    <div key={product.id} className={`group cursor-pointer relative overflow-hidden bg-[#0a0a0a] ${isLarge ? 'md:col-span-2 md:row-span-2' : 'md:col-span-1 md:row-span-1'}`}>
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img src={product.image} alt={product.name} className="w-full h-full object-cover grayscale-[0.3] group-hover:grayscale-0 group-hover:scale-105 transition-all duration-1000 ease-out" />
+                      
+                      {/* Quick View Overlay (Center) */}
+                      <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-500 flex items-center justify-center z-20">
+                        <button 
+                          onClick={(e) => handleQuickView(product, e)}
+                          className="bg-white/10 backdrop-blur-md text-white border border-white/20 text-xs uppercase tracking-widest px-8 py-3 hover:bg-white hover:text-black transition-colors duration-300"
+                        >
+                          Quick View
+                        </button>
+                      </div>
+
+                      {/* Info Overlay (Bottom) */}
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent flex flex-col justify-end p-6 md:p-8 z-10 pointer-events-none">
+                        <span className="text-[#C5A059] text-[10px] uppercase tracking-widest mb-2 block">{product.type}</span>
+                        <h3 className={`font-light uppercase tracking-widest text-white ${isLarge ? 'text-2xl md:text-3xl' : 'text-lg'}`}>{product.name}</h3>
+                        <span className="text-white/70 font-mono text-sm mt-2">${product.price}</span>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            ) : (
+              /* --- STANDARD LUXURY GRID --- */
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-16">
+                {filteredProducts.map((product) => (
+                  <div key={product.id} className="group cursor-pointer flex flex-col">
+                    <div className="relative aspect-[3/4] bg-[#0a0a0a] overflow-hidden mb-6">
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img src={product.image} alt={product.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-1000 ease-out opacity-90 group-hover:opacity-100" />
+                      
+                      {/* 4. Implement Quick View Button */}
+                      <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity duration-500 flex items-center justify-center z-10">
+                        <button 
+                          onClick={(e) => handleQuickView(product, e)}
+                          className="bg-white/10 backdrop-blur-md text-white border border-white/20 text-xs uppercase tracking-widest px-8 py-3 hover:bg-white hover:text-black transition-colors duration-300"
+                        >
+                          Quick View
+                        </button>
+                      </div>
+                    </div>
+                    
+                    <div className="flex justify-between items-start">
+                      <div>
+                        <h3 className="text-sm font-medium uppercase tracking-widest text-white mb-1">{product.name}</h3>
+                        <span className="text-[10px] text-zinc-500 uppercase tracking-widest">{product.category}</span>
+                      </div>
+                      <span className="text-sm text-zinc-400">${product.price}</span>
                     </div>
                   </div>
-                  {/* Product Details */}
-                  <div className="mt-4 flex justify-between items-start">
-                    <div>
-                      <span className="text-xs text-zinc-500 font-mono uppercase tracking-widest mb-1 block">
-                        {product.type} // {product.category}
-                      </span>
-                      <h3 className="text-lg font-bold uppercase tracking-tight text-white group-hover:text-[#e63946] transition-colors">
-                        {product.name}
-                      </h3>
-                    </div>
-                    <span className="text-lg font-black">${product.price}</span>
-                  </div>
-                </div>
-              ))}
-            </div>
+                ))}
+              </div>
+            )
           ) : (
-            // Empty State
-            <div className="w-full h-64 flex flex-col items-center justify-center border-2 border-dashed border-zinc-800 text-zinc-500 mt-10">
-              <span className="text-2xl font-black uppercase tracking-widest mb-2">Out of Stock</span>
-              <p className="font-mono text-sm uppercase">No drops match this vibe right now.</p>
-              <button 
-                onClick={() => { setActiveType("All"); setActiveCategory("All"); }}
-                className="mt-4 text-[#e63946] underline font-bold uppercase text-sm"
-              >
+            <div className="w-full h-[50vh] flex flex-col items-center justify-center text-zinc-600">
+              <span className="text-xl font-light uppercase tracking-widest mb-4">Archive Empty</span>
+              <button onClick={() => { setActiveType("All"); setActiveCategory("All"); }} className="text-[#C5A059] text-xs uppercase tracking-widest border-b border-[#C5A059] pb-1 hover:text-white transition-colors">
                 Clear Filters
               </button>
             </div>
           )}
         </div>
+
+        {/* 5. Render the Modal */}
+        <QuickViewModal 
+          isOpen={isQuickViewOpen} 
+          onClose={() => setIsQuickViewOpen(false)} 
+          product={selectedProduct} 
+        />
       </main>
     </div>
   );

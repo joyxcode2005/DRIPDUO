@@ -1,107 +1,227 @@
- 
- 
 "use client";
 
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
-import { AnimatedTestimonials } from "@/components/ui/animated-testimonials";
-import Image from "next/image";
-import { testimonials } from "@/constants";
+import { motion, AnimatePresence } from "framer-motion";
 
 export default function Home() {
+  const [showSplash, setShowSplash] = useState(true);
+
+  // Handle the Entry Hook Sequence
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setShowSplash(false);
+    }, 2800); // Splash screen duration
+    return () => clearTimeout(timer);
+  }, []);
+
   return (
-    <main className="dripduo-landing min-h-screen w-full bg-[#0a0a0a] text-white font-sans selection:bg-[#e63946] selection:text-white overflow-x-hidden">
+    <main className="min-h-screen w-full bg-[#050505] text-[#f8f8f8] font-sans selection:bg-[#C5A059] selection:text-black overflow-x-hidden">
       
-      {/* HERO SECTION */}
-      <section className="relative flex min-h-screen items-center justify-center overflow-hidden px-4">
-        <div className="relative z-10 max-w-7xl w-full flex flex-col items-start gap-6">
-          <p className="text-zinc-400 text-sm md:text-base font-mono uppercase tracking-widest mb-4">
-            Welcome to the Underground
-          </p>
-          <h1 className="font-black text-[12vw] md:text-[6rem] lg:text-[8rem] leading-[0.85] tracking-tighter uppercase">
-            We Are <br />
-            <span className="text-[#e63946]">Unapologetic.</span>
-          </h1>
-          
-          <h2 className="font-extrabold text-[2rem] md:text-[3.5rem] leading-tight tracking-tight mt-8 max-w-4xl">
-            Driven by rebellion, fueled by{" "}
-            <span className="inline-block relative pencil-underline-target text-white">
-              raw style.
-              <svg className="absolute -bottom-2 left-0 w-full h-4 pointer-events-none" viewBox="0 0 420 30" fill="none" preserveAspectRatio="none">
-                <path className="pencil-underline-path" d="M10 20 Q 120 5 210 20 Q 320 35 410 10" stroke="#e63946" strokeWidth="8" strokeLinecap="round" strokeLinejoin="round"/>
-              </svg>
-            </span>
-            <br />
-            It is time to take the{" "}
-            <span className="inline-block relative pencil-circle-target ml-2">
-              risk
-              <svg className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[140%] h-[140%] pointer-events-none" viewBox="0 0 120 60" fill="none">
-                <ellipse className="pencil-circle-ellipse" cx="60" cy="30" rx="54" ry="25" stroke="#e63946" strokeWidth="4" strokeLinecap="round" transform="rotate(-5 60 30)"/>
-              </svg>
-            </span>.
-          </h2>
-
-          {/* THE EXPLORE BUTTON */}
-          <Link href="/products" className="mt-10 group relative inline-flex items-center justify-center px-10 py-5 font-black text-white bg-[#e63946] overflow-hidden uppercase tracking-widest text-xl md:text-2xl border-2 border-transparent hover:border-white transition-all duration-300">
-            <span className="absolute w-0 h-0 transition-all duration-500 ease-out bg-white rounded-full group-hover:w-[150%] group-hover:h-75"></span>
-            <span className="relative group-hover:text-black flex items-center gap-3">
-              Explore The Drop <ArrowRight className="w-6 h-6 group-hover:translate-x-2 transition-transform" />
-            </span>
-          </Link>
-        </div>
-
-        {/* Floating Rotating Badge */}
-        <div className="absolute bottom-10 right-10 md:bottom-20 md:right-20">
-          <div className="relative items-center justify-center w-32 h-32 hidden md:flex">
-            <svg className="rotate-svg absolute inset-0 w-full h-full" viewBox="0 0 120 120" fill="none">
-              <path id="curve" d="M 60, 60 m -40, 0 a 40,40 0 1,1 80,0 a 40,40 0 1,1 -80,0" fill="transparent" />
-              <text fill="#ffffff" fontSize="11" className="font-mono tracking-widest uppercase font-bold">
-                <textPath href="#curve" startOffset="0%">
-                  • Dripduo • Worldwide • Est 2026
-                </textPath>
-              </text>
+      {/* 1. THE HOOK: LIQUID ENTRY SEQUENCE */}
+      <AnimatePresence>
+        {showSplash && (
+          <motion.div
+            key="splash"
+            initial={{ opacity: 1 }}
+            exit={{ opacity: 0, y: "-100%" }}
+            transition={{ duration: 1.2, ease: [0.25, 1, 0.5, 1] }}
+            className="fixed inset-0 z-[200] bg-[#050505] flex flex-col items-center justify-center overflow-hidden"
+          >
+            <motion.h1 
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 1.5, ease: "easeOut" }}
+              className="text-[#f8f8f8] text-4xl md:text-6xl font-light tracking-[0.4em] uppercase mb-10 z-10"
+            >
+              Dripduo
+            </motion.h1>
+            
+            {/* Liquid SVG rising from the bottom */}
+            <svg className="absolute bottom-0 left-0 w-full h-[50vh] opacity-40" viewBox="0 0 1440 200" preserveAspectRatio="none">
+              <path fill="#C5A059">
+                <animate attributeName="d" dur="4s" repeatCount="indefinite" values="M0,100 Q360,60 720,100 T1440,100 V200 H0 Z; M0,120 Q360,180 720,120 T1440,120 V200 H0 Z; M0,100 Q360,60 720,100 T1440,100 V200 H0 Z" />
+              </path>
             </svg>
-            <span className="text-[#e63946] font-black text-2xl">D2</span>
-          </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* 2. HERO SECTION: VISUALS FIRST */}
+      <section className="relative h-screen w-full flex flex-col items-center justify-end pb-12 md:pb-24">
+        <div className="absolute inset-0 z-0">
+          <img 
+            src="https://images.unsplash.com/photo-1550614000-4b95d4ed141b?q=80&w=2000" 
+            alt="Dripduo FW26 Collection" 
+            className="w-full h-full object-cover grayscale-[0.2]"
+          />
+          {/* Luxury Gradient Overlay */}
+          <div className="absolute inset-0 bg-gradient-to-t from-[#050505] via-[#050505]/20 to-black/40" />
+        </div>
+        
+        <div className="relative z-10 text-center px-4">
+          <h2 className="text-5xl md:text-[8vw] font-light uppercase tracking-[0.1em] leading-none mb-6 text-white drop-shadow-2xl">
+            The Archive
+          </h2>
+          <p className="text-[#C5A059] text-[10px] md:text-xs font-mono tracking-[0.4em] uppercase">
+            Scroll to Explore • Fall/Winter 2026
+          </p>
         </div>
       </section>
 
-      {/* INFINITE MARQUEE */}
-      <section className="w-full bg-[#e63946] py-6 border-y-4 border-white overflow-hidden flex items-center">
-        <div className="marquee-container text-4xl md:text-6xl font-black text-white tracking-tighter uppercase whitespace-nowrap">
-          {/* We duplicate the content to create a seamless infinite scroll */}
-          {[...Array(2)].map((_, index) => (
-            <div key={index} className="flex gap-12 px-6">
-              <span>Creativity</span>
-              <span className="text-black stroke-text">Rebellion</span>
-              <span>Streetwear</span>
-              <span className="text-black stroke-text">Boldness</span>
-              <span>Dripduo</span>
+      {/* 3. INSTANT PRODUCT REVEAL: BENTO GRID WITH INTERACTIVE ANIMATIONS */}
+      <section className="px-4 py-16 md:py-32 max-w-[1600px] mx-auto z-20 relative bg-[#050505]">
+        <div className="grid grid-cols-1 md:grid-cols-4 md:auto-rows-[400px] gap-4">
+          
+          {/* Bento Cell A: Main Look (Spans 2x2) - Hover Side Movement */}
+          <Link href="/products" className="md:col-span-2 md:row-span-2 group relative overflow-hidden bg-[#0a0a0a] border border-white/5">
+            <img src="https://images.unsplash.com/photo-1583743814966-8936f5b7be1a?w=1000" alt="Main Collection" className="w-full h-full object-cover grayscale-[0.3] group-hover:grayscale-0 group-hover:scale-105 transition-all duration-[1.5s] ease-[cubic-bezier(0.25,1,0.5,1)]" />
+            <div className="absolute inset-0 flex flex-col justify-end p-8 md:p-12 bg-gradient-to-t from-black/90 via-black/20 to-transparent">
+              {/* The Hover Side Movement Application */}
+              <div className="transform transition-transform duration-700 ease-[cubic-bezier(0.25,1,0.5,1)] group-hover:translate-x-6">
+                <span className="text-[#C5A059] text-[10px] tracking-[0.3em] uppercase mb-3 block font-bold">Signature</span>
+                <h3 className="text-3xl md:text-5xl font-light uppercase text-white">Heavyweight<br/>Oversized</h3>
+                <span className="mt-6 flex items-center gap-2 text-xs font-mono uppercase tracking-widest text-zinc-400 group-hover:text-white transition-colors">
+                  Shop Now <ArrowRight className="w-4 h-4" />
+                </span>
+              </div>
+            </div>
+          </Link>
+
+          {/* Bento Cell B: The Responsive Flip Card */}
+          <div className="md:col-span-1 md:row-span-2 group/flip perspective-[2000px] bg-transparent min-h-[400px]">
+            <div className="relative w-full h-full transition-transform duration-[1.2s] ease-[cubic-bezier(0.25,1,0.5,1)] transform-style-3d group-hover/flip:rotate-y-180">
+              {/* Front */}
+              <div className="absolute inset-0 backface-hidden bg-[#0a0a0a] border border-white/5 flex flex-col items-center justify-center p-8 text-center shadow-2xl">
+                <span className="text-2xl font-light uppercase tracking-[0.2em] text-white">Edition 01</span>
+                <div className="h-[1px] w-12 bg-white/20 my-8"></div>
+                <span className="text-zinc-500 text-xs tracking-widest uppercase font-mono">Hover to Unveil</span>
+              </div>
+              {/* Back */}
+              <div className="absolute inset-0 backface-hidden rotate-y-180 bg-[#C5A059] border border-[#C5A059] flex flex-col items-center justify-center p-8 text-center shadow-2xl">
+                <span className="text-xl font-medium uppercase tracking-[0.2em] text-[#050505]">Uncompromising<br/>Quality</span>
+                <p className="text-[#050505]/80 text-xs mt-6 leading-relaxed font-medium">Milled in Italy. Assembled with absolute precision. Designed to outlast trends.</p>
+                <button className="mt-8 border border-[#050505] text-[#050505] px-6 py-3 text-[10px] uppercase tracking-widest font-black hover:bg-[#050505] hover:text-[#C5A059] transition-colors">
+                  Discover
+                </button>
+              </div>
+            </div>
+          </div>
+
+          {/* Bento Cell C: The Rotating Half-Circle Animation */}
+          <div className="md:col-span-1 md:row-span-1 flex items-center justify-center bg-[#0a0a0a] border border-white/5 relative overflow-hidden group">
+            <div className="absolute inset-0 bg-gradient-to-br from-black/50 to-transparent z-0" />
+            <div className="relative z-10 flex items-center justify-center w-48 h-48">
+              <svg className="animate-[spin_12s_linear_infinite] absolute inset-0 w-full h-full opacity-60" viewBox="0 0 120 120" fill="none">
+                <path id="curve-bento" d="M 60, 60 m -45, 0 a 45,45 0 1,1 90,0 a 45,45 0 1,1 -90,0" fill="transparent" />
+                <text fill="#C5A059" fontSize="8.5" className="font-mono tracking-[0.2em] uppercase font-bold">
+                  <textPath href="#curve-bento" startOffset="0%">
+                    • Dripduo Worldwide • Super Premium
+                  </textPath>
+                </text>
+              </svg>
+              <span className="text-white font-light text-2xl tracking-[0.2em]">D2</span>
+            </div>
+          </div>
+
+          {/* Bento Cell D: Secondary Look - Hover Side Movement */}
+          <Link href="/products" className="md:col-span-1 md:row-span-1 group relative overflow-hidden bg-[#0a0a0a] border border-white/5">
+            <img src="https://images.unsplash.com/photo-1529374255404-311a2a4f1fd9?w=600" alt="Secondary" className="w-full h-full object-cover grayscale-[0.5] group-hover:grayscale-0 group-hover:scale-105 transition-all duration-[1.5s] ease-[cubic-bezier(0.25,1,0.5,1)]" />
+            <div className="absolute inset-0 flex flex-col justify-end p-6 bg-gradient-to-t from-black/90 to-transparent">
+              <div className="transform transition-transform duration-700 ease-[cubic-bezier(0.25,1,0.5,1)] group-hover:translate-x-4">
+                <span className="text-[#C5A059] text-[9px] tracking-widest uppercase mb-1 block">Essentials</span>
+                <h3 className="text-xl font-light uppercase text-white">Washed Denim</h3>
+              </div>
+            </div>
+          </Link>
+          
+        </div>
+      </section>
+
+      {/* 4. THE WRITING PARTS DOWNWARD: BRAND STORY & PENCIL ANIMATION */}
+      <section className="py-32 md:py-48 px-4 max-w-5xl mx-auto text-center relative z-20">
+        <h2 className="text-[1.75rem] md:text-5xl font-light leading-[1.5] tracking-wide text-zinc-400">
+          We reject the ordinary. Dripduo is engineered for those who demand <br className="hidden md:block"/>
+          <span className="relative inline-block text-white font-medium mx-3 mt-4 md:mt-0">
+            excellence.
+            {/* Scroll-Triggered Pencil Underline */}
+            <svg className="absolute -bottom-2 md:-bottom-4 left-0 w-full h-4 md:h-6 pointer-events-none" viewBox="0 0 420 30" fill="none" preserveAspectRatio="none">
+              <motion.path 
+                initial={{ pathLength: 0 }}
+                whileInView={{ pathLength: 1 }}
+                viewport={{ once: true, margin: "-100px" }}
+                transition={{ duration: 1.5, ease: "easeInOut", delay: 0.2 }}
+                d="M10 20 Q 120 5 210 20 Q 320 35 410 10" 
+                stroke="#C5A059" 
+                strokeWidth="4" 
+                strokeLinecap="round" 
+              />
+            </svg>
+          </span>
+          <br className="hidden md:block"/>
+          Take the{" "}
+          <span className="relative inline-block font-serif italic text-white ml-2">
+            risk
+            {/* Scroll-Triggered Pencil Circle */}
+            <svg className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[140%] h-[140%] pointer-events-none" viewBox="0 0 120 60" fill="none">
+              <motion.ellipse 
+                initial={{ pathLength: 0 }}
+                whileInView={{ pathLength: 1 }}
+                viewport={{ once: true, margin: "-100px" }}
+                transition={{ duration: 1.2, ease: "easeOut", delay: 0.8 }}
+                cx="60" cy="30" rx="54" ry="25" 
+                stroke="#C5A059" 
+                strokeWidth="2" 
+                strokeLinecap="round" 
+                transform="rotate(-5 60 30)"
+              />
+            </svg>
+          </span>.
+        </h2>
+      </section>
+
+      {/* STATIC SCROLLING MARQUEE */}
+      <section className="w-full bg-[#C5A059] py-4 overflow-hidden flex items-center z-20 relative">
+        <div className="marquee-container text-sm md:text-base font-medium text-black tracking-[0.2em] uppercase whitespace-nowrap flex">
+          {[...Array(4)].map((_, index) => (
+            <div key={index} className="flex gap-16 px-8">
+              <span>Super Premium</span>
+              <span className="opacity-50">✦</span>
+              <span>Limited Archive</span>
+              <span className="opacity-50">✦</span>
+              <span>Unapologetic Style</span>
+              <span className="opacity-50">✦</span>
+              <span className="font-black">DRIPDUO</span>
+              <span className="opacity-50">✦</span>
             </div>
           ))}
         </div>
       </section>
 
-      {/* PARALLAX LOOKBOOK */}
-      <section className="w-full py-32 bg-[#0a0a0a] overflow-hidden relative">
-        <h3 className="text-center font-bold text-4xl md:text-6xl mb-16 tracking-tight">THE LOOKBOOK</h3>
+      {/* 5. FOOTER & NAVIGATION: PARALLAX LOOKBOOK */}
+      <section className="w-full py-32 md:py-48 overflow-hidden relative border-t border-white/5 bg-[#0a0a0a]">
+        <div className="flex flex-col md:flex-row justify-between items-end max-w-[95vw] mx-auto mb-16 px-4">
+          <h3 className="font-light text-3xl md:text-5xl uppercase tracking-[0.1em]">The Lookbook</h3>
+          <Link href="/products" className="text-[#C5A059] text-xs font-mono tracking-widest mt-4 md:mt-0 border-b border-[#C5A059] pb-1 hover:text-white transition-colors">
+            VIEW FULL ARCHIVE
+          </Link>
+        </div>
+        
+        {/* Parallax Track */}
         <div className="w-full overflow-hidden">
-          <div className="parallax-scroll gap-8 px-4">
-            {/* Duplicated array for seamless looping */}
-            {[1, 2, 3, 4, 5, 1, 2, 3, 4, 5].map((i, index) => (
-              <div key={index} className="shrink-0 w-72 h-96 md:w-96 md:h-120 rounded-2xl bg-zinc-900 border border-zinc-800 overflow-hidden group relative cursor-pointer">
-                <div className="absolute inset-0 bg-linear-to-t from-black/80 to-transparent z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-                { }
-                <Image
-                  src={`https://images.unsplash.com/photo-1550614000-4b95d4ed141b?w=600&q=80`} 
-                  alt="Streetwear Look" 
-                  width={1}
-                  height={10}
-                  className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-700 group-hover:scale-110"
+          <div className="parallax-scroll gap-8 md:gap-12 px-4 flex">
+            {[1, 2, 3, 4, 1, 2, 3, 4].map((i, index) => (
+              <div key={index} className="flex-shrink-0 w-72 h-[28rem] md:w-[28rem] md:h-[38rem] bg-[#050505] overflow-hidden group relative cursor-pointer border border-white/5">
+                <div className="absolute inset-0 bg-black/50 z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-1000 ease-[cubic-bezier(0.25,1,0.5,1)]" />
+                <img 
+                  src={`https://images.unsplash.com/photo-1550614000-4b95d4ed141b?w=800&q=80`} 
+                  alt="Lookbook" 
+                  className="w-full h-full object-cover grayscale opacity-70 group-hover:opacity-100 group-hover:grayscale-0 transition-all duration-[1.5s] ease-[cubic-bezier(0.25,1,0.5,1)] group-hover:scale-105"
                 />
-                <div className="absolute bottom-6 left-6 z-20 translate-y-4 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-500">
-                  <span className="bg-[#e63946] text-white text-xs font-bold px-3 py-1 uppercase rounded-full">Drop 0{i}</span>
-                  <h4 className="text-white font-black text-2xl mt-2">Core Collection</h4>
+                <div className="absolute bottom-8 left-8 z-20 translate-y-8 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-1000 ease-[cubic-bezier(0.25,1,0.5,1)]">
+                  <span className="text-[#C5A059] text-[10px] font-medium tracking-[0.2em] uppercase mb-2 block">Look 0{i}</span>
+                  <h4 className="text-white font-light text-2xl uppercase tracking-wider">Campaign Series</h4>
                 </div>
               </div>
             ))}
@@ -109,71 +229,6 @@ export default function Home() {
         </div>
       </section>
 
-      {/* FLIP CARD FEATURE */}
-      <section className="flex flex-col md:flex-row items-center justify-center gap-16 py-32 px-4 bg-zinc-950">
-        <div className="max-w-xl">
-          <h3 className="text-5xl md:text-7xl font-black uppercase leading-none mb-6">
-            Stand <br/><span className="text-transparent bg-clip-text bg-linear-to-r from-[#e63946] to-[#ff9900]">Out.</span>
-          </h3>
-          <p className="text-zinc-400 text-lg leading-relaxed mb-8">
-            Dripduo is not just clothing. It is a statement. Flip the card to reveal our mission, or browse the latest pieces designed to disrupt the mundane.
-          </p>
-        </div>
-
-        <div className="flip-card">
-          <div className="flip-card-inner">
-            <div className="flip-card-front">
-              <span className="text-4xl font-black text-white mb-2 uppercase tracking-tight">Dripduo</span>
-              <div className="h-1 w-12 bg-[#e63946] my-4 rounded-full"></div>
-              <span className="text-zinc-400 font-mono text-sm uppercase">Hover to Reveal</span>
-            </div>
-            <div className="flip-card-back">
-              <span className="text-3xl font-black text-white uppercase leading-tight">Defy<br/>Expectations.</span>
-              <p className="text-white/90 text-sm mt-6 font-medium">Join the underground. Wear the rebellion.</p>
-              <Link href="/products" className="mt-8 bg-white text-[#e63946] font-bold px-6 py-3 rounded-full hover:bg-black hover:text-white transition-colors uppercase text-sm cursor-pointer inline-block">
-                Shop Now
-              </Link>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* TESTIMONIALS SECTION */}
-      <section className="py-32 bg-zinc-950 px-4">
-        <div className="max-w-7xl mx-auto mb-16 text-center">
-          <h3 className="text-4xl md:text-6xl font-black uppercase tracking-tight text-white">The Cult <span className="text-[#e63946]">Speaks</span></h3>
-        </div>
-        <AnimatedTestimonials testimonials={testimonials} />
-      </section>
-
-      {/* NATIVE SVG LIQUID FOOTER TRANSITION */}
-      <section className="relative w-full h-48 md:h-64 mt-20">
-        <svg className="absolute bottom-0 left-0 w-full h-full" viewBox="0 0 1440 200" preserveAspectRatio="none">
-          <path fill="#e63946">
-            <animate 
-              attributeName="d" 
-              dur="6s" 
-              repeatCount="indefinite" 
-              values="M0,100 Q360,60 720,100 T1440,100 V200 H0 Z;
-                      M0,120 Q360,180 720,120 T1440,120 V200 H0 Z;
-                      M0,100 Q360,60 720,100 T1440,100 V200 H0 Z" 
-            />
-          </path>
-          <path fill="#0a0a0a" opacity="0.5">
-             <animate 
-              attributeName="d" 
-              dur="8s" 
-              repeatCount="indefinite" 
-              values="M0,120 Q360,180 720,120 T1440,120 V200 H0 Z;
-                      M0,140 Q360,60 720,140 T1440,140 V200 H0 Z;
-                      M0,120 Q360,180 720,120 T1440,120 V200 H0 Z" 
-            />
-          </path>
-        </svg>
-        <div className="absolute inset-0 flex items-end justify-center pb-8 z-10 pointer-events-none">
-          <span className="text-white font-black text-6xl md:text-9xl tracking-tighter opacity-20">DRIPDUO</span>
-        </div>
-      </section>
     </main>
   );
 }
