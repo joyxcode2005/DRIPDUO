@@ -1,6 +1,7 @@
 import * as dotenv from 'dotenv';
 import { createClient } from '@supabase/supabase-js';
-import path from 'path/win32';
+import path from 'path';
+
 
 // Load environment variables from .env
 dotenv.config({
@@ -30,10 +31,10 @@ const supabase = createClient(supabaseUrl, supabaseServiceRoleKey, {
 
 // Define the function to seed the admin user
 async function seedAdmin() {
-    const adminEmail = "admin@example.com"; // Add your email here
-    const adminPassword = "SuperSecurePassword123!"; // Add your password here
-    const fullname = "Admin User"; 
-    const phone = "6289666500";
+    const adminEmail = "joysengupta252005@gmail.com"; // Add your email here
+    const adminPassword = "joy.admin@2005"; // Add your password here
+    const fullname = "Joy Sengupta"; 
+    const phone = "8777699459";
 
     console.log(`Attempting to seed the admin user with email: ${adminEmail}`);
 
