@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { ArrowLeft, Lock, CheckCircle2, ShieldCheck, CreditCard } from "lucide-react";
 import { useCart } from "@/lib/CartContext";
@@ -8,10 +8,15 @@ import { useCart } from "@/lib/CartContext";
 export default function CheckoutPage() {
   const { cart, cartTotal } = useCart();
   const [activeStep, setActiveStep] = useState<"shipping" | "payment" | "success">("shipping");
+  const [orderId, setOrderId] = useState<string>("D2-FW26-PENDING");
 
-  // Calculate totals
+  // FIXED: Moved Math.random() into useEffect to prevent Hydration mismatch
+  useEffect(() => {
+    setOrderId(`D2-FW26-${Math.floor(Math.random() * 90000) + 10000}`);
+  }, []);
+
   const shippingCost = cartTotal > 200 ? 0 : 15;
-  const taxes = cartTotal * 0.08; // 8% mock tax
+  const taxes = cartTotal * 0.08;
   const finalTotal = cartTotal + shippingCost + taxes;
 
   if (cart.length === 0 && activeStep !== "success") {
@@ -38,7 +43,7 @@ export default function CheckoutPage() {
         </p>
         <div className="p-6 bg-[#0a0a0a] border border-white/5 inline-block text-left mb-10">
           <span className="text-zinc-500 text-[10px] uppercase tracking-widest block mb-2">Order Reference</span>
-          <span className="text-xl font-mono text-white">#D2-FW26-{Math.floor(Math.random() * 90000) + 10000}</span>
+          <span className="text-xl font-mono text-white">#{orderId}</span>
         </div>
         <Link href="/products" className="bg-[#f8f8f8] text-[#050505] px-10 py-4 text-xs font-black uppercase tracking-[0.2em] hover:bg-[#C5A059] transition-colors">
           Continue Exploring
@@ -51,7 +56,6 @@ export default function CheckoutPage() {
     <div className="min-h-screen bg-[#050505] text-[#f8f8f8] pt-24 pb-24 selection:bg-[#C5A059] selection:text-black">
       <div className="max-w-7xl mx-auto px-4 md:px-8">
         
-        {/* Header */}
         <div className="flex items-center justify-between border-b border-white/5 pb-8 mb-12">
           <Link href="/products" className="text-zinc-500 hover:text-white flex items-center gap-2 text-xs uppercase tracking-[0.2em] transition-colors">
             <ArrowLeft className="w-4 h-4" /> Back
@@ -64,7 +68,6 @@ export default function CheckoutPage() {
 
         <div className="flex flex-col lg:flex-row gap-16">
           
-          {/* Left Column: Form Steps */}
           <div className="flex-1 space-y-12">
             
             {/* Step 1: Shipping */}
@@ -163,7 +166,6 @@ export default function CheckoutPage() {
             </section>
           </div>
 
-          {/* Right Column: Order Summary */}
           <aside className="w-full lg:w-96 flex-shrink-0">
             <div className="bg-[#0a0a0a] border border-white/5 p-8 sticky top-24">
               <h3 className="text-sm font-medium uppercase tracking-[0.2em] mb-8 border-b border-white/5 pb-4">Order Summary</h3>
