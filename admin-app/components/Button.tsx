@@ -1,17 +1,17 @@
 
 
-interface ButtonProps {
+interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   children: React.ReactNode;
-  onClick?: (e: React.MouseEvent<HTMLDivElement>) => void;
 }
 
-export default function Button({ children, onClick }: ButtonProps) {
+export default function Button({ children, className = '', type = 'button', ...props }: ButtonProps) {
   return (
-    <div
-      onClick={onClick}
-      className="bg-black text-white px-4 py-2 rounded-md hover:bg-gray-800 transition-colors duration-300 text-center cursor-pointer"
+    <button
+      type={type}
+      className={`inline-flex items-center justify-center rounded-md bg-black px-4 py-2 text-center text-white transition-colors duration-300 hover:bg-gray-800 disabled:cursor-not-allowed disabled:opacity-60 ${className}`}
+      {...props}
     >
       {children}
-    </div>
+    </button>
   );
 }
