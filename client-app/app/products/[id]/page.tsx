@@ -1,85 +1,162 @@
 "use client";
 
 import React, { useState } from "react";
-import { motion } from "framer-motion";
-import ProductCard from "@/components/ProductCard";
+import Link from "next/link";
+import { ArrowLeft, Check } from "lucide-react";
+import { useGlobal } from "@/lib/GlobalContext";
 
-// Mock Data
-const ARCHIVE_PRODUCTS = [
-  { id: "1", name: "Heavyweight Boxy Tee", price: 85, image: "https://images.unsplash.com/photo-1583743814966-8936f5b7be1a?w=800", type: "Tops", category: "Essentials" },
-  { id: "2", name: "Tailored Cargo Pant", price: 180, image: "https://images.unsplash.com/photo-1529374255404-311a2a4f1fd9?w=800", type: "Bottoms", category: "Archive" },
-  { id: "3", name: "Mohair Overcoat", price: 450, image: "https://images.unsplash.com/photo-1550614000-4b95d4ed141b?w=800", type: "Outerwear", category: "FW26" },
-  { id: "4", name: "Washed Canvas Jacket", price: 220, image: "https://images.unsplash.com/photo-1618517351616-38fb9c52ce37?w=800", type: "Outerwear", category: "Archive" },
-  { id: "5", name: "Silk Blend Camp Shirt", price: 145, image: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=800", type: "Tops", category: "Essentials" },
-  { id: "6", name: "Pleated Trousers", price: 160, image: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=800", type: "Bottoms", category: "FW26" },
+const SIZES = ["XS", "S", "M", "L", "XL", "XXL"];
+const WEIGHTS = [
+  { id: "220", label: "220 GSM", desc: "Lightweight & Breathable" },
+  { id: "240", label: "240 GSM", desc: "Heavyweight Structure" }
 ];
 
-const FILTERS = ["All", "Outerwear", "Tops", "Bottoms", "Accessories"];
+export default function ProductDetailPage({ params }: { params: { id: string } }) {
+  const { addToCart } = useGlobal();
+  const [selectedSize, setSelectedSize] = useState<string | null>(null);
+  const [selectedGSM, setSelectedGSM] = useState<string>("240");
+  const [sizeError, setSizeError] = useState(false);
+  const [added, setAdded] = useState(false);
 
-export default function ProductsPage() {
-  const [activeFilter, setActiveFilter] = useState("All");
+  // Mock product data based on ID
+  const product = {
+    id: params.id,
+    name: "Heavyweight Archive Drop",
+    price: 180,
+    category: "Oversized",
+    image: "https://images.unsplash.com/photo-1583743814966-8936f5b7be1a?w=1000&q=85",
+    description: "Engineered with meticulous attention to detail. This garment embodies our dedication to architectural silhouettes and uncompromising fabric quality. Designed to drape perfectly regardless of the chosen weight."
+  };
 
-  const filteredProducts = activeFilter === "All" 
-    ? ARCHIVE_PRODUCTS 
-    : ARCHIVE_PRODUCTS.filter(p => p.type === activeFilter);
+  const handleAddToCart = () => {
+    if (!selectedSize) {
+      setSizeError(true);
+      return;
+    }
+    addToCart({
+      id: product.id,
+      name: product.name,
+      price: product.price,
+      image: product.image,
+      size: `${selectedSize} (${selectedGSM} GSM)`,
+    });
+    setAdded(true);
+    setTimeout(() => setAdded(false), 2000);
+  };
 
   return (
-    <main className="min-h-screen bg-background pt-32 pb-24 selection:bg-foreground selection:text-background">
-      <div className="max-w-[1800px] mx-auto px-4 md:px-8">
+    <div className="min-h-screen bg-[var(--black)] text-[var(--beige)] pt-20 pb-24 font-sans">
+      <div className="max-w-7xl mx-auto px-6 md:px-12 flex flex-col md:flex-row gap-12 lg:gap-24">
         
-        {/* Header */}
-        <div className="flex flex-col md:flex-row md:items-end justify-between mb-16 gap-8">
-          <div>
-            <span className="text-xs font-mono uppercase tracking-[0.3em] text-muted mb-4 block">
-              Fall / Winter 2026
-            </span>
-            <h1 className="text-4xl md:text-6xl font-light uppercase tracking-widest text-foreground">
-              The Archive
-            </h1>
+        {/* Left: Image Viewer */}
+        <div className="w-full md:w-1/2">
+          <Link href="/products" className="inline-flex items-center gap-2 label text-[var(--gray-400)] hover:text-[var(--orange)] transition-colors mb-8" style={{ fontSize: "10px", letterSpacing: "0.15em" }}>
+            <ArrowLeft size={14} strokeWidth={1.5} /> BACK TO ARCHIVE
+          </Link>
+          <div className="w-full bg-[var(--gray-900)] border border-[var(--gray-800)]" style={{ aspectRatio: "3/4" }}>
+            <img src={product.image} alt={product.name} className="w-full h-full object-cover" />
           </div>
-          <p className="text-sm text-muted max-w-sm tracking-wide">
-            A curated selection of uncompromising garments. Engineered for presence, designed to outlast trends.
+        </div>
+
+        {/* Right: Product Details & Order Form */}
+        <div className="w-full md:w-1/2 md:pt-16 flex flex-col">
+          
+          <p className="label text-[var(--orange)] mb-4" style={{ fontSize: "11px", letterSpacing: "0.2em" }}>
+            {product.category.toUpperCase()}
           </p>
+          <h1 className="font-serif text-4xl md:text-5xl lg:text-6xl font-light leading-tight mb-4 text-[var(--beige)]">
+            {product.name}
+          </h1>
+          <p className="label text-[var(--beige)] mb-10" style={{ fontSize: "14px" }}>
+            ${product.price.toFixed(2)}
+          </p>
+
+          <p className="label text-[var(--gray-200)] mb-12 leading-relaxed" style={{ fontSize: "12px", textTransform: "none", letterSpacing: "0.08em" }}>
+            {product.description}
+          </p>
+
+          {/* GSM (Fabric Weight) Selector */}
+          <div className="mb-10">
+            <span className="label block mb-5" style={{ fontSize: "11px", letterSpacing: "0.15em" }}>
+              FABRIC WEIGHT
+            </span>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              {WEIGHTS.map((weight) => (
+                <button
+                  key={weight.id}
+                  onClick={() => setSelectedGSM(weight.id)}
+                  className="border py-4 px-5 text-left transition-colors flex flex-col items-start gap-2"
+                  style={{
+                    borderColor: selectedGSM === weight.id ? "var(--orange)" : "var(--gray-800)",
+                    background: selectedGSM === weight.id ? "var(--orange)" : "transparent",
+                  }}
+                >
+                  <span className="label" style={{ fontSize: "12px", color: selectedGSM === weight.id ? "var(--black)" : "var(--beige)" }}>
+                    {weight.label}
+                  </span>
+                  <span style={{ fontSize: "10px", color: selectedGSM === weight.id ? "rgba(0,0,0,0.7)" : "var(--gray-400)", textTransform: "none", letterSpacing: "0.05em" }}>
+                    {weight.desc}
+                  </span>
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Size Selector */}
+          <div className="mb-12">
+            <div className="flex justify-between items-center mb-5">
+              <span className="label" style={{ fontSize: "11px", letterSpacing: "0.15em" }}>
+                SELECT SIZE
+              </span>
+              <button className="label text-[var(--gray-400)] hover:text-[var(--orange)] transition-colors underline" style={{ fontSize: "10px" }}>
+                Size Guide
+              </button>
+            </div>
+
+            {sizeError && (
+              <p className="label text-[var(--orange)] mb-4" style={{ fontSize: "10px", letterSpacing: "0.1em" }}>
+                Please select a size to continue.
+              </p>
+            )}
+
+            <div className="grid grid-cols-3 sm:grid-cols-6 gap-3">
+              {SIZES.map((size) => (
+                <button
+                  key={size}
+                  onClick={() => { setSelectedSize(size); setSizeError(false); }}
+                  className="border py-4 label transition-colors"
+                  style={{
+                    fontSize: "12px",
+                    borderColor: selectedSize === size ? "var(--beige)" : "var(--gray-800)",
+                    background: selectedSize === size ? "var(--beige)" : "transparent",
+                    color: selectedSize === size ? "var(--black)" : "var(--gray-400)",
+                  }}
+                >
+                  {size}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Add to Cart Button */}
+          <button
+            onClick={handleAddToCart}
+            className={`w-full font-bold label py-5 transition-colors duration-300 flex items-center justify-center gap-3 ${
+              added 
+                ? "bg-[var(--beige)] text-[var(--black)] border border-[var(--beige)]" 
+                : "bg-[var(--orange)] text-[var(--black)] border border-[var(--orange)] hover:bg-[var(--beige)] hover:border-[var(--beige)]"
+            }`}
+            style={{ fontSize: "12px", letterSpacing: "0.2em" }}
+          >
+            {added ? (
+              <><Check size={16} strokeWidth={2} /> ADDED TO BAG</>
+            ) : (
+              "ADD TO BAG"
+            )}
+          </button>
+          
         </div>
-
-        {/* Minimal Filters */}
-        <div className="flex flex-wrap items-center gap-4 md:gap-8 mb-12 border-b border-border pb-6 scrollbar-hide overflow-x-auto">
-          {FILTERS.map((filter) => (
-            <button
-              key={filter}
-              onClick={() => setActiveFilter(filter)}
-              className={`text-xs font-medium uppercase tracking-[0.2em] transition-colors whitespace-nowrap ${
-                activeFilter === filter ? "text-foreground" : "text-muted hover:text-foreground"
-              }`}
-            >
-              {filter}
-            </button>
-          ))}
-          <span className="ml-auto text-xs font-mono text-muted hidden md:block">
-            {filteredProducts.length} Items
-          </span>
-        </div>
-
-        {/* The Grid */}
-        <motion.div 
-          layout
-          className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-4 gap-y-12 md:gap-x-8 md:gap-y-16"
-        >
-          {filteredProducts.map((product) => (
-            <motion.div
-              layout
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.95 }}
-              transition={{ duration: 0.5 }}
-              key={product.id}
-            >
-              <ProductCard product={product} />
-            </motion.div>
-          ))}
-        </motion.div>
-
       </div>
-    </main>
+    </div>
   );
 }

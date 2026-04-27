@@ -46,74 +46,80 @@ export default function ProductsPage() {
   }, [activeCategory, activeType, sortBy, search]);
 
   return (
-    <div className="bg-white min-h-screen" style={{ fontFamily: "'Helvetica Neue', Helvetica, Arial, sans-serif" }}>
+    <div className="bg-(--black) min-h-screen text-(--beige) pt-14" style={{ fontFamily: "'Helvetica Neue', Helvetica, Arial, sans-serif" }}>
 
-      {/* FILTER SIDEBAR (mobile) */}
+      {/* FILTER SIDEBAR (mobile & desktop) */}
       {filterOpen && (
         <div
-          className="fixed inset-0 bg-black bg-opacity-30 z-[75]"
+          className="fixed inset-0 bg-black/70 z-[75] backdrop-blur-sm transition-opacity"
           onClick={() => setFilterOpen(false)}
         />
       )}
-      <aside className={`filter-sidebar ${filterOpen ? "open" : ""}`}>
-        <div className="flex items-center justify-between mb-10">
-          <span className="label" style={{ fontSize: "11px", letterSpacing: "0.12em" }}>FILTERS</span>
-          <button onClick={() => setFilterOpen(false)} className="hover:opacity-60">
-            <X size={18} strokeWidth={1.5} />
+      <aside className={`filter-sidebar ${filterOpen ? "open" : ""}`} style={{ zIndex: 80 }}>
+        <div className="flex items-center justify-between mb-12 text-(--beige)">
+          <span className="label" style={{ fontSize: "12px", letterSpacing: "0.15em" }}>FILTERS</span>
+          <button onClick={() => setFilterOpen(false)} className="hover:text-(--orange) transition-colors">
+            <X size={22} strokeWidth={1.5} />
           </button>
         </div>
 
         {/* Type filter */}
-        <div className="mb-8">
-          <p className="label text-gray-400 mb-4" style={{ fontSize: "10px" }}>Category</p>
+        <div className="mb-10">
+          <p className="label text-(--orange) mb-6" style={{ fontSize: "11px" }}>Category</p>
           {PRODUCT_TYPES.map((t) => (
             <button
               key={t}
               onClick={() => setActiveType(t)}
-              className="block w-full text-left py-2 label hover:opacity-60 transition-opacity"
+              className="block w-full text-left py-3 label hover:text-(--orange) transition-colors"
               style={{
-                fontSize: "11px",
+                fontSize: "12px",
                 fontWeight: activeType === t ? 500 : 400,
-                borderBottom: activeType === t ? "1px solid black" : "none",
+                color: activeType === t ? "var(--orange)" : "var(--beige)",
+                borderBottom: activeType === t ? "1px solid var(--orange)" : "none",
+                letterSpacing: "0.12em"
               }}
             >
-              {t}
+              {t.toUpperCase()}
             </button>
           ))}
         </div>
 
         {/* Sort */}
         <div>
-          <p className="label text-gray-400 mb-4" style={{ fontSize: "10px" }}>Sort By</p>
+          <p className="label text-(--orange) mb-6" style={{ fontSize: "11px" }}>Sort By</p>
           {SORT_OPTIONS.map((s) => (
             <button
               key={s}
               onClick={() => setSortBy(s)}
-              className="block w-full text-left py-2 label hover:opacity-60 transition-opacity"
-              style={{ fontSize: "11px", fontWeight: sortBy === s ? 500 : 400 }}
+              className="block w-full text-left py-3 label hover:text-(--orange) transition-colors"
+              style={{ 
+                fontSize: "12px", 
+                fontWeight: sortBy === s ? 500 : 400,
+                color: sortBy === s ? "var(--orange)" : "var(--beige)",
+                letterSpacing: "0.12em"
+              }}
             >
-              {s}
+              {s.toUpperCase()}
             </button>
           ))}
         </div>
       </aside>
 
-      {/* TOP BAR (sticky) */}
-      <div
-        className="sticky top-14 z-40 bg-white border-b border-gray-200"
-      >
+      {/* TOP BAR (non-sticky, spacious) */}
+      <div className="z-40 bg-(--black) border-b border-(--gray-800) pt-6">
+        
         {/* Category tabs */}
-        <div className="flex items-center overflow-x-auto no-scroll px-4 md:px-8">
+        <div className="flex items-center overflow-x-auto no-scroll px-6 md:px-12 gap-8 md:gap-12">
           {CATEGORIES.map((cat) => (
             <button
               key={cat}
               onClick={() => setActiveCategory(cat)}
-              className="flex-shrink-0 label py-4 px-4 border-b-2 transition-colors"
+              className="flex-shrink-0 label pb-5 border-b-[3px] transition-colors hover:text-[var(--orange)]"
               style={{
-                fontSize: "10px",
-                letterSpacing: "0.12em",
-                borderColor: activeCategory === cat ? "#000" : "transparent",
-                color: activeCategory === cat ? "#000" : "#999",
+                fontSize: "11.5px",
+                letterSpacing: "0.15em",
+                borderColor: activeCategory === cat ? "var(--orange)" : "transparent",
+                color: activeCategory === cat ? "var(--orange)" : "var(--gray-400)",
               }}
             >
               {cat.toUpperCase()}
@@ -122,35 +128,37 @@ export default function ProductsPage() {
         </div>
 
         {/* Filter + Sort row */}
-        <div className="flex items-center justify-between px-4 md:px-8 py-3 border-t border-gray-100">
-          <div className="flex items-center gap-4">
+        <div className="flex items-center justify-between px-6 md:px-12 py-5 border-t border-[var(--gray-900)]">
+          <div className="flex items-center gap-6 md:gap-10">
             <button
               onClick={() => setFilterOpen(true)}
-              className="flex items-center gap-2 label hover:opacity-60 transition-opacity"
-              style={{ fontSize: "10px" }}
+              className="flex items-center gap-3 label text-(--beige) hover:text-(--orange) transition-colors"
+              style={{ fontSize: "11px", letterSpacing: "0.15em" }}
             >
-              <SlidersHorizontal size={14} strokeWidth={1.5} />
-              Filters
+              <SlidersHorizontal size={16} strokeWidth={1.5} />
+              FILTERS
             </button>
-            <span className="label text-gray-400" style={{ fontSize: "10px" }}>
-              {filtered.length} items
+            <span className="label text-(--gray-400)" style={{ fontSize: "11px", letterSpacing: "0.15em" }}>
+              {filtered.length} ITEMS
             </span>
           </div>
 
           {/* Sort dropdown */}
           <div className="relative group">
-            <button className="flex items-center gap-2 label hover:opacity-60" style={{ fontSize: "10px" }}>
-              {sortBy} <ChevronDown size={12} strokeWidth={1.5} />
+            <button className="flex items-center gap-3 label text-(--beige) hover:text-(--orange) transition-colors" style={{ fontSize: "11px", letterSpacing: "0.15em" }}>
+              {sortBy.toUpperCase()} <ChevronDown size={14} strokeWidth={1.5} />
             </button>
-            <div className="absolute right-0 top-full mt-2 bg-white border border-gray-200 shadow-sm z-50 hidden group-hover:block min-w-max">
+            
+            {/* Dropdown Menu - Spacious */}
+            <div className="absolute right-0 top-full mt-3 bg-(--gray-900) border border-(--gray-800) shadow-lg z-50 hidden group-hover:block min-w-max py-2">
               {SORT_OPTIONS.map((s) => (
                 <button
                   key={s}
                   onClick={() => setSortBy(s)}
-                  className="block w-full text-left px-5 py-3 label hover:bg-gray-50 transition-colors"
-                  style={{ fontSize: "10px", fontWeight: sortBy === s ? 500 : 400 }}
+                  className="block w-full text-left px-8 py-4 label text-(--beige) hover:bg-(--black) hover:text-(--orange) transition-colors"
+                  style={{ fontSize: "11px", fontWeight: sortBy === s ? 500 : 400, letterSpacing: "0.12em" }}
                 >
-                  {s}
+                  {s.toUpperCase()}
                 </button>
               ))}
             </div>
@@ -159,20 +167,20 @@ export default function ProductsPage() {
       </div>
 
       {/* PRODUCT GRID */}
-      <div className="px-4 md:px-8 py-8">
+      <div className="px-6 md:px-12 py-12 md:py-16">
         {filtered.length === 0 ? (
           <div className="text-center py-32">
-            <p className="label text-gray-400 mb-6" style={{ fontSize: "11px" }}>No items found</p>
+            <p className="label text-(--gray-400) mb-6" style={{ fontSize: "12px", letterSpacing: "0.15em" }}>No items found</p>
             <button
               onClick={() => { setActiveCategory("All"); setActiveType("All"); setSearch(""); }}
-              className="label underline hover:opacity-60"
-              style={{ fontSize: "11px" }}
+              className="label text-(--orange) border-b border-(--orange) pb-1 hover:opacity-75 transition-opacity"
+              style={{ fontSize: "11px", letterSpacing: "0.15em" }}
             >
-              Clear filters
+              CLEAR FILTERS
             </button>
           </div>
         ) : (
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-2 gap-y-10">
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-4 md:gap-x-6 gap-y-12 md:gap-y-16">
             {filtered.map((product) => (
               <div
                 key={product.id}
@@ -181,16 +189,16 @@ export default function ProductsPage() {
                 onMouseLeave={() => setHoveredId(null)}
                 onClick={() => openQuickView({ ...product, quantity: 1 })}
               >
-                {/* Image */}
-                <div className="product-img-wrap relative" style={{ aspectRatio: "3/4" }}>
+                {/* Image Wrapper */}
+                <div className="product-img-wrap relative border border-(--gray-800) group-hover:border-(--orange) transition-colors" style={{ aspectRatio: "3/4" }}>
                   <img src={product.image} alt={product.name} />
 
                   {/* Quick add overlay */}
                   <div
-                    className="absolute bottom-0 left-0 right-0 bg-white text-black text-center py-3 label transition-transform duration-300"
+                    className="absolute bottom-0 left-0 right-0 bg-(--orange) text-(--black) font-bold text-center py-4 label transition-transform duration-300"
                     style={{
-                      fontSize: "10px",
-                      letterSpacing: "0.12em",
+                      fontSize: "11px",
+                      letterSpacing: "0.15em",
                       transform: hoveredId === product.id ? "translateY(0)" : "translateY(100%)",
                     }}
                   >
@@ -199,16 +207,16 @@ export default function ProductsPage() {
                 </div>
 
                 {/* Product info */}
-                <div className="mt-3 flex justify-between items-start">
+                <div className="mt-5 flex justify-between items-start">
                   <div>
-                    <p className="label" style={{ fontSize: "11px", lineHeight: 1.4 }}>
+                    <p className="label text-(--beige) group-hover:text-(--orange) transition-colors" style={{ fontSize: "11px", lineHeight: 1.5 }}>
                       {product.name}
                     </p>
-                    <p className="label text-gray-400 mt-0.5" style={{ fontSize: "10px" }}>
+                    <p className="label text-(--gray-400) mt-1.5" style={{ fontSize: "10px", letterSpacing: "0.15em" }}>
                       {product.category}
                     </p>
                   </div>
-                  <p className="label flex-shrink-0 ml-2" style={{ fontSize: "11px" }}>
+                  <p className="label text-(--beige) shrink-0 ml-4" style={{ fontSize: "11px" }}>
                     ${product.price}
                   </p>
                 </div>

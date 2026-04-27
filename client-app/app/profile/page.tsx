@@ -71,23 +71,23 @@ export default function ProfilePage() {
   ];
 
   return (
-    <div style={{ background: "var(--white)", minHeight: "100vh", paddingTop: "58px", fontFamily: "var(--font-sans)" }}>
+    <div style={{ background: "var(--black)", minHeight: "100vh", paddingTop: "58px", fontFamily: "var(--font-sans)", color: "var(--beige)" }}>
 
       {/* ── PAGE HEADER ── */}
-      <div style={{ borderBottom: "1px solid var(--gray-200)", padding: "clamp(32px,5vw,56px) clamp(16px,4vw,48px) 0" }}>
-        <Link href="/" className="btn-ghost anim-fade-in" style={{ fontSize: "10px", marginBottom: "28px", display: "inline-flex" }}>
+      <div style={{ borderBottom: "1px solid var(--gray-800)", padding: "clamp(32px,5vw,56px) clamp(16px,4vw,48px) 0" }}>
+        <Link href="/" className="btn-ghost anim-fade-in text-[var(--beige)] hover:text-[var(--orange)]" style={{ fontSize: "10px", marginBottom: "28px", display: "inline-flex" }}>
           <ArrowLeft size={13} strokeWidth={1.25} /> Back
         </Link>
 
         <div style={{ display: "flex", alignItems: "flex-end", justifyContent: "space-between", paddingBottom: "clamp(20px,3vw,32px)" }}>
           <div className="anim-fade-up">
-            <p className="label" style={{ color: "var(--gray-400)", marginBottom: "10px", fontSize: "9px", letterSpacing: "0.22em" }}>
+            <p className="label" style={{ color: "var(--orange)", marginBottom: "10px", fontSize: "9px", letterSpacing: "0.22em" }}>
               Member since 2026
             </p>
-            <h1 className="display-md">My Account</h1>
+            <h1 className="display-md text-[var(--beige)]">My Account</h1>
           </div>
 
-          <button className="btn-ghost anim-fade-in delay-200" style={{ fontSize: "10px", color: "var(--gray-400)" }}>
+          <button className="btn-ghost anim-fade-in delay-200 text-[var(--gray-400)] hover:text-[var(--orange)]" style={{ fontSize: "10px" }}>
             <LogOut size={14} strokeWidth={1.25} />
             Sign Out
           </button>
@@ -115,27 +115,28 @@ export default function ProfilePage() {
         {/* ────── ORDERS ────── */}
         {activeTab === "orders" && (
           <div className="anim-scale-up">
-            <p className="label" style={{ color: "var(--gray-400)", marginBottom: "28px", fontSize: "9px", letterSpacing: "0.2em" }}>
+            <p className="label" style={{ color: "var(--orange)", marginBottom: "28px", fontSize: "9px", letterSpacing: "0.2em" }}>
               {MOCK_ORDERS.length} Orders
             </p>
 
-            <div style={{ display: "flex", flexDirection: "column", gap: "2px" }}>
+            <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
               {MOCK_ORDERS.map((order) => (
-                <div key={order.id} style={{ border: "1px solid var(--gray-100)", background: "var(--white)" }}>
+                <div key={order.id} style={{ border: "1px solid var(--gray-800)", background: "var(--black)" }}>
                   {/* Order header */}
                   <button
                     style={{ width: "100%", display: "flex", alignItems: "center", justifyContent: "space-between", padding: "20px 24px", cursor: "pointer", background: "transparent", border: "none", textAlign: "left" }}
                     onClick={() => setExpandedOrder(expandedOrder === order.id ? null : order.id)}
+                    className="text-[var(--beige)] hover:text-[var(--orange)] transition-colors"
                   >
                     <div style={{ display: "flex", alignItems: "center", gap: "clamp(16px,4vw,40px)", flexWrap: "wrap" }}>
                       <div>
-                        <p className="label" style={{ fontSize: "10px", letterSpacing: "0.15em", marginBottom: "4px" }}>#{order.id}</p>
+                        <p className="label" style={{ fontSize: "10px", letterSpacing: "0.15em", marginBottom: "4px", color: "inherit" }}>#{order.id}</p>
                         <p className="label" style={{ fontSize: "9px", color: "var(--gray-400)", letterSpacing: "0.1em" }}>{order.date}</p>
                       </div>
                       <StatusBadge status={order.status} />
                     </div>
                     <div style={{ display: "flex", alignItems: "center", gap: "20px" }}>
-                      <span className="label" style={{ fontSize: "10px" }}>$ {order.total}</span>
+                      <span className="label" style={{ fontSize: "10px", color: "inherit" }}>$ {order.total}</span>
                       <ChevronRight
                         size={14} strokeWidth={1.25}
                         style={{ transition: "transform 0.3s ease", transform: expandedOrder === order.id ? "rotate(90deg)" : "rotate(0deg)" }}
@@ -148,25 +149,25 @@ export default function ProfilePage() {
                     className="accordion-body"
                     style={{ maxHeight: expandedOrder === order.id ? "600px" : "0" }}
                   >
-                    <div style={{ borderTop: "1px solid var(--gray-100)", padding: "20px 24px 24px" }}>
+                    <div style={{ borderTop: "1px solid var(--gray-800)", padding: "20px 24px 24px" }}>
                       <div style={{ display: "flex", flexDirection: "column", gap: "20px", marginBottom: "20px" }}>
                         {order.items.map((item, i) => (
                           <div key={i} style={{ display: "flex", gap: "16px", alignItems: "center" }}>
-                            <div style={{ width: "64px", flexShrink: 0, background: "var(--gray-50)", aspectRatio: "3/4", overflow: "hidden" }}>
+                            <div style={{ width: "64px", flexShrink: 0, background: "var(--gray-900)", aspectRatio: "3/4", overflow: "hidden" }}>
                               <img src={item.image} alt={item.name} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
                             </div>
                             <div style={{ flex: 1 }}>
-                              <p className="label" style={{ fontSize: "10px", marginBottom: "4px", letterSpacing: "0.12em" }}>{item.name}</p>
-                              <p className="body-copy" style={{ fontSize: "10px" }}>Size: {item.size} &nbsp;·&nbsp; Qty: {item.qty}</p>
+                              <p className="label text-[var(--beige)]" style={{ fontSize: "10px", marginBottom: "4px", letterSpacing: "0.12em" }}>{item.name}</p>
+                              <p className="body-copy" style={{ fontSize: "10px", color: "var(--gray-400)" }}>Size: {item.size} &nbsp;·&nbsp; Qty: {item.qty}</p>
                             </div>
-                            <span className="label" style={{ fontSize: "10px" }}>$ {item.price}</span>
+                            <span className="label text-[var(--orange)]" style={{ fontSize: "10px" }}>$ {item.price}</span>
                           </div>
                         ))}
                       </div>
 
-                      <div style={{ display: "flex", gap: "12px", paddingTop: "16px", borderTop: "1px solid var(--gray-100)" }}>
+                      <div style={{ display: "flex", gap: "12px", paddingTop: "16px", borderTop: "1px solid var(--gray-800)" }}>
                         <button className="btn-secondary" style={{ fontSize: "9px", padding: "10px 20px" }}>
-                          <Eye size={12} strokeWidth={1.25} /> Track Order
+                          <Eye size={12} strokeWidth={1.25} className="mr-2" /> Track Order
                         </button>
                         <button className="btn-ghost" style={{ fontSize: "9px" }}>
                           Return / Exchange
@@ -184,7 +185,7 @@ export default function ProfilePage() {
         {activeTab === "addresses" && (
           <div className="anim-scale-up">
             <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "28px" }}>
-              <p className="label" style={{ color: "var(--gray-400)", fontSize: "9px", letterSpacing: "0.2em" }}>Saved Addresses</p>
+              <p className="label" style={{ color: "var(--orange)", fontSize: "9px", letterSpacing: "0.2em" }}>Saved Addresses</p>
               <button className="btn-ghost" style={{ fontSize: "9px" }}>
                 <Plus size={13} strokeWidth={1.25} /> Add New
               </button>
@@ -192,15 +193,15 @@ export default function ProfilePage() {
 
             <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", gap: "16px" }}>
               {/* Default address */}
-              <div style={{ border: "1px solid var(--black)", padding: "28px" }}>
+              <div style={{ border: "1px solid var(--beige)", padding: "28px", background: "var(--gray-900)" }}>
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "16px" }}>
-                  <span className="label" style={{ fontSize: "9px", letterSpacing: "0.18em" }}>Home — Default</span>
+                  <span className="label text-[var(--beige)]" style={{ fontSize: "9px", letterSpacing: "0.18em" }}>Home — Default</span>
                   <div style={{ display: "flex", gap: "12px" }}>
-                    <button className="btn-ghost" style={{ padding: 0, fontSize: "10px" }}><Edit2 size={12} strokeWidth={1.25} /></button>
-                    <button className="btn-ghost" style={{ padding: 0, fontSize: "10px", color: "var(--gray-400)" }}><Trash2 size={12} strokeWidth={1.25} /></button>
+                    <button className="btn-ghost text-[var(--beige)] hover:text-[var(--orange)]" style={{ padding: 0, fontSize: "10px" }}><Edit2 size={14} strokeWidth={1.5} /></button>
+                    <button className="btn-ghost text-[var(--gray-400)] hover:text-[var(--orange)]" style={{ padding: 0, fontSize: "10px" }}><Trash2 size={14} strokeWidth={1.5} /></button>
                   </div>
                 </div>
-                <p className="label" style={{ fontSize: "11px", letterSpacing: "0.06em", lineHeight: 1.9, fontWeight: 400, textTransform: "none", letterSpacing: "0.04em" }}>
+                <p className="label text-[var(--gray-200)]" style={{ fontSize: "11px", lineHeight: 1.9, fontWeight: 400, textTransform: "none", letterSpacing: "0.04em" }}>
                   Jane Doe<br />
                   123 Park Street<br />
                   Kolkata, West Bengal<br />
@@ -209,15 +210,15 @@ export default function ProfilePage() {
               </div>
 
               {/* Work address */}
-              <div style={{ border: "1px solid var(--gray-200)", padding: "28px" }}>
+              <div style={{ border: "1px solid var(--gray-800)", padding: "28px", background: "var(--black)" }}>
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "16px" }}>
                   <span className="label" style={{ fontSize: "9px", color: "var(--gray-400)", letterSpacing: "0.18em" }}>Office</span>
                   <div style={{ display: "flex", gap: "12px" }}>
-                    <button className="btn-ghost" style={{ padding: 0 }}><Edit2 size={12} strokeWidth={1.25} /></button>
-                    <button className="btn-ghost" style={{ padding: 0, color: "var(--gray-400)" }}><Trash2 size={12} strokeWidth={1.25} /></button>
+                    <button className="btn-ghost text-[var(--beige)] hover:text-[var(--orange)]" style={{ padding: 0 }}><Edit2 size={14} strokeWidth={1.5} /></button>
+                    <button className="btn-ghost text-[var(--gray-400)] hover:text-[var(--orange)]" style={{ padding: 0 }}><Trash2 size={14} strokeWidth={1.5} /></button>
                   </div>
                 </div>
-                <p style={{ fontFamily: "var(--font-sans)", fontSize: "11px", letterSpacing: "0.04em", lineHeight: 1.9, color: "var(--gray-600)" }}>
+                <p style={{ fontFamily: "var(--font-sans)", fontSize: "11px", letterSpacing: "0.04em", lineHeight: 1.9, color: "var(--gray-400)" }}>
                   Jane Doe<br />
                   45 MG Road, 3rd Floor<br />
                   Bengaluru, Karnataka<br />
@@ -227,16 +228,17 @@ export default function ProfilePage() {
 
               {/* Add new card */}
               <button style={{
-                border: "1px dashed var(--gray-200)", padding: "28px",
+                border: "1px dashed var(--gray-600)", padding: "28px",
                 display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
                 gap: "10px", cursor: "pointer", minHeight: "160px", background: "transparent",
-                transition: "border-color 0.25s ease",
+                transition: "border-color 0.25s ease, color 0.25s ease",
+                color: "var(--gray-400)"
               }}
-                onMouseEnter={e => (e.currentTarget.style.borderColor = "var(--black)")}
-                onMouseLeave={e => (e.currentTarget.style.borderColor = "var(--gray-200)")}
+                onMouseEnter={e => { e.currentTarget.style.borderColor = "var(--orange)"; e.currentTarget.style.color = "var(--orange)"; }}
+                onMouseLeave={e => { e.currentTarget.style.borderColor = "var(--gray-600)"; e.currentTarget.style.color = "var(--gray-400)"; }}
               >
-                <Plus size={20} strokeWidth={1} style={{ color: "var(--gray-400)" }} />
-                <span className="label" style={{ fontSize: "9px", color: "var(--gray-400)", letterSpacing: "0.18em" }}>Add Address</span>
+                <Plus size={20} strokeWidth={1.5} color="inherit" />
+                <span className="label" style={{ fontSize: "9px", color: "inherit", letterSpacing: "0.18em" }}>Add Address</span>
               </button>
             </div>
           </div>
@@ -245,13 +247,13 @@ export default function ProfilePage() {
         {/* ────── WISHLIST ────── */}
         {activeTab === "wishlist" && (
           <div className="anim-scale-up">
-            <p className="label" style={{ color: "var(--gray-400)", marginBottom: "28px", fontSize: "9px", letterSpacing: "0.2em" }}>
+            <p className="label" style={{ color: "var(--orange)", marginBottom: "28px", fontSize: "9px", letterSpacing: "0.2em" }}>
               {wishlist.length} Saved Items
             </p>
 
             {wishlist.length === 0 ? (
               <div style={{ textAlign: "center", padding: "80px 0" }}>
-                <Heart size={28} strokeWidth={1} style={{ margin: "0 auto 16px", color: "var(--gray-200)" }} />
+                <Heart size={28} strokeWidth={1} style={{ margin: "0 auto 16px", color: "var(--gray-400)" }} />
                 <p className="label" style={{ color: "var(--gray-400)", marginBottom: "24px", fontSize: "10px" }}>Your wishlist is empty</p>
                 <Link href="/products" className="btn-primary" style={{ fontSize: "9px" }}>Browse Collection</Link>
               </div>
@@ -263,17 +265,17 @@ export default function ProfilePage() {
                       animation: `fadeUp 0.6s var(--ease-out-expo) ${i * 80}ms both`,
                     }}
                   >
-                    <div className="product-img-wrap" style={{ aspectRatio: "3/4", position: "relative" }}>
+                    <div className="product-img-wrap border border-[var(--gray-800)] group-hover:border-[var(--orange)] transition-colors" style={{ aspectRatio: "3/4", position: "relative" }}>
                       <img src={item.image} alt={item.name} />
                       {/* Actions overlay */}
                       <div style={{
-                        position: "absolute", inset: 0, background: "rgba(10,10,10,0)",
+                        position: "absolute", inset: 0, background: "rgba(0,0,0,0)",
                         display: "flex", flexDirection: "column", justifyContent: "flex-end",
                         padding: "16px", gap: "8px",
                         transition: "background 0.35s ease",
                       }}
-                        onMouseEnter={e => { (e.currentTarget as HTMLDivElement).style.background = "rgba(10,10,10,0.15)"; }}
-                        onMouseLeave={e => { (e.currentTarget as HTMLDivElement).style.background = "rgba(10,10,10,0)"; }}
+                        onMouseEnter={e => { (e.currentTarget as HTMLDivElement).style.background = "rgba(0,0,0,0.4)"; }}
+                        onMouseLeave={e => { (e.currentTarget as HTMLDivElement).style.background = "rgba(0,0,0,0)"; }}
                       >
                         <button className="btn-primary" style={{ fontSize: "9px", padding: "10px", opacity: 0, transition: "opacity 0.3s ease" }}
                           onMouseEnter={e => ((e.currentTarget.parentElement as HTMLElement).querySelectorAll('button').forEach(b => (b as HTMLElement).style.opacity = "1"))}
@@ -284,21 +286,23 @@ export default function ProfilePage() {
                           onClick={() => setWishlist(w => w.filter(x => x.id !== item.id))}
                           style={{
                             position: "absolute", top: "10px", right: "10px",
-                            background: "rgba(250,250,250,0.9)", border: "none",
-                            width: "30px", height: "30px", cursor: "pointer",
+                            background: "var(--gray-900)", border: "1px solid var(--gray-600)",
+                            color: "var(--beige)",
+                            width: "32px", height: "32px", cursor: "pointer",
                             display: "flex", alignItems: "center", justifyContent: "center",
                           }}
+                          className="hover:border-[var(--orange)] hover:text-[var(--orange)] transition-colors"
                         >
-                          <Trash2 size={12} strokeWidth={1.25} />
+                          <Trash2 size={14} strokeWidth={1.5} />
                         </button>
                       </div>
                     </div>
                     <div style={{ marginTop: "10px", display: "flex", justifyContent: "space-between" }}>
                       <div>
-                        <p className="label" style={{ fontSize: "10px", letterSpacing: "0.12em", marginBottom: "3px" }}>{item.name}</p>
+                        <p className="label text-[var(--beige)] group-hover:text-[var(--orange)] transition-colors" style={{ fontSize: "10px", letterSpacing: "0.12em", marginBottom: "3px" }}>{item.name}</p>
                         <p className="label" style={{ fontSize: "9px", color: "var(--gray-400)" }}>{item.category}</p>
                       </div>
-                      <span className="label" style={{ fontSize: "10px" }}>$ {item.price}</span>
+                      <span className="label text-[var(--beige)]" style={{ fontSize: "10px" }}>$ {item.price}</span>
                     </div>
                   </div>
                 ))}
@@ -310,13 +314,13 @@ export default function ProfilePage() {
         {/* ────── SETTINGS ────── */}
         {activeTab === "settings" && (
           <div className="anim-scale-up" style={{ maxWidth: "560px" }}>
-            <p className="label" style={{ color: "var(--gray-400)", marginBottom: "36px", fontSize: "9px", letterSpacing: "0.2em" }}>
+            <p className="label" style={{ color: "var(--orange)", marginBottom: "36px", fontSize: "9px", letterSpacing: "0.2em" }}>
               Account Settings
             </p>
 
             {/* Personal Info */}
             <section style={{ marginBottom: "48px" }}>
-              <h2 style={{ fontFamily: "var(--font-serif)", fontSize: "1.4rem", fontWeight: 400, marginBottom: "24px", letterSpacing: "-0.01em" }}>
+              <h2 style={{ fontFamily: "var(--font-serif)", fontSize: "1.4rem", fontWeight: 400, marginBottom: "24px", letterSpacing: "-0.01em", color: "var(--beige)" }}>
                 Personal Information
               </h2>
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "24px", marginBottom: "24px" }}>
@@ -340,8 +344,8 @@ export default function ProfilePage() {
             </section>
 
             {/* Password */}
-            <section style={{ marginBottom: "48px", borderTop: "1px solid var(--gray-100)", paddingTop: "36px" }}>
-              <h2 style={{ fontFamily: "var(--font-serif)", fontSize: "1.4rem", fontWeight: 400, marginBottom: "24px" }}>
+            <section style={{ marginBottom: "48px", borderTop: "1px solid var(--gray-800)", paddingTop: "36px" }}>
+              <h2 style={{ fontFamily: "var(--font-serif)", fontSize: "1.4rem", fontWeight: 400, marginBottom: "24px", color: "var(--beige)" }}>
                 Password
               </h2>
               <div style={{ marginBottom: "16px" }}>
@@ -361,8 +365,8 @@ export default function ProfilePage() {
             </section>
 
             {/* Preferences */}
-            <section style={{ marginBottom: "48px", borderTop: "1px solid var(--gray-100)", paddingTop: "36px" }}>
-              <h2 style={{ fontFamily: "var(--font-serif)", fontSize: "1.4rem", fontWeight: 400, marginBottom: "24px" }}>
+            <section style={{ marginBottom: "48px", borderTop: "1px solid var(--gray-800)", paddingTop: "36px" }}>
+              <h2 style={{ fontFamily: "var(--font-serif)", fontSize: "1.4rem", fontWeight: 400, marginBottom: "24px", color: "var(--beige)" }}>
                 Communication Preferences
               </h2>
               {[
@@ -371,12 +375,12 @@ export default function ProfilePage() {
                 { label: "Exclusive member offers", checked: false },
                 { label: "Style edits & lookbooks", checked: true },
               ].map((pref) => (
-                <label key={pref.label} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "14px 0", borderBottom: "1px solid var(--gray-100)", cursor: "pointer" }}>
-                  <span className="label" style={{ fontSize: "10px", letterSpacing: "0.12em" }}>{pref.label}</span>
+                <label key={pref.label} className="hover:text-[var(--orange)] transition-colors group" style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "14px 0", borderBottom: "1px solid var(--gray-800)", cursor: "pointer" }}>
+                  <span className="label text-[var(--beige)] group-hover:text-[var(--orange)] transition-colors" style={{ fontSize: "10px", letterSpacing: "0.12em" }}>{pref.label}</span>
                   <input
                     type="checkbox"
                     defaultChecked={pref.checked}
-                    style={{ width: "16px", height: "16px", accentColor: "var(--black)", cursor: "pointer" }}
+                    style={{ width: "16px", height: "16px", accentColor: "var(--orange)", cursor: "pointer" }}
                   />
                 </label>
               ))}
@@ -389,9 +393,9 @@ export default function ProfilePage() {
             </div>
 
             {/* Danger zone */}
-            <div style={{ marginTop: "48px", paddingTop: "28px", borderTop: "1px solid var(--gray-100)" }}>
+            <div style={{ marginTop: "48px", paddingTop: "28px", borderTop: "1px solid var(--gray-800)" }}>
               <p className="label" style={{ color: "var(--gray-400)", fontSize: "9px", marginBottom: "12px" }}>Danger Zone</p>
-              <button className="btn-ghost" style={{ fontSize: "10px", color: "#c0392b" }}>Delete Account</button>
+              <button className="btn-ghost hover:text-[var(--orange)]" style={{ fontSize: "10px", color: "#EE3C24" }}>Delete Account</button>
             </div>
           </div>
         )}

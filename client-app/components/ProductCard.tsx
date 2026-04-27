@@ -4,30 +4,31 @@ import { Product } from "@/types";
 import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
-import { useGlobal } from "@/lib/GlobalContext";
+import { useCart } from "@/lib/CartContext";
 import { Heart } from "lucide-react";
 
 export default function ProductCard({ product }: { product: Product }) {
-  const { addToCart } = useGlobal();
+  const { addToCart } = useCart();
   const [isHovered, setIsHovered] = useState(false);
   const [isWishlisted, setIsWishlisted] = useState(false);
 
-  // Fallback secondary image logic for the hover effect
   const hoverImage = product.hoverImage || product.image; 
 
   const handleQuickAdd = (e: React.MouseEvent) => {
-    e.preventDefault(); // Prevent link navigation
+    e.preventDefault(); 
+    e.stopPropagation();
     addToCart({
       id: product.id,
       name: product.name,
       price: product.price,
       image: product.image,
-      size: "M", // Defaulting to M for quick add, real implementation might need a size selector
+      size: "M (240 GSM)", // Defaulting for quick add
     });
   };
 
   const toggleWishlist = (e: React.MouseEvent) => {
     e.preventDefault();
+    e.stopPropagation(); // Prevents the link from redirecting you when you click the heart
     setIsWishlisted(!isWishlisted);
   };
 
@@ -38,17 +39,9 @@ export default function ProductCard({ product }: { product: Product }) {
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
-      <div className="relative aspect-[3/4] w-full overflow-hidden bg-surface border border-transparent group-hover:border-border transition-colors">
+      <div className="relative aspect-[3/4] w-full overflow-hidden bg-[var(--gray-900)] border border-[var(--gray-800)] group-hover:border-[var(--orange)] transition-colors duration-400">
         
-        {/* Wishlist Heart */}
-        <button 
-          onClick={toggleWishlist}
-          className="absolute top-4 right-4 z-20 p-2 text-foreground/50 hover:text-red-500 transition-colors"
-        >
-          <Heart className={`w-5 h-5 ${isWishlisted ? "fill-red-500 text-red-500" : ""}`} />
-        </button>
-
-        {/* Image Swap Animation */}
+        {/* ── IMAGES ── */}
         <div className="relative w-full h-full">
           <Image
             fill
@@ -59,27 +52,50 @@ export default function ProductCard({ product }: { product: Product }) {
           <Image
             fill
             src={hoverImage}
-            alt={`${product.name} alternate view`}
-            className={`object-cover object-center absolute inset-0 transition-opacity duration-700 ease-in-out transform scale-105 group-hover:scale-100 ${isHovered ? "opacity-100" : "opacity-0"}`}
+            alt={product.name}
+            className={`object-cover object-center absolute inset-0 transition-all duration-1000 ease-in-out ${isHovered ? "opacity-100 scale-105" : "opacity-0 scale-100"}`}
           />
         </div>
-        
-        {/* Quick Add Overlay */}
-        <div className="absolute inset-x-0 bottom-0 flex translate-y-full items-center justify-center p-4 transition-transform duration-500 ease-out group-hover:translate-y-0 z-10 hidden md:flex">
-          <button 
+
+        {/* ── QUICK ADD ── */}
+        <div 
+          className={`absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-[var(--black)] via-[var(--black)]/80 to-transparent transition-all duration-400 z-40 ${isHovered ? "translate-y-0 opacity-100" : "translate-y-4 opacity-0"}`}
+        >
+          <div 
             onClick={handleQuickAdd}
-            className="w-full bg-background/90 backdrop-blur-md text-foreground py-3 text-xs font-medium uppercase tracking-[0.2em] border border-border hover:bg-foreground hover:text-background transition-colors"
+            className="w-full py-3.5 bg-[var(--beige)] text-[var(--black)] font-bold text-center uppercase hover:bg-[var(--orange)] transition-colors duration-300"
+            style={{ fontSize: "10px", letterSpacing: "0.2em" }}
           >
-            Quick Add +
-          </button>
+            Quick Add
+          </div>
         </div>
+
+        {/* ── WISHLIST LOVE BUTTON ── */}
+        <div 
+          onClick={toggleWishlist}
+          role="button"
+          tabIndex={0}
+          className={`absolute top-3 right-3 z-50 p-2.5 rounded-full backdrop-blur-md transition-all duration-300 active:scale-75 ${
+            isWishlisted 
+              ? "bg-[var(--orange)]/20 text-[var(--orange)] border border-[var(--orange)]/50" 
+              : "bg-black/40 text-[var(--beige)] border border-white/10 hover:bg-black/60 hover:text-[var(--orange)] hover:border-[var(--orange)]/50"
+          }`}
+          aria-label="Add to wishlist"
+        >
+          <Heart 
+            className={`w-4 h-4 transition-all duration-400 ${
+              isWishlisted ? "fill-[var(--orange)] scale-110 drop-shadow-[0_0_8px_rgba(238,60,36,0.5)]" : "scale-100"
+            }`} 
+          />
+        </div>
+
       </div>
 
-      <div className="mt-4 flex flex-col items-center justify-center space-y-1 text-center">
-        <h3 className="text-sm font-medium uppercase tracking-widest text-foreground">
+      <div className="mt-4 flex flex-col gap-1.5">
+        <h3 className="label text-[var(--beige)] group-hover:text-[var(--orange)] transition-colors" style={{ fontSize: "11px", lineHeight: 1.4 }}>
           {product.name}
         </h3>
-        <p className="text-xs text-muted font-mono tracking-widest">
+        <p className="label text-[var(--gray-200)]" style={{ fontSize: "10px", letterSpacing: "0.15em" }}>
           ${product.price.toFixed(2)}
         </p>
       </div>
