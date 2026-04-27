@@ -15,12 +15,9 @@ import {
   getProductImages,
   getProductTypes,
   getProducts,
-  ProductCategoryRow,
-  ProductImageRow,
-  ProductRow,
-  ProductTypeRow,
   upsertProduct,
 } from "@/services/admin";
+import { ProductCategoryRow, ProductImageRow, ProductRow, ProductTypeRow } from "@/types";
 
 const emptyForm = {
   id: "",

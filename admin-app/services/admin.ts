@@ -1,89 +1,8 @@
+import { CategoryRow, OrderItemRow, OrderRow, ProductCategoryRow, ProductImageRow, ProductRow, ProductTypeRow, ProductVariantRow } from "@/types";
 import { createClient } from "@/utils/supabse";
 
-export type ProductRow = {
-  id: string;
-  name: string;
-  description: string | null;
-  product_type_id: string | null;
-  price: number | null;
-  discount: number | null;
-  finalPrice: number | null;
-  stock: number | null;
-  isActive: boolean;
-  createdAt: string | null;
-  updatedAt: string | null;
-};
 
-export type CategoryRow = {
-  id: string;
-  name: string;
-  slug: string;
-  isActive: boolean;
-};
 
-export type ProductTypeRow = {
-  id: string;
-  name: string;
-  slug: string;
-  isActive: boolean;
-};
-
-export type ProductImageRow = {
-  id: string;
-  product_id: string;
-  url: string;
-  isPrimary: boolean;
-};
-
-export type ProductCategoryRow = {
-  id: string;
-  product_id: string;
-  category_id: string;
-};
-
-export type ProductVariantRow = {
-  id: string;
-  product_id: string;
-  size: string;
-  stock: number;
-  gsm: number | null;
-};
-
-export type OrderRow = {
-  id: string;
-  user_id: string;
-  totalAmount: number | null;
-  discount: number | null;
-  finalAmount: number | null;
-  address_id: string | null;
-  paymentMethod: string | null;
-  paymentStatus: string | null;
-  orderStatus: string | null;
-  name: string | null;
-  phone: string | null;
-  addressLine1: string | null;
-  addressLine2: string | null;
-  city: string | null;
-  state: string | null;
-  country: string | null;
-  pincode: string | null;
-  trackingId: string | null;
-  courier: string | null;
-  createdAt: string | null;
-  updatedAt: string | null;
-};
-
-export type OrderItemRow = {
-  id: string;
-  order_id: string;
-  product_id: string;
-  variant_id: string | null;
-  name: string;
-  price: number;
-  quantity: number;
-  size: string | null;
-  image: string | null;
-};
 
 const supabase = createClient();
 
@@ -110,7 +29,7 @@ export async function getCategories() {
   return mutate(
     supabase
       .from("categories")
-      .select("id, name, slug, isActive")
+      .select("id, name, slug, is_active")
       .order("name", { ascending: true })
   ) as Promise<CategoryRow[]>;
 }
@@ -119,9 +38,45 @@ export async function getProductTypes() {
   return mutate(
     supabase
       .from("product_type")
-      .select("id, name, slug, isActive")
+      .select("id, name, slug, is_active")
       .order("name", { ascending: true })
   ) as Promise<ProductTypeRow[]>;
+}
+
+
+// Replace your existing upsertProductType with this:
+export async function upsertProductType(payload: {
+  id?: string;
+  name: string;
+  slug: string;
+  isActive: boolean;
+}) {
+  if (payload.id) {
+    await mutate(
+      supabase
+        .from("product_type")
+        .update({ name: payload.name, slug: payload.slug, is_active: payload.isActive })
+        .eq("id", payload.id)
+        .select("id")
+    );
+    return payload.id;
+  }
+
+  // ADDED: The insert logic for creating new product types
+  const created = await mutate<{ id: string }>(
+    supabase
+      .from("product_type")
+      .insert({ name: payload.name, slug: payload.slug, is_active: payload.isActive })
+      .select("id")
+      .single()
+  );
+
+  return created?.id as string;
+}
+
+// ADDED: The missing delete function
+export async function deleteProductType(id: string) {
+  await mutate(supabase.from("product_type").delete().eq("id", id).select("id"));
 }
 
 export async function getProductImages() {
@@ -200,7 +155,7 @@ export async function upsertProduct(payload: {
       supabase.from("products").update(productPayload).eq("id", productId).select("id")
     );
   } else {
-    const created = await mutate(
+    const created = await mutate<{ id: string }>(
       supabase
         .from("products")
         .insert({ ...productPayload, createdAt: new Date().toISOString() })
@@ -256,17 +211,17 @@ export async function upsertCategory(payload: {
     await mutate(
       supabase
         .from("categories")
-        .update({ name: payload.name, slug: payload.slug, isActive: payload.isActive })
+        .update({ name: payload.name, slug: payload.slug, is_active: payload.isActive })
         .eq("id", payload.id)
         .select("id")
     );
     return payload.id;
   }
 
-  const created = await mutate(
+  const created = await mutate<{ id: string }>(
     supabase
       .from("categories")
-      .insert({ name: payload.name, slug: payload.slug, isActive: payload.isActive })
+      .insert({ name: payload.name, slug: payload.slug, is_active: payload.isActive })
       .select("id")
       .single()
   );
@@ -297,7 +252,7 @@ export async function upsertVariant(payload: {
     return payload.id;
   }
 
-  const created = await mutate(
+  const created = await mutate<{ id: string }>(
     supabase
       .from("product_variants")
       .insert({ product_id: payload.product_id, size: payload.size, stock: payload.stock, gsm: payload.gsm })
