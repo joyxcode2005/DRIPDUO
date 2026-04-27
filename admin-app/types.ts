@@ -12,19 +12,15 @@ export type CategoryRow = {
     is_active: boolean;
 };
 
-export type ProductRow = {
+// Adding Product Row Type based on your schema
+export interface ProductRow {
     id: string;
     name: string;
-    description: string | null;
-    product_type_id: string | null;
-    price: number | null;
-    discount: number | null;
-    finalPrice: number | null;
-    stock: number | null;
-    isActive: boolean;
-    createdAt: string | null;
-    updatedAt: string | null;
-};
+    price: number;
+    stock: number;
+    is_active: boolean;
+    product_type_id?: string;
+}
 
 export type ProductImageRow = {
     id: string;
