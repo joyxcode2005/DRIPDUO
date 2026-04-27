@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { toast } from "react-toastify";
 import { Edit3, Plus, RefreshCw, Trash2, FolderTree, Tags } from "lucide-react";
 
@@ -259,7 +259,17 @@ export default function TaxonomyPage() {
                           <td className="px-4 py-4 text-black">{category.is_active ? "Active" : "Disabled"}</td>
                           <td className="px-4 py-4">
                             <div className="flex flex-wrap gap-2">
-                              <button onClick={() => setCatForm({ id: category.id, name: category.name, slug: category.slug, isActive: category.is_active })} className="p-2 border rounded-xl hover:bg-black/5">
+                              <button
+                                onClick={() =>
+                                  setCatForm({
+                                    id: category.id,
+                                    name: category.name,
+                                    slug: category.slug,
+                                    isActive: category.is_active,
+                                  })
+                                }
+                                className="p-2 border rounded-xl hover:bg-black/5"
+                              >
                                 <Edit3 className="h-3.5 w-3.5" />
                               </button>
                               <button onClick={() => handleCatDelete(category.id)} className="p-2 border rounded-xl hover:bg-black/5">
