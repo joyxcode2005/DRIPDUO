@@ -9,46 +9,58 @@ import { useCart } from "@/lib/CartContext";
 export const BottomNav = () => {
   const pathname = usePathname();
   const { cart, openCart } = useCart();
+  const cartCount = cart.reduce((s, i) => s + i.quantity, 0);
+
+  const navItems = [
+    { href: "/", icon: Home, label: "Home" },
+    { href: "/products", icon: Search, label: "Search" },
+  ];
 
   return (
-    <nav className="md:hidden fixed bottom-0 w-full z-[90] bg-[#050505]/95 backdrop-blur-xl border-t border-white/10 pb-safe">
-      <div className="flex items-center justify-around h-20 pb-4 px-2">
-        
-        <Link href="/" className="flex flex-col items-center justify-center w-full h-full gap-1 active:scale-95 transition-transform">
-          <Home className={`w-5 h-5 transition-colors ${pathname === '/' ? 'text-[#C5A059]' : 'text-zinc-500'}`} />
-          <span className={`text-[9px] uppercase tracking-widest font-mono transition-colors ${pathname === '/' ? 'text-[#C5A059]' : 'text-zinc-500'}`}>
-            Home
-          </span>
-        </Link>
+    <nav
+      className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 z-[65]"
+      style={{ fontFamily: "'Helvetica Neue', Helvetica, Arial, sans-serif" }}
+    >
+      <div className="flex items-center justify-around h-14">
+        {navItems.map(({ href, icon: Icon, label }) => (
+          <Link
+            key={href}
+            href={href}
+            className="flex flex-col items-center gap-1 flex-1 h-full justify-center"
+            style={{ color: pathname === href ? "#000" : "#999" }}
+          >
+            <Icon size={20} strokeWidth={1.5} />
+            <span className="label" style={{ fontSize: "9px", letterSpacing: "0.1em" }}>{label}</span>
+          </Link>
+        ))}
 
-        <Link href="/products" className="flex flex-col items-center justify-center w-full h-full gap-1 active:scale-95 transition-transform">
-          <Search className={`w-5 h-5 transition-colors ${pathname === '/products' ? 'text-[#C5A059]' : 'text-zinc-500'}`} />
-          <span className={`text-[9px] uppercase tracking-widest font-mono transition-colors ${pathname === '/products' ? 'text-[#C5A059]' : 'text-zinc-500'}`}>
-            Search
-          </span>
-        </Link>
-
-        <button onClick={openCart} className="flex flex-col items-center justify-center w-full h-full gap-1 active:scale-95 transition-transform relative">
+        <button
+          onClick={openCart}
+          className="flex flex-col items-center gap-1 flex-1 h-full justify-center relative"
+          style={{ color: "#000" }}
+        >
           <div className="relative">
-            <ShoppingBag className="w-5 h-5 text-zinc-500" />
-            {cart.length > 0 && (
-              <span className="absolute -top-1.5 -right-2 bg-[#C5A059] text-[#050505] text-[9px] font-bold w-4 h-4 flex items-center justify-center rounded-full border border-[#050505]">
-                {cart.length}
+            <ShoppingBag size={20} strokeWidth={1.5} />
+            {cartCount > 0 && (
+              <span
+                className="absolute -top-1.5 -right-1.5 w-4 h-4 bg-black text-white rounded-full flex items-center justify-center"
+                style={{ fontSize: "8px" }}
+              >
+                {cartCount}
               </span>
             )}
           </div>
-          <span className="text-[9px] uppercase tracking-widest font-mono text-zinc-500">
-            Cart
-          </span>
+          <span className="label" style={{ fontSize: "9px", letterSpacing: "0.1em" }}>Bag</span>
         </button>
 
-        <Link href="/profile" className="flex flex-col items-center justify-center w-full h-full gap-1 active:scale-95 transition-transform">
-          <User className={`w-5 h-5 transition-colors ${pathname === '/profile' ? 'text-[#C5A059]' : 'text-zinc-500'}`} />
-          <span className={`text-[9px] uppercase tracking-widest font-mono transition-colors ${pathname === '/profile' ? 'text-[#C5A059]' : 'text-zinc-500'}`}>
-            Profile
-          </span>
+        <Link
+          href="/profile"
+          className="flex flex-col items-center gap-1 flex-1 h-full justify-center"
+          style={{ color: pathname === "/profile" ? "#000" : "#999" }}
+        >
+          <User size={20} strokeWidth={1.5} />
+          <span className="label" style={{ fontSize: "9px", letterSpacing: "0.1em" }}>Profile</span>
         </Link>
-
       </div>
     </nav>
   );

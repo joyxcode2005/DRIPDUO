@@ -1,80 +1,123 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import Link from "next/link";
-import { ArrowRight } from "lucide-react";
+import { Plus, Minus } from "lucide-react";
+
+const FOOTER_SECTIONS = [
+  {
+    title: "Help",
+    links: ["Customer Care", "FAQ", "Track Your Order", "Shipping & Returns", "Exchanges"],
+  },
+  {
+    title: "Company",
+    links: ["About Us", "Careers", "Press", "Sustainability"],
+  },
+  {
+    title: "Legal",
+    links: ["Privacy Policy", "Terms of Use", "Cookie Policy"],
+  },
+];
+
+const FooterSection = ({ title, links }: { title: string; links: string[] }) => {
+  const [open, setOpen] = useState(false);
+
+  return (
+    <div className="border-b border-gray-200 md:border-none">
+      {/* Mobile accordion header */}
+      <button
+        className="w-full flex items-center justify-between py-4 md:hidden"
+        onClick={() => setOpen(!open)}
+      >
+        <span className="label" style={{ fontSize: "11px", letterSpacing: "0.12em" }}>
+          {title.toUpperCase()}
+        </span>
+        {open ? <Minus size={14} strokeWidth={1.5} /> : <Plus size={14} strokeWidth={1.5} />}
+      </button>
+
+      {/* Desktop header */}
+      <p className="label mb-5 hidden md:block" style={{ fontSize: "11px", letterSpacing: "0.12em" }}>
+        {title.toUpperCase()}
+      </p>
+
+      {/* Links */}
+      <div className={`accordion-content md:max-h-none ${open ? "open" : ""}`}>
+        <div className="pb-4 md:pb-0 space-y-3 md:space-y-3">
+          {links.map((link) => (
+            <Link
+              key={link}
+              href="#"
+              className="block label text-gray-500 hover:text-black transition-colors"
+              style={{ fontSize: "11px" }}
+            >
+              {link}
+            </Link>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+};
 
 export const Footer = () => {
   return (
-    <footer className="w-full bg-[#050505] border-t border-white/5 pt-20 pb-10 px-6 md:px-12 text-[#f8f8f8] selection:bg-[#C5A059] selection:text-black">
-      <div className="max-w-[1600px] mx-auto grid grid-cols-1 md:grid-cols-4 gap-16 md:gap-8 mb-20">
-        
-        {/* Brand & Newsletter */}
-        <div className="md:col-span-2 flex flex-col justify-between">
-          <div>
-            <h2 className="text-4xl md:text-5xl font-light uppercase tracking-[0.3em] mb-4">Dripduo</h2>
-            <p className="text-zinc-500 text-sm font-light leading-relaxed max-w-md tracking-wide">
-              Unapologetic style. Uncompromising quality. Engineered for those who demand excellence in every thread.
+    <footer
+      className="bg-white border-t border-gray-200"
+      style={{ fontFamily: "'Helvetica Neue', Helvetica, Arial, sans-serif" }}
+    >
+      {/* Top */}
+      <div className="px-4 md:px-8 py-12 md:py-16">
+        <div className="grid grid-cols-1 md:grid-cols-5 gap-0 md:gap-12">
+          {/* Brand */}
+          <div className="md:col-span-2 mb-8 md:mb-0">
+            <Link href="/" className="block mb-6">
+              <span style={{
+                fontFamily: "'Helvetica Neue', Helvetica, Arial, sans-serif",
+                fontSize: "16px",
+                fontWeight: 400,
+                letterSpacing: "0.25em",
+                textTransform: "uppercase",
+              }}>
+                DRIPDUO
+              </span>
+            </Link>
+            <p className="label text-gray-500 mb-8" style={{ fontSize: "11px", lineHeight: 1.8, maxWidth: "320px" }}>
+              Unapologetic style. Uncompromising quality. Engineered for those who demand excellence.
             </p>
+            {/* Socials */}
+            <div className="flex gap-5">
+              {["Instagram", "TikTok", "X"].map((s) => (
+                <a
+                  key={s}
+                  href="#"
+                  className="label text-gray-400 hover:text-black transition-colors"
+                  style={{ fontSize: "10px" }}
+                >
+                  {s}
+                </a>
+              ))}
+            </div>
           </div>
-          <div className="mt-12">
-            <span className="text-[#C5A059] text-[10px] uppercase tracking-[0.3em] font-bold block mb-4">Join The Archive</span>
-            <form className="relative max-w-md group" onSubmit={(e) => e.preventDefault()}>
-              <input 
-                type="email" 
-                placeholder="EMAIL ADDRESS" 
-                className="w-full bg-transparent border-b border-white/20 pb-3 text-sm font-mono uppercase tracking-widest text-white placeholder-white/20 focus:outline-none focus:border-[#C5A059] transition-colors"
-              />
-              <button type="submit" className="absolute right-0 bottom-3 text-zinc-500 group-hover:text-[#C5A059] transition-colors">
-                <ArrowRight className="w-5 h-5" />
-              </button>
-            </form>
-          </div>
-        </div>
 
-        {/* Shop Links */}
-        <div>
-          <span className="text-white text-xs uppercase tracking-[0.2em] font-medium block mb-8 border-b border-white/10 pb-4">Explore</span>
-          <ul className="space-y-4">
-            {["Latest Arrivals", "FW26 Lookbook", "Signature Heavyweight", "Accessories", "Gift Cards"].map((link) => (
-              <li key={link}>
-                <Link href="/products" className="text-zinc-400 text-xs font-mono uppercase tracking-widest hover:text-[#C5A059] transition-colors">
-                  {link}
-                </Link>
-              </li>
-            ))}
-          </ul>
-        </div>
-
-        {/* Help & Socials */}
-        <div>
-          <span className="text-white text-xs uppercase tracking-[0.2em] font-medium block mb-8 border-b border-white/10 pb-4">Assistance</span>
-          <ul className="space-y-4 mb-12">
-            {["Client Care", "Shipping & Returns", "Track Order", "Terms & Conditions"].map((link) => (
-              <li key={link}>
-                <Link href="#" className="text-zinc-400 text-xs font-mono uppercase tracking-widest hover:text-[#C5A059] transition-colors">
-                  {link}
-                </Link>
-              </li>
-            ))}
-          </ul>
-          
-          <span className="text-white text-xs uppercase tracking-[0.2em] font-medium block mb-6">Socials</span>
-          <div className="flex gap-6">
-            {["INSTAGRAM", "X", "TIKTOK"].map((social) => (
-              <a key={social} href="#" className="text-zinc-400 text-[10px] font-bold uppercase tracking-[0.2em] hover:text-[#C5A059] hover:underline underline-offset-4 transition-all">
-                {social}
-              </a>
+          {/* Links */}
+          <div className="md:col-span-3 grid grid-cols-1 md:grid-cols-3 gap-0 md:gap-8">
+            {FOOTER_SECTIONS.map((section) => (
+              <FooterSection key={section.title} {...section} />
             ))}
           </div>
         </div>
-
       </div>
 
-      <div className="max-w-[1600px] mx-auto flex flex-col md:flex-row justify-between items-center pt-8 border-t border-white/5 text-[10px] font-mono text-zinc-600 uppercase tracking-[0.2em]">
-        {/* FIXED: Hardcoded the date to prevent Hydration crashes */}
-        <span>&copy; 2026 DRIPDUO. All Rights Reserved.</span>
-        <span className="mt-4 md:mt-0">Super Premium Architecture</span>
+      {/* Bottom */}
+      <div className="border-t border-gray-200 px-4 md:px-8 py-5 flex flex-col md:flex-row items-center justify-between gap-3">
+        <p className="label text-gray-400" style={{ fontSize: "10px" }}>
+          © 2026 DRIPDUO. All rights reserved.
+        </p>
+        <div className="flex items-center gap-5">
+          <span className="label text-gray-400" style={{ fontSize: "10px" }}>India</span>
+          <span className="label text-gray-400" style={{ fontSize: "10px" }}>USD</span>
+          <span className="label text-gray-400" style={{ fontSize: "10px" }}>English</span>
+        </div>
       </div>
     </footer>
   );

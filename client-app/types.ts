@@ -6,6 +6,7 @@ export type Testimonial = {
 };
 
 export interface Product {
+  hoverImage: string;
   id: number;
   name: string;
   price: number;
