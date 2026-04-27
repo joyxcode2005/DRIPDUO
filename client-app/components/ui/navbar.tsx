@@ -11,14 +11,12 @@ export const Navbar = () => {
   const { cart, openCart } = useCart();
   const [scrolled, setScrolled] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
-  const [menuOpen, setMenuOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
-
-  const cartCount = cart.reduce((s, i) => s + i.quantity, 0);
+  const [menuOpen, setMenuOpen] = useState(false);
 
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 12);
-    window.addEventListener("scroll", onScroll, { passive: true });
+    const onScroll = () => setScrolled(window.scrollY > 10);
+    window.addEventListener("scroll", onScroll);
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
@@ -27,144 +25,133 @@ export const Navbar = () => {
     return () => { document.body.style.overflow = ""; };
   }, [searchOpen, menuOpen]);
 
-  const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (searchQuery.trim()) {
-      window.location.href = `/products?search=${encodeURIComponent(searchQuery)}`;
-      setSearchOpen(false);
-    }
-  };
+  const cartCount = cart.reduce((s, i) => s + i.quantity, 0);
 
   return (
     <>
-      {/* ── MAIN NAV ── */}
-      <header className={`site-nav ${scrolled ? "scrolled" : ""}`}>
-        <div className="w-full flex items-center justify-between px-5 md:px-10">
-
+      {/* MAIN NAV */}
+      <nav className={scrolled ? "scrolled" : ""} style={{ fontFamily: "'Helvetica Neue', Helvetica, Arial, sans-serif" }}>
+        <div className="flex items-center justify-between h-14 px-4 md:px-8">
           {/* LEFT */}
-          <div className="flex items-center gap-7 flex-1">
+          <div className="flex items-center gap-6 flex-1">
+            {/* Hamburger mobile */}
             <button
               onClick={() => setMenuOpen(true)}
-              className="md:hidden flex flex-col gap-[5px] p-1"
-              aria-label="Open menu"
+              className="md:hidden flex flex-col gap-1 p-1"
+              aria-label="Menu"
             >
-              <span className="w-[22px] h-[1px] bg-[#0a0a0a] block transition-all duration-300" />
-              <span className="w-[16px] h-[1px] bg-[#0a0a0a] block transition-all duration-300" />
+              <span className="w-5 h-px bg-black block" />
+              <span className="w-5 h-px bg-black block" />
+              <span className="w-5 h-px bg-black block" />
             </button>
 
-            <nav className="hidden md:flex items-center gap-7">
+            {/* Desktop nav links */}
+            <div className="hidden md:flex items-center gap-6">
               {NAV_LINKS.map((link) => (
                 <Link
                   key={link}
                   href="/products"
-                  className="label link-reveal"
-                  style={{ color: "var(--black)", fontSize: "10px", letterSpacing: "0.18em" }}
+                  className="label line-hover text-black hover:text-black"
+                  style={{ fontSize: "11px", letterSpacing: "0.12em" }}
                 >
                   {link}
                 </Link>
               ))}
-            </nav>
+            </div>
           </div>
 
-          {/* CENTER — LOGO */}
-          <Link href="/" className="absolute left-1/2 -translate-x-1/2">
+          {/* CENTER - LOGO */}
+          <Link href="/" className="absolute left-1/2 -translate-x-1/2 flex items-center">
             <span style={{
-              fontFamily: "var(--font-sans)",
-              fontSize: "15px",
-              fontWeight: 300,
-              letterSpacing: "0.45em",
+              fontFamily: "'Helvetica Neue', Helvetica, Arial, sans-serif",
+              fontSize: "20px",
+              fontWeight: "400",
+              letterSpacing: "0.25em",
               textTransform: "uppercase",
-              color: "var(--black)",
             }}>
               DRIPDUO
             </span>
           </Link>
 
           {/* RIGHT */}
-          <div className="flex items-center gap-5 flex-1 justify-end">
+          <div className="flex items-center gap-4 flex-1 justify-end">
             <button
               onClick={() => setSearchOpen(true)}
-              className="btn-ghost"
               aria-label="Search"
-              style={{ padding: 0 }}
+              className="p-1 hover:opacity-60 transition-opacity"
             >
-              <Search size={17} strokeWidth={1.25} />
+              <Search size={18} strokeWidth={1.5} />
             </button>
-
-            <Link href="/profile" className="btn-ghost hidden md:flex" style={{ padding: 0 }}>
-              <User size={17} strokeWidth={1.25} />
+            <Link href="/profile" className="p-1 hover:opacity-60 transition-opacity hidden md:block">
+              <User size={18} strokeWidth={1.5} />
             </Link>
-
             <button
               onClick={openCart}
-              className="btn-ghost relative"
-              aria-label="Bag"
-              style={{ padding: 0 }}
+              className="p-1 hover:opacity-60 transition-opacity relative"
+              aria-label="Cart"
             >
-              <ShoppingBag size={17} strokeWidth={1.25} />
+              <ShoppingBag size={18} strokeWidth={1.5} />
               {cartCount > 0 && (
-                <span
-                  className="absolute -top-2 -right-2 w-[18px] h-[18px] bg-[#0a0a0a] text-[#fafafa] rounded-full flex items-center justify-center"
-                  style={{ fontSize: "8px", letterSpacing: 0 }}
-                >
+                <span className="absolute -top-1 -right-1 w-4 h-4 bg-black text-white rounded-full flex items-center justify-center"
+                  style={{ fontSize: "9px" }}>
                   {cartCount}
                 </span>
               )}
             </button>
           </div>
         </div>
-      </header>
+      </nav>
 
-      {/* ── SEARCH OVERLAY ── */}
-      <div className={`search-overlay ${searchOpen ? "open" : ""}`}>
-        <div className="flex items-center justify-between px-5 md:px-10 border-b border-[var(--gray-200)]" style={{ height: "58px" }}>
-          <span className="label" style={{ color: "var(--gray-400)", fontSize: "10px" }}>Search</span>
-          <button onClick={() => setSearchOpen(false)} className="btn-ghost" style={{ padding: 0 }}>
-            <X size={18} strokeWidth={1.25} />
+      {/* SEARCH OVERLAY */}
+      <div
+        className="fixed inset-0 bg-white z-[150] flex flex-col"
+        style={{
+          opacity: searchOpen ? 1 : 0,
+          visibility: searchOpen ? "visible" : "hidden",
+          transition: "opacity 0.3s ease",
+        }}
+      >
+        <div className="flex items-center justify-between h-14 px-4 md:px-8 border-b border-gray-200">
+          <span className="label" style={{ fontSize: "11px", letterSpacing: "0.12em" }}>Search</span>
+          <button onClick={() => setSearchOpen(false)} className="hover:opacity-60">
+            <X size={20} strokeWidth={1.5} />
           </button>
         </div>
-
-        <div className="px-5 md:px-10 pt-14 flex flex-col">
-          <form onSubmit={handleSearch}>
+        <div className="flex-1 flex flex-col px-4 md:px-8 pt-12">
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+              if (searchQuery.trim()) {
+                window.location.href = `/products?search=${encodeURIComponent(searchQuery)}`;
+                setSearchOpen(false);
+              }
+            }}
+          >
             <input
               autoFocus={searchOpen}
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search products…"
-              style={{
-                fontFamily: "var(--font-serif)",
-                fontSize: "clamp(1.8rem, 5vw, 4rem)",
-                fontWeight: 400,
-                width: "100%",
-                border: "none",
-                borderBottom: "1px solid var(--gray-200)",
-                outline: "none",
-                paddingBottom: "20px",
-                background: "transparent",
-                color: "var(--black)",
-                letterSpacing: "-0.01em",
-              }}
+              placeholder="Search for products, collections..."
+              className="w-full text-2xl md:text-4xl border-0 border-b border-black outline-none pb-4 placeholder:text-gray-300"
+              style={{ fontFamily: "'EB Garamond', Georgia, serif", fontWeight: 400 }}
             />
           </form>
-
           <div className="mt-12">
-            <p className="label" style={{ color: "var(--gray-400)", marginBottom: "20px", fontSize: "9px" }}>
-              Trending Searches
-            </p>
+            <p className="label text-gray-400 mb-6" style={{ fontSize: "10px" }}>Trending</p>
             <div className="flex flex-wrap gap-3">
-              {["Oversized", "Gothic", "Anime", "Gym Wear", "States"].map((term) => (
+              {["Oversized Tee", "Gothic", "Anime Collection", "Heavyweight"].map((t) => (
                 <button
-                  key={term}
+                  key={t}
                   onClick={() => {
-                    setSearchQuery(term);
-                    window.location.href = `/products?search=${encodeURIComponent(term)}`;
+                    setSearchQuery(t);
+                    window.location.href = `/products?search=${encodeURIComponent(t)}`;
                     setSearchOpen(false);
                   }}
-                  className="btn-secondary"
-                  style={{ padding: "10px 18px", fontSize: "9px" }}
+                  className="border border-black px-4 py-2 label hover:bg-black hover:text-white transition-colors"
+                  style={{ fontSize: "10px" }}
                 >
-                  {term}
+                  {t}
                 </button>
               ))}
             </div>
@@ -172,46 +159,40 @@ export const Navbar = () => {
         </div>
       </div>
 
-      {/* ── MOBILE MENU ── */}
-      <div className={`mobile-menu ${menuOpen ? "open" : ""}`}>
-        <div
-          className="flex items-center justify-between px-5 border-b border-[var(--gray-100)]"
-          style={{ height: "58px" }}
-        >
-          <span className="label" style={{ color: "var(--gray-400)", fontSize: "10px" }}>Menu</span>
-          <button onClick={() => setMenuOpen(false)} className="btn-ghost" style={{ padding: 0 }}>
-            <X size={18} strokeWidth={1.25} />
+      {/* MOBILE MENU */}
+      <div
+        className="fixed inset-0 bg-white z-[150] flex flex-col"
+        style={{
+          opacity: menuOpen ? 1 : 0,
+          visibility: menuOpen ? "visible" : "hidden",
+          transition: "opacity 0.3s ease",
+        }}
+      >
+        <div className="flex items-center justify-between h-14 px-4 border-b border-gray-200">
+          <span className="label" style={{ fontSize: "11px", letterSpacing: "0.12em" }}>Menu</span>
+          <button onClick={() => setMenuOpen(false)}>
+            <X size={20} strokeWidth={1.5} />
           </button>
         </div>
-
-        <div className="px-6 pt-8 flex-1 overflow-y-auto">
+        <div className="flex-1 px-6 pt-10 overflow-y-auto">
           {NAV_LINKS.map((link) => (
             <Link
               key={link}
               href="/products"
-              className="mobile-menu-link"
               onClick={() => setMenuOpen(false)}
+              className="block py-5 border-b border-gray-100"
+              style={{
+                fontFamily: "'EB Garamond', Georgia, serif",
+                fontSize: "28px",
+                fontWeight: 400,
+              }}
             >
               {link}
             </Link>
           ))}
-
-          <div className="mt-10 space-y-1">
-            {[
-              { label: "My Account", href: "/profile" },
-              { label: "Orders", href: "/profile" },
-              { label: "Help & Support", href: "#" },
-            ].map((item) => (
-              <Link
-                key={item.label}
-                href={item.href}
-                className="block label py-3"
-                onClick={() => setMenuOpen(false)}
-                style={{ color: "var(--gray-400)", fontSize: "10px" }}
-              >
-                {item.label}
-              </Link>
-            ))}
+          <div className="mt-8">
+            <Link href="/profile" onClick={() => setMenuOpen(false)} className="label block py-3 text-gray-500">My Account</Link>
+            <Link href="/checkout" onClick={() => setMenuOpen(false)} className="label block py-3 text-gray-500">Orders</Link>
           </div>
         </div>
       </div>

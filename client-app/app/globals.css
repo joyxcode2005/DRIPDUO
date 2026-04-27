@@ -400,7 +400,7 @@ img { display: block; max-width: 100%; }
 
 .filter-sidebar {
   position: fixed;
-  inset-y: 0; left: 0;
+  visibility: 0; left: 0;
   width: 300px;
   background: var(--white);
   z-index: 80;
