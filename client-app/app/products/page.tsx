@@ -48,60 +48,97 @@ export default function ProductsPage() {
   return (
     <div className="bg-(--black) min-h-screen text-(--beige) pt-14" style={{ fontFamily: "'Helvetica Neue', Helvetica, Arial, sans-serif" }}>
 
-      {/* FILTER SIDEBAR (mobile & desktop) */}
-      {filterOpen && (
-        <div
-          className="fixed inset-0 bg-black/70 z-[75] backdrop-blur-sm transition-opacity"
-          onClick={() => setFilterOpen(false)}
-        />
-      )}
-      <aside className={`filter-sidebar ${filterOpen ? "open" : ""}`} style={{ zIndex: 80 }}>
-        <div className="flex items-center justify-between mb-12 text-(--beige)">
-          <span className="label" style={{ fontSize: "12px", letterSpacing: "0.15em" }}>FILTERS</span>
-          <button onClick={() => setFilterOpen(false)} className="hover:text-(--orange) transition-colors">
-            <X size={22} strokeWidth={1.5} />
+      {/* FILTER DRAWER OVERLAY */}
+      <div
+        className={`fixed inset-0 bg-black/80 z-[90] backdrop-blur-sm transition-opacity duration-300 ${
+          filterOpen ? "opacity-100 visible" : "opacity-0 invisible"
+        }`}
+        onClick={() => setFilterOpen(false)}
+      />
+
+      {/* FILTER DRAWER - DARK THEME */}
+      <aside
+        className={`fixed top-0 right-0 h-full w-full max-w-[400px] bg-(--black) border-l border-(--gray-800) z-[100] transform transition-transform duration-500 ease-[cubic-bezier(0.25,1,0.5,1)] flex flex-col ${
+          filterOpen ? "translate-x-0" : "translate-x-full"
+        }`}
+      >
+        {/* Header */}
+        <div className="flex items-center justify-between px-8 py-6 border-b border-(--gray-800)">
+          <span className="font-sans text-[11px] font-semibold tracking-[0.2em] uppercase text-(--beige)">
+            Filter & Sort
+          </span>
+          <button
+            onClick={() => setFilterOpen(false)}
+            className="text-(--beige) hover:text-(--orange) transition-colors"
+          >
+            <X size={24} strokeWidth={1} />
           </button>
         </div>
 
-        {/* Type filter */}
-        <div className="mb-10">
-          <p className="label text-(--orange) mb-6" style={{ fontSize: "11px" }}>Category</p>
-          {PRODUCT_TYPES.map((t) => (
-            <button
-              key={t}
-              onClick={() => setActiveType(t)}
-              className="block w-full text-left py-3 label hover:text-(--orange) transition-colors"
-              style={{
-                fontSize: "12px",
-                fontWeight: activeType === t ? 500 : 400,
-                color: activeType === t ? "var(--orange)" : "var(--beige)",
-                borderBottom: activeType === t ? "1px solid var(--orange)" : "none",
-                letterSpacing: "0.12em"
-              }}
-            >
-              {t.toUpperCase()}
-            </button>
-          ))}
+        {/* Scrollable Content */}
+        <div className="flex-1 overflow-y-auto px-8 py-10 space-y-12">
+          {/* Product Type Filter */}
+          <div>
+            <span className="block font-sans text-[10px] tracking-[0.2em] uppercase text-(--gray-400) mb-6">
+              Product Type
+            </span>
+            <div className="flex flex-col space-y-5">
+              {PRODUCT_TYPES.map((t) => (
+                <button
+                  key={t}
+                  onClick={() => setActiveType(t)}
+                  className={`text-left font-sans text-[12px] tracking-[0.15em] uppercase transition-colors ${
+                    activeType === t
+                      ? "text-(--orange) font-medium"
+                      : "text-(--beige) hover:text-(--orange)"
+                  }`}
+                >
+                  {t}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Sort Filter */}
+          <div>
+            <span className="block font-sans text-[10px] tracking-[0.2em] uppercase text-(--gray-400) mb-6">
+              Sort By
+            </span>
+            <div className="flex flex-col space-y-5">
+              {SORT_OPTIONS.map((s) => (
+                <button
+                  key={s}
+                  onClick={() => setSortBy(s)}
+                  className={`text-left font-sans text-[12px] tracking-[0.15em] uppercase transition-colors ${
+                    sortBy === s
+                      ? "text-(--orange) font-medium"
+                      : "text-(--beige) hover:text-(--orange)"
+                  }`}
+                >
+                  {s}
+                </button>
+              ))}
+            </div>
+          </div>
         </div>
 
-        {/* Sort */}
-        <div>
-          <p className="label text-(--orange) mb-6" style={{ fontSize: "11px" }}>Sort By</p>
-          {SORT_OPTIONS.map((s) => (
-            <button
-              key={s}
-              onClick={() => setSortBy(s)}
-              className="block w-full text-left py-3 label hover:text-(--orange) transition-colors"
-              style={{ 
-                fontSize: "12px", 
-                fontWeight: sortBy === s ? 500 : 400,
-                color: sortBy === s ? "var(--orange)" : "var(--beige)",
-                letterSpacing: "0.12em"
-              }}
-            >
-              {s.toUpperCase()}
-            </button>
-          ))}
+        {/* Footer Actions */}
+        <div className="p-6 border-t border-(--gray-800) flex gap-4 bg-(--black)">
+          <button
+            onClick={() => {
+              setActiveType("All");
+              setSortBy("New In");
+            }}
+            className="flex-1 py-4 font-sans text-[10px] font-semibold tracking-[0.2em] uppercase border border-(--gray-600) text-(--beige) hover:bg-(--beige) hover:text-(--black) hover:border-(--beige) transition-colors"
+          >
+            Clear
+          </button>
+          <button
+            onClick={() => setFilterOpen(false)}
+            className="flex-1 py-4 font-sans text-[10px] font-semibold tracking-[0.2em] uppercase bg-(--beige) text-(--black) hover:bg-(--orange) hover:border-(--orange) hover:text-(--black) border border-(--beige) transition-colors"
+          >
+            Apply
+          </button>
         </div>
       </aside>
 
