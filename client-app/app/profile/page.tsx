@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useState } from "react";
-import Image from "next/image";
 import Link from "next/link";
 import { Package, MapPin, Heart, Settings, LogOut, ChevronRight, Plus, Edit2, Trash2, Eye, ArrowLeft } from "lucide-react";
 
@@ -44,16 +43,17 @@ const MOCK_WISHLIST = [
   { id: "w3", name: "Spiritual Mandala Drop", price: 140, category: "Spiritual", image: "https://images.unsplash.com/photo-1529374255404-311a2a4f1fd9?w=600&q=80" },
 ];
 
-/* ── status badge ── */
 const StatusBadge = ({ status }: { status: string }) => {
-  const map: Record<string, string> = {
-    delivered: "badge-delivered",
-    processing: "badge-processing",
-    shipped: "badge-shipped",
-  };
+  const isDelivered = status === "delivered";
+  const isProcessing = status === "processing";
+  
   return (
-    <span className={`badge ${map[status] || ""}`}>
-      {status.charAt(0).toUpperCase() + status.slice(1)}
+    <span className={`font-sans text-[9px] font-semibold tracking-[0.15em] uppercase px-3 py-1 border ${
+      isDelivered ? "bg-(--beige) text-(--black) border-(--beige)" : 
+      isProcessing ? "bg-(--orange) text-(--black) border-(--orange)" : 
+      "bg-transparent text-(--beige) border-(--beige)"
+    }`}>
+      {status}
     </span>
   );
 };
@@ -64,112 +64,110 @@ export default function ProfilePage() {
   const [wishlist, setWishlist] = useState(MOCK_WISHLIST);
 
   const tabs: { id: Tab; label: string; icon: React.ReactNode }[] = [
-    { id: "orders",    label: "Orders",    icon: <Package size={15} strokeWidth={1.25} /> },
-    { id: "addresses", label: "Addresses", icon: <MapPin size={15} strokeWidth={1.25} /> },
-    { id: "wishlist",  label: "Wishlist",  icon: <Heart size={15} strokeWidth={1.25} /> },
-    { id: "settings",  label: "Settings",  icon: <Settings size={15} strokeWidth={1.25} /> },
+    { id: "orders",    label: "Orders",    icon: <Package size={14} strokeWidth={1} /> },
+    { id: "addresses", label: "Addresses", icon: <MapPin size={14} strokeWidth={1} /> },
+    { id: "wishlist",  label: "Wishlist",  icon: <Heart size={14} strokeWidth={1} /> },
+    { id: "settings",  label: "Settings",  icon: <Settings size={14} strokeWidth={1} /> },
   ];
 
   return (
-    <div style={{ background: "var(--black)", minHeight: "100vh", paddingTop: "58px", fontFamily: "var(--font-sans)", color: "var(--beige)" }}>
+    <div className="bg-(--black) min-h-screen text-(--beige) pt-24 font-sans">
 
       {/* ── PAGE HEADER ── */}
-      <div style={{ borderBottom: "1px solid var(--gray-800)", padding: "clamp(32px,5vw,56px) clamp(16px,4vw,48px) 0" }}>
-        <Link href="/" className="btn-ghost anim-fade-in text-[var(--beige)] hover:text-[var(--orange)]" style={{ fontSize: "10px", marginBottom: "28px", display: "inline-flex" }}>
-          <ArrowLeft size={13} strokeWidth={1.25} /> Back
+      <div className="px-6 md:px-12 pb-12 border-b border-(--gray-800)">
+        <Link href="/" className="inline-flex items-center gap-2 font-sans text-[10px] uppercase tracking-[0.2em] text-(--beige) hover:text-(--orange) transition-colors mb-12">
+          <ArrowLeft size={14} strokeWidth={1} /> Back to store
         </Link>
 
-        <div style={{ display: "flex", alignItems: "flex-end", justifyContent: "space-between", paddingBottom: "clamp(20px,3vw,32px)" }}>
-          <div className="anim-fade-up">
-            <p className="label" style={{ color: "var(--orange)", marginBottom: "10px", fontSize: "9px", letterSpacing: "0.22em" }}>
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-8">
+          <div>
+            <p className="font-sans text-[9px] uppercase tracking-[0.2em] text-(--orange) mb-4">
               Member since 2026
             </p>
-            <h1 className="display-md text-[var(--beige)]">My Account</h1>
+            <h1 className="font-serif text-[clamp(3rem,8vw,6rem)] leading-[0.9] text-(--beige)">
+              My Account
+            </h1>
           </div>
 
-          <button className="btn-ghost anim-fade-in delay-200 text-[var(--gray-400)] hover:text-[var(--orange)]" style={{ fontSize: "10px" }}>
-            <LogOut size={14} strokeWidth={1.25} />
+          <button className="flex items-center gap-2 font-sans text-[10px] uppercase tracking-[0.2em] text-(--gray-400) hover:text-(--orange) transition-colors">
+            <LogOut size={14} strokeWidth={1} />
             Sign Out
           </button>
         </div>
 
         {/* TABS */}
-        <div style={{ display: "flex", gap: "clamp(20px,4vw,48px)", overflowX: "auto" }} className="no-scroll">
+        <div className="flex overflow-x-auto no-scroll mt-16 gap-8 md:gap-16 border-b border-(--gray-900)">
           {tabs.map(({ id, label, icon }) => (
             <button
               key={id}
-              className={`profile-tab-btn ${activeTab === id ? "active" : ""}`}
               onClick={() => setActiveTab(id)}
-              style={{ display: "flex", alignItems: "center", gap: "7px", whiteSpace: "nowrap" }}
+              className={`flex items-center gap-3 font-sans text-[10px] uppercase tracking-[0.2em] pb-4 border-b-2 transition-colors ${
+                activeTab === id ? "border-(--orange) text-(--orange)" : "border-transparent text-(--gray-400) hover:text-(--beige)"
+              }`}
             >
-              {icon}
-              {label}
+              {icon} {label}
             </button>
           ))}
         </div>
       </div>
 
       {/* ── CONTENT ── */}
-      <div style={{ padding: "clamp(28px,5vw,56px) clamp(16px,4vw,48px)" }}>
+      <div className="px-6 md:px-12 py-12 md:py-24">
 
         {/* ────── ORDERS ────── */}
         {activeTab === "orders" && (
-          <div className="anim-scale-up">
-            <p className="label" style={{ color: "var(--orange)", marginBottom: "28px", fontSize: "9px", letterSpacing: "0.2em" }}>
+          <div className="animate-in fade-in slide-in-from-bottom-4 duration-700">
+            <p className="font-sans text-[10px] uppercase tracking-[0.2em] text-(--orange) mb-8">
               {MOCK_ORDERS.length} Orders
             </p>
 
-            <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+            <div className="flex flex-col border-t border-(--gray-800)">
               {MOCK_ORDERS.map((order) => (
-                <div key={order.id} style={{ border: "1px solid var(--gray-800)", background: "var(--black)" }}>
+                <div key={order.id} className="border-b border-(--gray-800) bg-(--black)">
                   {/* Order header */}
                   <button
-                    style={{ width: "100%", display: "flex", alignItems: "center", justifyContent: "space-between", padding: "20px 24px", cursor: "pointer", background: "transparent", border: "none", textAlign: "left" }}
+                    className="w-full flex items-center justify-between py-8 group transition-colors"
                     onClick={() => setExpandedOrder(expandedOrder === order.id ? null : order.id)}
-                    className="text-[var(--beige)] hover:text-[var(--orange)] transition-colors"
                   >
-                    <div style={{ display: "flex", alignItems: "center", gap: "clamp(16px,4vw,40px)", flexWrap: "wrap" }}>
-                      <div>
-                        <p className="label" style={{ fontSize: "10px", letterSpacing: "0.15em", marginBottom: "4px", color: "inherit" }}>#{order.id}</p>
-                        <p className="label" style={{ fontSize: "9px", color: "var(--gray-400)", letterSpacing: "0.1em" }}>{order.date}</p>
+                    <div className="flex items-center gap-8 md:gap-16 flex-wrap">
+                      <div className="text-left">
+                        <p className="font-sans text-[11px] uppercase tracking-[0.15em] text-(--beige) group-hover:text-(--orange) mb-2 transition-colors">#{order.id}</p>
+                        <p className="font-sans text-[10px] uppercase tracking-[0.1em] text-(--gray-400)">{order.date}</p>
                       </div>
                       <StatusBadge status={order.status} />
                     </div>
-                    <div style={{ display: "flex", alignItems: "center", gap: "20px" }}>
-                      <span className="label" style={{ fontSize: "10px", color: "inherit" }}>$ {order.total}</span>
+                    <div className="flex items-center gap-6">
+                      <span className="font-sans text-[11px] tracking-[0.1em] text-(--beige)">$ {order.total}</span>
                       <ChevronRight
-                        size={14} strokeWidth={1.25}
-                        style={{ transition: "transform 0.3s ease", transform: expandedOrder === order.id ? "rotate(90deg)" : "rotate(0deg)" }}
+                        size={16} strokeWidth={1}
+                        className={`text-(--gray-400) transition-transform duration-500 ${expandedOrder === order.id ? "rotate-90 text-(--orange)" : ""}`}
                       />
                     </div>
                   </button>
 
                   {/* Expanded items */}
-                  <div
-                    className="accordion-body"
-                    style={{ maxHeight: expandedOrder === order.id ? "600px" : "0" }}
-                  >
-                    <div style={{ borderTop: "1px solid var(--gray-800)", padding: "20px 24px 24px" }}>
-                      <div style={{ display: "flex", flexDirection: "column", gap: "20px", marginBottom: "20px" }}>
+                  <div className={`overflow-hidden transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] ${expandedOrder === order.id ? "max-h-[800px] opacity-100 mb-8" : "max-h-0 opacity-0"}`}>
+                    <div className="pt-8 border-t border-(--gray-900)">
+                      <div className="flex flex-col gap-6 mb-8">
                         {order.items.map((item, i) => (
-                          <div key={i} style={{ display: "flex", gap: "16px", alignItems: "center" }}>
-                            <div style={{ width: "64px", flexShrink: 0, background: "var(--gray-900)", aspectRatio: "3/4", overflow: "hidden" }}>
-                              <img src={item.image} alt={item.name} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                          <div key={i} className="flex gap-6 items-center">
+                            <div className="w-20 shrink-0 bg-(--gray-900) aspect-[2/3] overflow-hidden">
+                              <img src={item.image} alt={item.name} className="w-full h-full object-cover" />
                             </div>
-                            <div style={{ flex: 1 }}>
-                              <p className="label text-[var(--beige)]" style={{ fontSize: "10px", marginBottom: "4px", letterSpacing: "0.12em" }}>{item.name}</p>
-                              <p className="body-copy" style={{ fontSize: "10px", color: "var(--gray-400)" }}>Size: {item.size} &nbsp;·&nbsp; Qty: {item.qty}</p>
+                            <div className="flex-1">
+                              <p className="font-sans text-[11px] uppercase tracking-[0.15em] text-(--beige) mb-2">{item.name}</p>
+                              <p className="font-sans text-[10px] uppercase tracking-[0.1em] text-(--gray-400)">Size: {item.size} &nbsp;·&nbsp; Qty: {item.qty}</p>
                             </div>
-                            <span className="label text-[var(--orange)]" style={{ fontSize: "10px" }}>$ {item.price}</span>
+                            <span className="font-sans text-[11px] tracking-[0.1em] text-(--orange)">$ {item.price}</span>
                           </div>
                         ))}
                       </div>
 
-                      <div style={{ display: "flex", gap: "12px", paddingTop: "16px", borderTop: "1px solid var(--gray-800)" }}>
-                        <button className="btn-secondary" style={{ fontSize: "9px", padding: "10px 20px" }}>
-                          <Eye size={12} strokeWidth={1.25} className="mr-2" /> Track Order
+                      <div className="flex gap-4">
+                        <button className="border border-(--beige) text-(--beige) font-sans text-[9px] uppercase tracking-[0.2em] px-8 py-3 hover:bg-(--beige) hover:text-(--black) transition-colors flex items-center gap-2">
+                          <Eye size={12} strokeWidth={1} /> Track Order
                         </button>
-                        <button className="btn-ghost" style={{ fontSize: "9px" }}>
+                        <button className="text-(--gray-400) font-sans text-[9px] uppercase tracking-[0.2em] px-4 hover:text-(--orange) transition-colors">
                           Return / Exchange
                         </button>
                       </div>
@@ -183,25 +181,25 @@ export default function ProfilePage() {
 
         {/* ────── ADDRESSES ────── */}
         {activeTab === "addresses" && (
-          <div className="anim-scale-up">
-            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "28px" }}>
-              <p className="label" style={{ color: "var(--orange)", fontSize: "9px", letterSpacing: "0.2em" }}>Saved Addresses</p>
-              <button className="btn-ghost" style={{ fontSize: "9px" }}>
-                <Plus size={13} strokeWidth={1.25} /> Add New
+          <div className="animate-in fade-in slide-in-from-bottom-4 duration-700">
+            <div className="flex items-center justify-between mb-8">
+              <p className="font-sans text-[10px] uppercase tracking-[0.2em] text-(--orange)">Saved Addresses</p>
+              <button className="flex items-center gap-2 font-sans text-[10px] uppercase tracking-[0.2em] text-(--beige) hover:text-(--orange) transition-colors">
+                <Plus size={14} strokeWidth={1} /> Add New
               </button>
             </div>
 
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", gap: "16px" }}>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {/* Default address */}
-              <div style={{ border: "1px solid var(--beige)", padding: "28px", background: "var(--gray-900)" }}>
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "16px" }}>
-                  <span className="label text-[var(--beige)]" style={{ fontSize: "9px", letterSpacing: "0.18em" }}>Home — Default</span>
-                  <div style={{ display: "flex", gap: "12px" }}>
-                    <button className="btn-ghost text-[var(--beige)] hover:text-[var(--orange)]" style={{ padding: 0, fontSize: "10px" }}><Edit2 size={14} strokeWidth={1.5} /></button>
-                    <button className="btn-ghost text-[var(--gray-400)] hover:text-[var(--orange)]" style={{ padding: 0, fontSize: "10px" }}><Trash2 size={14} strokeWidth={1.5} /></button>
+              <div className="border border-(--beige) p-8 bg-(--gray-900)">
+                <div className="flex justify-between items-start mb-6">
+                  <span className="font-sans text-[10px] uppercase tracking-[0.2em] text-(--beige)">Home — Default</span>
+                  <div className="flex gap-4">
+                    <button className="text-(--beige) hover:text-(--orange) transition-colors"><Edit2 size={14} strokeWidth={1} /></button>
+                    <button className="text-(--gray-400) hover:text-(--orange) transition-colors"><Trash2 size={14} strokeWidth={1} /></button>
                   </div>
                 </div>
-                <p className="label text-[var(--gray-200)]" style={{ fontSize: "11px", lineHeight: 1.9, fontWeight: 400, textTransform: "none", letterSpacing: "0.04em" }}>
+                <p className="font-sans text-[11px] tracking-[0.05em] leading-loose text-(--gray-200)">
                   Jane Doe<br />
                   123 Park Street<br />
                   Kolkata, West Bengal<br />
@@ -210,15 +208,15 @@ export default function ProfilePage() {
               </div>
 
               {/* Work address */}
-              <div style={{ border: "1px solid var(--gray-800)", padding: "28px", background: "var(--black)" }}>
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "16px" }}>
-                  <span className="label" style={{ fontSize: "9px", color: "var(--gray-400)", letterSpacing: "0.18em" }}>Office</span>
-                  <div style={{ display: "flex", gap: "12px" }}>
-                    <button className="btn-ghost text-[var(--beige)] hover:text-[var(--orange)]" style={{ padding: 0 }}><Edit2 size={14} strokeWidth={1.5} /></button>
-                    <button className="btn-ghost text-[var(--gray-400)] hover:text-[var(--orange)]" style={{ padding: 0 }}><Trash2 size={14} strokeWidth={1.5} /></button>
+              <div className="border border-(--gray-800) p-8 bg-(--black)">
+                <div className="flex justify-between items-start mb-6">
+                  <span className="font-sans text-[10px] uppercase tracking-[0.2em] text-(--gray-400)">Office</span>
+                  <div className="flex gap-4">
+                    <button className="text-(--beige) hover:text-(--orange) transition-colors"><Edit2 size={14} strokeWidth={1} /></button>
+                    <button className="text-(--gray-400) hover:text-(--orange) transition-colors"><Trash2 size={14} strokeWidth={1} /></button>
                   </div>
                 </div>
-                <p style={{ fontFamily: "var(--font-sans)", fontSize: "11px", letterSpacing: "0.04em", lineHeight: 1.9, color: "var(--gray-400)" }}>
+                <p className="font-sans text-[11px] tracking-[0.05em] leading-loose text-(--gray-400)">
                   Jane Doe<br />
                   45 MG Road, 3rd Floor<br />
                   Bengaluru, Karnataka<br />
@@ -227,18 +225,9 @@ export default function ProfilePage() {
               </div>
 
               {/* Add new card */}
-              <button style={{
-                border: "1px dashed var(--gray-600)", padding: "28px",
-                display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
-                gap: "10px", cursor: "pointer", minHeight: "160px", background: "transparent",
-                transition: "border-color 0.25s ease, color 0.25s ease",
-                color: "var(--gray-400)"
-              }}
-                onMouseEnter={e => { e.currentTarget.style.borderColor = "var(--orange)"; e.currentTarget.style.color = "var(--orange)"; }}
-                onMouseLeave={e => { e.currentTarget.style.borderColor = "var(--gray-600)"; e.currentTarget.style.color = "var(--gray-400)"; }}
-              >
-                <Plus size={20} strokeWidth={1.5} color="inherit" />
-                <span className="label" style={{ fontSize: "9px", color: "inherit", letterSpacing: "0.18em" }}>Add Address</span>
+              <button className="border border-dashed border-(--gray-600) p-8 flex flex-col items-center justify-center gap-4 min-h-[200px] text-(--gray-400) hover:text-(--orange) hover:border-(--orange) transition-colors group">
+                <Plus size={24} strokeWidth={1} className="group-hover:scale-110 transition-transform" />
+                <span className="font-sans text-[10px] uppercase tracking-[0.2em]">Add Address</span>
               </button>
             </div>
           </div>
@@ -246,63 +235,47 @@ export default function ProfilePage() {
 
         {/* ────── WISHLIST ────── */}
         {activeTab === "wishlist" && (
-          <div className="anim-scale-up">
-            <p className="label" style={{ color: "var(--orange)", marginBottom: "28px", fontSize: "9px", letterSpacing: "0.2em" }}>
+          <div className="animate-in fade-in slide-in-from-bottom-4 duration-700">
+            <p className="font-sans text-[10px] uppercase tracking-[0.2em] text-(--orange) mb-8">
               {wishlist.length} Saved Items
             </p>
 
             {wishlist.length === 0 ? (
-              <div style={{ textAlign: "center", padding: "80px 0" }}>
-                <Heart size={28} strokeWidth={1} style={{ margin: "0 auto 16px", color: "var(--gray-400)" }} />
-                <p className="label" style={{ color: "var(--gray-400)", marginBottom: "24px", fontSize: "10px" }}>Your wishlist is empty</p>
-                <Link href="/products" className="btn-primary" style={{ fontSize: "9px" }}>Browse Collection</Link>
+              <div className="text-center py-32 border border-(--gray-800)">
+                <Heart size={28} strokeWidth={1} className="mx-auto mb-6 text-(--gray-400)" />
+                <p className="font-sans text-[11px] uppercase tracking-[0.2em] text-(--gray-400) mb-8">Your wishlist is empty</p>
+                <Link href="/products" className="border-b border-(--beige) pb-1 font-sans text-[10px] uppercase tracking-[0.2em] text-(--beige) hover:text-(--orange) hover:border-(--orange) transition-colors">
+                  Browse Collection
+                </Link>
               </div>
             ) : (
-              <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: "clamp(8px,2vw,20px)" }} className="md:grid-cols-4">
+              <div className="grid grid-cols-2 md:grid-cols-4 w-full border-t border-l border-(--gray-800)">
                 {wishlist.map((item, i) => (
-                  <div key={item.id} className="group"
-                    style={{
-                      animation: `fadeUp 0.6s var(--ease-out-expo) ${i * 80}ms both`,
-                    }}
-                  >
-                    <div className="product-img-wrap border border-[var(--gray-800)] group-hover:border-[var(--orange)] transition-colors" style={{ aspectRatio: "3/4", position: "relative" }}>
-                      <img src={item.image} alt={item.name} />
-                      {/* Actions overlay */}
-                      <div style={{
-                        position: "absolute", inset: 0, background: "rgba(0,0,0,0)",
-                        display: "flex", flexDirection: "column", justifyContent: "flex-end",
-                        padding: "16px", gap: "8px",
-                        transition: "background 0.35s ease",
-                      }}
-                        onMouseEnter={e => { (e.currentTarget as HTMLDivElement).style.background = "rgba(0,0,0,0.4)"; }}
-                        onMouseLeave={e => { (e.currentTarget as HTMLDivElement).style.background = "rgba(0,0,0,0)"; }}
+                  <div key={item.id} className="group relative border-r border-b border-(--gray-800) bg-(--gray-900) overflow-hidden">
+                    <div className="relative w-full aspect-[2/3]">
+                      <img src={item.image} alt={item.name} className="absolute inset-0 w-full h-full object-cover transition-transform duration-[1.5s] ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:scale-105" />
+                      <div className="absolute inset-x-0 bottom-0 h-32 bg-gradient-to-t from-black/80 to-transparent pointer-events-none" />
+                      
+                      {/* Delete Button */}
+                      <button
+                        onClick={() => setWishlist(w => w.filter(x => x.id !== item.id))}
+                        className="absolute top-4 right-4 bg-(--black) text-(--beige) p-2 hover:text-(--orange) transition-colors z-20"
                       >
-                        <button className="btn-primary" style={{ fontSize: "9px", padding: "10px", opacity: 0, transition: "opacity 0.3s ease" }}
-                          onMouseEnter={e => ((e.currentTarget.parentElement as HTMLElement).querySelectorAll('button').forEach(b => (b as HTMLElement).style.opacity = "1"))}
-                        >
-                          Add to Bag
-                        </button>
-                        <button
-                          onClick={() => setWishlist(w => w.filter(x => x.id !== item.id))}
-                          style={{
-                            position: "absolute", top: "10px", right: "10px",
-                            background: "var(--gray-900)", border: "1px solid var(--gray-600)",
-                            color: "var(--beige)",
-                            width: "32px", height: "32px", cursor: "pointer",
-                            display: "flex", alignItems: "center", justifyContent: "center",
-                          }}
-                          className="hover:border-[var(--orange)] hover:text-[var(--orange)] transition-colors"
-                        >
-                          <Trash2 size={14} strokeWidth={1.5} />
-                        </button>
+                        <Trash2 size={14} strokeWidth={1} />
+                      </button>
+
+                      <div className="absolute bottom-6 left-4 right-4 z-10 pointer-events-none">
+                        <p className="font-sans text-[10px] tracking-[0.15em] uppercase text-(--beige) mb-1">{item.name}</p>
+                        <div className="flex justify-between items-center">
+                          <p className="font-sans text-[9px] tracking-[0.15em] uppercase text-(--gray-400)">{item.category}</p>
+                          <p className="font-sans text-[10px] tracking-[0.15em] uppercase text-(--beige)">${item.price}</p>
+                        </div>
                       </div>
-                    </div>
-                    <div style={{ marginTop: "10px", display: "flex", justifyContent: "space-between" }}>
-                      <div>
-                        <p className="label text-[var(--beige)] group-hover:text-[var(--orange)] transition-colors" style={{ fontSize: "10px", letterSpacing: "0.12em", marginBottom: "3px" }}>{item.name}</p>
-                        <p className="label" style={{ fontSize: "9px", color: "var(--gray-400)" }}>{item.category}</p>
-                      </div>
-                      <span className="label text-[var(--beige)]" style={{ fontSize: "10px" }}>$ {item.price}</span>
+
+                      {/* Quick Add Slide-Up */}
+                      <button className="absolute bottom-0 left-0 right-0 bg-(--orange) text-(--black) py-4 font-sans text-[11px] font-bold uppercase tracking-[0.15em] transition-transform duration-300 translate-y-full group-hover:translate-y-0 z-20">
+                        Add to Bag
+                      </button>
                     </div>
                   </div>
                 ))}
@@ -313,89 +286,61 @@ export default function ProfilePage() {
 
         {/* ────── SETTINGS ────── */}
         {activeTab === "settings" && (
-          <div className="anim-scale-up" style={{ maxWidth: "560px" }}>
-            <p className="label" style={{ color: "var(--orange)", marginBottom: "36px", fontSize: "9px", letterSpacing: "0.2em" }}>
+          <div className="animate-in fade-in slide-in-from-bottom-4 duration-700 max-w-2xl">
+            <p className="font-sans text-[10px] uppercase tracking-[0.2em] text-(--orange) mb-12">
               Account Settings
             </p>
 
             {/* Personal Info */}
-            <section style={{ marginBottom: "48px" }}>
-              <h2 style={{ fontFamily: "var(--font-serif)", fontSize: "1.4rem", fontWeight: 400, marginBottom: "24px", letterSpacing: "-0.01em", color: "var(--beige)" }}>
-                Personal Information
-              </h2>
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "24px", marginBottom: "24px" }}>
+            <section className="mb-16">
+              <h2 className="font-serif text-3xl mb-8 text-(--beige)">Personal Information</h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
                 <div>
-                  <label className="label" style={{ display: "block", color: "var(--gray-400)", fontSize: "9px", marginBottom: "8px" }}>First Name</label>
-                  <input defaultValue="Jane" className="input-box" />
+                  <label className="font-sans text-[9px] uppercase tracking-[0.2em] text-(--gray-400) mb-4 block">First Name</label>
+                  <input defaultValue="Jane" className="w-full bg-transparent border-b border-(--gray-600) py-3 font-sans text-[12px] tracking-[0.1em] text-(--beige) focus:outline-none focus:border-(--orange) transition-colors" />
                 </div>
                 <div>
-                  <label className="label" style={{ display: "block", color: "var(--gray-400)", fontSize: "9px", marginBottom: "8px" }}>Last Name</label>
-                  <input defaultValue="Doe" className="input-box" />
+                  <label className="font-sans text-[9px] uppercase tracking-[0.2em] text-(--gray-400) mb-4 block">Last Name</label>
+                  <input defaultValue="Doe" className="w-full bg-transparent border-b border-(--gray-600) py-3 font-sans text-[12px] tracking-[0.1em] text-(--beige) focus:outline-none focus:border-(--orange) transition-colors" />
                 </div>
               </div>
-              <div style={{ marginBottom: "24px" }}>
-                <label className="label" style={{ display: "block", color: "var(--gray-400)", fontSize: "9px", marginBottom: "8px" }}>Email Address</label>
-                <input type="email" defaultValue="jane.doe@example.com" className="input-box" />
+              <div className="mb-8">
+                <label className="font-sans text-[9px] uppercase tracking-[0.2em] text-(--gray-400) mb-4 block">Email Address</label>
+                <input type="email" defaultValue="jane.doe@example.com" className="w-full bg-transparent border-b border-(--gray-600) py-3 font-sans text-[12px] tracking-[0.1em] text-(--beige) focus:outline-none focus:border-(--orange) transition-colors" />
               </div>
               <div>
-                <label className="label" style={{ display: "block", color: "var(--gray-400)", fontSize: "9px", marginBottom: "8px" }}>Phone</label>
-                <input type="tel" defaultValue="+91 98765 43210" className="input-box" />
+                <label className="font-sans text-[9px] uppercase tracking-[0.2em] text-(--gray-400) mb-4 block">Phone</label>
+                <input type="tel" defaultValue="98765 43210" className="w-full bg-transparent border-b border-(--gray-600) py-3 font-sans text-[12px] tracking-[0.1em] text-(--beige) focus:outline-none focus:border-(--orange) transition-colors" />
               </div>
             </section>
 
             {/* Password */}
-            <section style={{ marginBottom: "48px", borderTop: "1px solid var(--gray-800)", paddingTop: "36px" }}>
-              <h2 style={{ fontFamily: "var(--font-serif)", fontSize: "1.4rem", fontWeight: 400, marginBottom: "24px", color: "var(--beige)" }}>
-                Password
-              </h2>
-              <div style={{ marginBottom: "16px" }}>
-                <label className="label" style={{ display: "block", color: "var(--gray-400)", fontSize: "9px", marginBottom: "8px" }}>Current Password</label>
-                <input type="password" placeholder="••••••••" className="input-box" />
+            <section className="mb-16 pt-12 border-t border-(--gray-800)">
+              <h2 className="font-serif text-3xl mb-8 text-(--beige)">Password</h2>
+              <div className="mb-8">
+                <label className="font-sans text-[9px] uppercase tracking-[0.2em] text-(--gray-400) mb-4 block">Current Password</label>
+                <input type="password" placeholder="••••••••" className="w-full bg-transparent border-b border-(--gray-600) py-3 font-sans text-[12px] tracking-[0.1em] text-(--beige) focus:outline-none focus:border-(--orange) transition-colors" />
               </div>
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px" }}>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                 <div>
-                  <label className="label" style={{ display: "block", color: "var(--gray-400)", fontSize: "9px", marginBottom: "8px" }}>New Password</label>
-                  <input type="password" placeholder="••••••••" className="input-box" />
+                  <label className="font-sans text-[9px] uppercase tracking-[0.2em] text-(--gray-400) mb-4 block">New Password</label>
+                  <input type="password" placeholder="••••••••" className="w-full bg-transparent border-b border-(--gray-600) py-3 font-sans text-[12px] tracking-[0.1em] text-(--beige) focus:outline-none focus:border-(--orange) transition-colors" />
                 </div>
                 <div>
-                  <label className="label" style={{ display: "block", color: "var(--gray-400)", fontSize: "9px", marginBottom: "8px" }}>Confirm Password</label>
-                  <input type="password" placeholder="••••••••" className="input-box" />
+                  <label className="font-sans text-[9px] uppercase tracking-[0.2em] text-(--gray-400) mb-4 block">Confirm Password</label>
+                  <input type="password" placeholder="••••••••" className="w-full bg-transparent border-b border-(--gray-600) py-3 font-sans text-[12px] tracking-[0.1em] text-(--beige) focus:outline-none focus:border-(--orange) transition-colors" />
                 </div>
               </div>
-            </section>
-
-            {/* Preferences */}
-            <section style={{ marginBottom: "48px", borderTop: "1px solid var(--gray-800)", paddingTop: "36px" }}>
-              <h2 style={{ fontFamily: "var(--font-serif)", fontSize: "1.4rem", fontWeight: 400, marginBottom: "24px", color: "var(--beige)" }}>
-                Communication Preferences
-              </h2>
-              {[
-                { label: "New arrivals & drops", checked: true },
-                { label: "Order updates & tracking", checked: true },
-                { label: "Exclusive member offers", checked: false },
-                { label: "Style edits & lookbooks", checked: true },
-              ].map((pref) => (
-                <label key={pref.label} className="hover:text-[var(--orange)] transition-colors group" style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "14px 0", borderBottom: "1px solid var(--gray-800)", cursor: "pointer" }}>
-                  <span className="label text-[var(--beige)] group-hover:text-[var(--orange)] transition-colors" style={{ fontSize: "10px", letterSpacing: "0.12em" }}>{pref.label}</span>
-                  <input
-                    type="checkbox"
-                    defaultChecked={pref.checked}
-                    style={{ width: "16px", height: "16px", accentColor: "var(--orange)", cursor: "pointer" }}
-                  />
-                </label>
-              ))}
             </section>
 
             {/* Actions */}
-            <div style={{ display: "flex", gap: "12px", flexWrap: "wrap" }}>
-              <button className="btn-primary" style={{ fontSize: "10px" }}>Save Changes</button>
-              <button className="btn-ghost" style={{ fontSize: "10px", color: "var(--gray-400)" }}>Cancel</button>
-            </div>
-
-            {/* Danger zone */}
-            <div style={{ marginTop: "48px", paddingTop: "28px", borderTop: "1px solid var(--gray-800)" }}>
-              <p className="label" style={{ color: "var(--gray-400)", fontSize: "9px", marginBottom: "12px" }}>Danger Zone</p>
-              <button className="btn-ghost hover:text-[var(--orange)]" style={{ fontSize: "10px", color: "#EE3C24" }}>Delete Account</button>
+            <div className="flex gap-6 pt-8">
+              <button className="bg-(--beige) text-(--black) font-sans text-[10px] font-bold uppercase tracking-[0.2em] px-10 py-5 hover:bg-(--orange) transition-colors">
+                Save Changes
+              </button>
+              <button className="text-(--gray-400) font-sans text-[10px] uppercase tracking-[0.2em] hover:text-(--beige) transition-colors">
+                Cancel
+              </button>
             </div>
           </div>
         )}

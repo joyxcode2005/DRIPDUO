@@ -1,7 +1,6 @@
 "use client";
 
 import { Product } from "@/types";
-import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
 import { useCart } from "@/lib/CartContext";
@@ -22,83 +21,74 @@ export default function ProductCard({ product }: { product: Product }) {
       name: product.name,
       price: product.price,
       image: product.image,
-      size: "M (240 GSM)", // Defaulting for quick add
+      size: "M", 
+      quantity: 1
     });
   };
 
   const toggleWishlist = (e: React.MouseEvent) => {
     e.preventDefault();
-    e.stopPropagation(); // Prevents the link from redirecting you when you click the heart
+    e.stopPropagation();
     setIsWishlisted(!isWishlisted);
   };
 
   return (
     <Link 
       href={`/products/${product.id}`} 
-      className="group block cursor-pointer"
+      className="group relative border-r border-b border-(--gray-800) overflow-hidden bg-(--gray-900) block cursor-pointer"
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
-      <div className="relative aspect-[3/4] w-full overflow-hidden bg-[var(--gray-900)] border border-[var(--gray-800)] group-hover:border-[var(--orange)] transition-colors duration-400">
+      {/* 2:3 Editorial Aspect Ratio */}
+      <div className="w-full relative" style={{ aspectRatio: "2/3" }}>
+        <img 
+          src={product.image} 
+          alt={product.name} 
+          className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-700 ${isHovered && product.hoverImage ? "opacity-0" : "opacity-100"}`} 
+        />
+        {product.hoverImage && (
+          <img 
+            src={hoverImage} 
+            alt={`${product.name} Alt`} 
+            className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-700 ${isHovered ? "opacity-100" : "opacity-0"}`} 
+          />
+        )}
+        <div className="absolute inset-x-0 bottom-0 h-32 bg-gradient-to-t from-black/70 to-transparent pointer-events-none" />
         
-        {/* ── IMAGES ── */}
-        <div className="relative w-full h-full">
-          <Image
-            fill
-            src={product.image}
-            alt={product.name}
-            className={`object-cover object-center transition-opacity duration-700 ease-in-out ${isHovered ? "opacity-0" : "opacity-100"}`}
-          />
-          <Image
-            fill
-            src={hoverImage}
-            alt={product.name}
-            className={`object-cover object-center absolute inset-0 transition-all duration-1000 ease-in-out ${isHovered ? "opacity-100 scale-105" : "opacity-0 scale-100"}`}
-          />
-        </div>
-
-        {/* ── QUICK ADD ── */}
-        <div 
-          className={`absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-[var(--black)] via-[var(--black)]/80 to-transparent transition-all duration-400 z-40 ${isHovered ? "translate-y-0 opacity-100" : "translate-y-4 opacity-0"}`}
-        >
-          <div 
-            onClick={handleQuickAdd}
-            className="w-full py-3.5 bg-[var(--beige)] text-[var(--black)] font-bold text-center uppercase hover:bg-[var(--orange)] transition-colors duration-300"
-            style={{ fontSize: "10px", letterSpacing: "0.2em" }}
-          >
-            Quick Add
-          </div>
-        </div>
-
-        {/* ── WISHLIST LOVE BUTTON ── */}
-        <div 
+        {/* Wishlist Button - Minimalist */}
+        <button 
           onClick={toggleWishlist}
-          role="button"
-          tabIndex={0}
-          className={`absolute top-3 right-3 z-50 p-2.5 rounded-full backdrop-blur-md transition-all duration-300 active:scale-75 ${
-            isWishlisted 
-              ? "bg-[var(--orange)]/20 text-[var(--orange)] border border-[var(--orange)]/50" 
-              : "bg-black/40 text-[var(--beige)] border border-white/10 hover:bg-black/60 hover:text-[var(--orange)] hover:border-[var(--orange)]/50"
+          className={`absolute top-4 right-4 z-20 p-2 rounded-full transition-colors duration-300 ${
+            isWishlisted ? "text-(--orange)" : "text-(--beige) hover:text-(--orange)"
           }`}
-          aria-label="Add to wishlist"
         >
-          <Heart 
-            className={`w-4 h-4 transition-all duration-400 ${
-              isWishlisted ? "fill-[var(--orange)] scale-110 drop-shadow-[0_0_8px_rgba(238,60,36,0.5)]" : "scale-100"
-            }`} 
-          />
-        </div>
-
+          <Heart size={16} strokeWidth={1.5} className={isWishlisted ? "fill-(--orange)" : "fill-transparent"} />
+        </button>
       </div>
 
-      <div className="mt-4 flex flex-col gap-1.5">
-        <h3 className="label text-[var(--beige)] group-hover:text-[var(--orange)] transition-colors" style={{ fontSize: "11px", lineHeight: 1.4 }}>
-          {product.name}
-        </h3>
-        <p className="label text-[var(--gray-200)]" style={{ fontSize: "10px", letterSpacing: "0.15em" }}>
-          ${product.price.toFixed(2)}
+      {/* Info Overlay */}
+      <div className="absolute bottom-6 left-4 right-4 flex justify-between items-end z-10 pointer-events-none">
+        <div className="max-w-[70%]">
+          <p className="font-sans text-[10px] tracking-[0.15em] uppercase text-(--beige) leading-relaxed">
+            {product.name}
+          </p>
+          <p className="font-sans text-[9px] tracking-[0.15em] uppercase text-(--gray-400) mt-1">
+            {product.category || "Apparel"}
+          </p>
+        </div>
+        <p className="font-sans text-[10px] tracking-[0.15em] uppercase text-(--beige)">
+          ${product.price}
         </p>
       </div>
+
+      {/* Quick Add Slide-Up */}
+      <button
+        onClick={handleQuickAdd}
+        className="absolute bottom-0 left-0 right-0 bg-(--orange) text-(--black) font-bold text-center py-4 font-sans text-[11px] tracking-[0.15em] uppercase transition-transform duration-300 z-20"
+        style={{ transform: isHovered ? "translateY(0)" : "translateY(100%)" }}
+      >
+        Quick Add
+      </button>
     </Link>
   );
 }

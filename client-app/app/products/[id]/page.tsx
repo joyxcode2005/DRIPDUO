@@ -1,9 +1,9 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, use } from "react";
 import Link from "next/link";
 import { ArrowLeft, Check } from "lucide-react";
-
+import { useCart } from "@/lib/CartContext";
 
 const SIZES = ["XS", "S", "M", "L", "XL", "XXL"];
 const WEIGHTS = [
@@ -11,16 +11,19 @@ const WEIGHTS = [
   { id: "240", label: "240 GSM", desc: "Heavyweight Structure" }
 ];
 
-export default function ProductDetailPage({ params }: { params: { id: string } }) {
-  const { addToCart } = useGlobal();
+export default function ProductDetailPage({ params }: { params: Promise<{ id: string }> }) {
+  // 1. Unwrap the params Promise using React.use()
+  const { id } = use(params); 
+
+  const { addToCart } = useCart();
   const [selectedSize, setSelectedSize] = useState<string | null>(null);
   const [selectedGSM, setSelectedGSM] = useState<string>("240");
   const [sizeError, setSizeError] = useState(false);
   const [added, setAdded] = useState(false);
 
-  // Mock product data based on ID
+  // Mock product data based on the unwrapped ID
   const product = {
-    id: params.id,
+    id: id,
     name: "Heavyweight Archive Drop",
     price: 180,
     category: "Oversized",
@@ -39,62 +42,66 @@ export default function ProductDetailPage({ params }: { params: { id: string } }
       price: product.price,
       image: product.image,
       size: `${selectedSize} (${selectedGSM} GSM)`,
+      quantity: 1,
     });
     setAdded(true);
     setTimeout(() => setAdded(false), 2000);
   };
 
   return (
-    <div className="min-h-screen bg-[var(--black)] text-[var(--beige)] pt-20 pb-24 font-sans">
-      <div className="max-w-7xl mx-auto px-6 md:px-12 flex flex-col md:flex-row gap-12 lg:gap-24">
+    <div className="min-h-screen bg-(--black) text-(--beige) pt-24 pb-24 font-sans">
+      <div className="max-w-[1400px] mx-auto px-6 md:px-12 flex flex-col md:flex-row gap-12 lg:gap-24">
         
         {/* Left: Image Viewer */}
         <div className="w-full md:w-1/2">
-          <Link href="/products" className="inline-flex items-center gap-2 label text-[var(--gray-400)] hover:text-[var(--orange)] transition-colors mb-8" style={{ fontSize: "10px", letterSpacing: "0.15em" }}>
-            <ArrowLeft size={14} strokeWidth={1.5} /> BACK TO ARCHIVE
+          <Link 
+            href="/products" 
+            className="inline-flex items-center gap-3 font-sans text-[10px] uppercase tracking-[0.2em] text-(--gray-400) hover:text-(--orange) transition-colors mb-12"
+          >
+            <ArrowLeft size={14} strokeWidth={1} /> BACK TO ARCHIVE
           </Link>
-          <div className="w-full bg-[var(--gray-900)] border border-[var(--gray-800)]" style={{ aspectRatio: "3/4" }}>
+          <div className="w-full bg-(--gray-900) border border-(--gray-800) aspect-[3/4] overflow-hidden">
             <img src={product.image} alt={product.name} className="w-full h-full object-cover" />
           </div>
         </div>
 
         {/* Right: Product Details & Order Form */}
-        <div className="w-full md:w-1/2 md:pt-16 flex flex-col">
+        <div className="w-full md:w-1/2 md:pt-20 flex flex-col">
           
-          <p className="label text-[var(--orange)] mb-4" style={{ fontSize: "11px", letterSpacing: "0.2em" }}>
-            {product.category.toUpperCase()}
+          <p className="font-sans text-[11px] uppercase tracking-[0.2em] text-(--orange) mb-6">
+            {product.category}
           </p>
-          <h1 className="font-serif text-4xl md:text-5xl lg:text-6xl font-light leading-tight mb-4 text-[var(--beige)]">
+          <h1 className="font-serif text-[clamp(2.5rem,5vw,4.5rem)] leading-[0.9] mb-6 text-(--beige)">
             {product.name}
           </h1>
-          <p className="label text-[var(--beige)] mb-10" style={{ fontSize: "14px" }}>
-            ${product.price.toFixed(2)}
+          <p className="font-sans text-[12px] tracking-[0.1em] text-(--beige) mb-12">
+            ${product.price.toFixed(2)} USD
           </p>
 
-          <p className="label text-[var(--gray-200)] mb-12 leading-relaxed" style={{ fontSize: "12px", textTransform: "none", letterSpacing: "0.08em" }}>
+          <p className="font-sans text-[12px] leading-relaxed tracking-[0.05em] text-(--gray-200) mb-16">
             {product.description}
           </p>
 
           {/* GSM (Fabric Weight) Selector */}
-          <div className="mb-10">
-            <span className="label block mb-5" style={{ fontSize: "11px", letterSpacing: "0.15em" }}>
+          <div className="mb-12">
+            <span className="block font-sans text-[10px] uppercase tracking-[0.2em] text-(--gray-400) mb-6">
               FABRIC WEIGHT
             </span>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               {WEIGHTS.map((weight) => (
                 <button
                   key={weight.id}
                   onClick={() => setSelectedGSM(weight.id)}
-                  className="border py-4 px-5 text-left transition-colors flex flex-col items-start gap-2"
-                  style={{
-                    borderColor: selectedGSM === weight.id ? "var(--orange)" : "var(--gray-800)",
-                    background: selectedGSM === weight.id ? "var(--orange)" : "transparent",
-                  }}
+                  className={`border p-5 text-left transition-colors flex flex-col items-start gap-2 ${
+                    selectedGSM === weight.id 
+                      ? "border-(--beige) bg-(--gray-900)" 
+                      : "border-(--gray-800) bg-transparent hover:border-(--gray-600)"
+                  }`}
                 >
-                  <span className="label" style={{ fontSize: "12px", color: selectedGSM === weight.id ? "var(--black)" : "var(--beige)" }}>
+                  <span className={`font-sans text-[11px] uppercase tracking-[0.15em] ${selectedGSM === weight.id ? "text-(--beige)" : "text-(--gray-400)"}`}>
                     {weight.label}
                   </span>
-                  <span style={{ fontSize: "10px", color: selectedGSM === weight.id ? "rgba(0,0,0,0.7)" : "var(--gray-400)", textTransform: "none", letterSpacing: "0.05em" }}>
+                  <span className="font-sans text-[10px] tracking-[0.05em] text-(--gray-600)">
                     {weight.desc}
                   </span>
                 </button>
@@ -103,34 +110,32 @@ export default function ProductDetailPage({ params }: { params: { id: string } }
           </div>
 
           {/* Size Selector */}
-          <div className="mb-12">
-            <div className="flex justify-between items-center mb-5">
-              <span className="label" style={{ fontSize: "11px", letterSpacing: "0.15em" }}>
+          <div className="mb-16">
+            <div className="flex justify-between items-center mb-6">
+              <span className="font-sans text-[10px] uppercase tracking-[0.2em] text-(--gray-400)">
                 SELECT SIZE
               </span>
-              <button className="label text-[var(--gray-400)] hover:text-[var(--orange)] transition-colors underline" style={{ fontSize: "10px" }}>
+              <button className="font-sans text-[10px] uppercase tracking-[0.1em] text-(--gray-400) hover:text-(--orange) transition-colors underline underline-offset-4">
                 Size Guide
               </button>
             </div>
 
             {sizeError && (
-              <p className="label text-[var(--orange)] mb-4" style={{ fontSize: "10px", letterSpacing: "0.1em" }}>
+              <p className="font-sans text-[10px] uppercase tracking-[0.15em] text-(--orange) mb-4 animate-pulse">
                 Please select a size to continue.
               </p>
             )}
 
-            <div className="grid grid-cols-3 sm:grid-cols-6 gap-3">
+            <div className="grid grid-cols-3 sm:grid-cols-6 gap-2">
               {SIZES.map((size) => (
                 <button
                   key={size}
                   onClick={() => { setSelectedSize(size); setSizeError(false); }}
-                  className="border py-4 label transition-colors"
-                  style={{
-                    fontSize: "12px",
-                    borderColor: selectedSize === size ? "var(--beige)" : "var(--gray-800)",
-                    background: selectedSize === size ? "var(--beige)" : "transparent",
-                    color: selectedSize === size ? "var(--black)" : "var(--gray-400)",
-                  }}
+                  className={`border py-4 font-sans text-[11px] uppercase tracking-[0.15em] transition-colors ${
+                    selectedSize === size 
+                      ? "border-(--beige) bg-(--beige) text-(--black) font-bold" 
+                      : "border-(--gray-800) bg-transparent text-(--gray-400) hover:border-(--gray-600) hover:text-(--beige)"
+                  }`}
                 >
                   {size}
                 </button>
@@ -141,12 +146,11 @@ export default function ProductDetailPage({ params }: { params: { id: string } }
           {/* Add to Cart Button */}
           <button
             onClick={handleAddToCart}
-            className={`w-full font-bold label py-5 transition-colors duration-300 flex items-center justify-center gap-3 ${
+            className={`w-full font-sans text-[11px] font-bold uppercase tracking-[0.2em] py-6 transition-colors duration-300 flex items-center justify-center gap-3 ${
               added 
-                ? "bg-[var(--beige)] text-[var(--black)] border border-[var(--beige)]" 
-                : "bg-[var(--orange)] text-[var(--black)] border border-[var(--orange)] hover:bg-[var(--beige)] hover:border-[var(--beige)]"
+                ? "bg-(--beige) text-(--black) border border-(--beige)" 
+                : "bg-(--orange) text-(--black) border border-(--orange) hover:bg-(--beige) hover:border-(--beige)"
             }`}
-            style={{ fontSize: "12px", letterSpacing: "0.2em" }}
           >
             {added ? (
               <><Check size={16} strokeWidth={2} /> ADDED TO BAG</>
