@@ -57,7 +57,7 @@ export const Navbar = () => {
                 <Link
                   key={link}
                   href="/products"
-                  className="relative text-(--beige) hover:text-(--orange) [text-shadow:0_1px_2px_rgba(0,0,0)] transition-colors uppercase tracking-[0.15em] text-[10px] font-medium group"
+                  className="relative text-(--beige) hover:text-(--orange) [text-shadow:0_1px_2px_rgba(0,0,0)] transition-colors uppercase tracking-[0.15em] text-[10px] font-medium group hover:text-shadow:0_2px_4px_rgba(255,0,0,1) hover:underline-offset-4"
                 >
                   {link}
                   {/* Subtle hover underline effect */}
