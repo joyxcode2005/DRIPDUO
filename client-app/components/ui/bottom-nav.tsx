@@ -18,12 +18,9 @@ export const BottomNav = () => {
 
   return (
     <>
-      {/* ── SPACER ── 
-          This invisible block matches the height of the BottomNav (4rem / 16 + safe area).
-          It physically pushes the bottom of the website down so the footer is never hidden. */}
       <div className="md:hidden w-full h-[calc(4rem+env(safe-area-inset-bottom))]" aria-hidden="true" />
 
-      <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-(--black) border-t border-(--gray-800) z-65 pb-safe">
+      <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-(--black) border-t border-(--gray-800) z-50 pb-safe">
         <div className="flex items-center justify-around h-16">
           {navItems.map(({ href, icon: Icon, label }) => {
             const isActive = pathname === href;
@@ -31,38 +28,39 @@ export const BottomNav = () => {
               <Link
                 key={href}
                 href={href}
-                className="flex flex-col items-center gap-1 flex-1 h-full justify-center transition-colors duration-300"
-                style={{ color: isActive ? "var(--orange)" : "var(--gray-400)" }}
+                className={`flex flex-col items-center gap-1.5 flex-1 h-full justify-center transition-colors duration-300 ${
+                  isActive ? "text-(--orange)" : "text-(--gray-400)"
+                }`}
               >
-                <Icon size={20} strokeWidth={isActive ? 2 : 1.5} />
-                <span className="label-sm">{label}</span>
+                <Icon size={18} strokeWidth={isActive ? 1.5 : 1} />
+                <span className="font-sans text-[9px] uppercase tracking-[0.15em]">{label}</span>
               </Link>
             );
           })}
 
           <button
             onClick={openCart}
-            className="flex flex-col items-center gap-1 flex-1 h-full justify-center relative transition-colors duration-300 hover:text-[var(--orange)]"
-            style={{ color: "var(--gray-400)" }}
+            className="flex flex-col items-center gap-1.5 flex-1 h-full justify-center relative transition-colors duration-300 text-(--gray-400) hover:text-(--orange)"
           >
             <div className="relative">
-              <ShoppingBag size={20} strokeWidth={1.5} />
+              <ShoppingBag size={18} strokeWidth={1} />
               {cartCount > 0 && (
-                <span className="absolute -top-1.5 -right-2 w-4 h-4 bg-[var(--orange)] text-[var(--black)] rounded-full flex items-center justify-center font-bold text-[9px] tracking-tighter">
+                <span className="absolute -top-1.5 -right-2 w-4 h-4 bg-(--orange) text-(--black) rounded-full flex items-center justify-center font-bold text-[8px] tracking-tighter">
                   {cartCount}
                 </span>
               )}
             </div>
-            <span className="label-sm">Bag</span>
+            <span className="font-sans text-[9px] uppercase tracking-[0.15em]">Bag</span>
           </button>
 
           <Link
             href="/profile"
-            className="flex flex-col items-center gap-1 flex-1 h-full justify-center transition-colors duration-300"
-            style={{ color: pathname === "/profile" ? "var(--orange)" : "var(--gray-400)" }}
+            className={`flex flex-col items-center gap-1.5 flex-1 h-full justify-center transition-colors duration-300 ${
+              pathname === "/profile" ? "text-(--orange)" : "text-(--gray-400)"
+            }`}
           >
-            <User size={20} strokeWidth={pathname === "/profile" ? 2 : 1.5} />
-            <span className="label-sm">Profile</span>
+            <User size={18} strokeWidth={pathname === "/profile" ? 1.5 : 1} />
+            <span className="font-sans text-[9px] uppercase tracking-[0.15em]">Profile</span>
           </Link>
         </div>
       </nav>

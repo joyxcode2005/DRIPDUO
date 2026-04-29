@@ -509,7 +509,7 @@ export default function ProductsPage() {
             <div className="mt-5 overflow-hidden rounded-2xl border border-black/10 shadow-sm">
               <div className="overflow-x-auto">
                 <table className="min-w-full divide-y divide-black/10 text-left text-sm">
-                  <thead className="bg-black/[0.03] text-black">
+                  <thead className="bg-black/3 text-black">
                     <tr>
                       <th className="px-4 py-3 font-medium">Product</th>
                       <th className="px-4 py-3 font-medium">Price</th>
@@ -533,7 +533,7 @@ export default function ProductsPage() {
                       </tr>
                     ) : (
                       productCards.map((product) => (
-                        <tr key={product.id} className="align-top transition-colors hover:bg-black/[0.02] group">
+                        <tr key={product.id} className="align-top transition-colors hover:bg-black/2 group">
                           <td className="px-4 py-4">
                             <div className="font-medium text-black">{product.name}</div>
                             <div className="mt-1 text-xs font-semibold text-emerald-600">{product.typeName}</div>

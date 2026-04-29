@@ -5,89 +5,97 @@ import Link from "next/link";
 import { X, Plus, Minus } from "lucide-react";
 import { useCart } from "@/lib/CartContext";
 
-export const CartDrawer = () => {
+export default function CartDrawer() {
   const { cart, isCartOpen, closeCart, updateQuantity, removeFromCart, cartTotal } = useCart();
 
   return (
     <>
-      <div className={`cart-backdrop ${isCartOpen ? "open" : ""}`} onClick={closeCart} />
-      <div className={`cart-drawer ${isCartOpen ? "open" : ""}`} style={{ fontFamily: "'Helvetica Neue', Helvetica, Arial, sans-serif" }}>
+      {/* Backdrop */}
+      <div 
+        className={`fixed inset-0 bg-black/80 z-[110] backdrop-blur-sm transition-opacity duration-300 ${isCartOpen ? "opacity-100 visible" : "opacity-0 invisible"}`} 
+        onClick={closeCart} 
+      />
+      
+      {/* Drawer */}
+      <div className={`fixed top-0 right-0 h-full w-full max-w-[420px] bg-(--black) border-l border-(--gray-800) z-[120] transform transition-transform duration-500 ease-[cubic-bezier(0.25,1,0.5,1)] flex flex-col ${isCartOpen ? "translate-x-0" : "translate-x-full"}`}>
         
-        <div className="flex items-center justify-between px-6 py-5 border-b border-[var(--gray-800)]">
-          <span className="label text-[var(--beige)]" style={{ fontSize: "11px", letterSpacing: "0.15em" }}>
+        {/* Header */}
+        <div className="flex items-center justify-between px-8 py-6 border-b border-(--gray-800)">
+          <span className="font-sans text-[11px] uppercase tracking-[0.2em] font-semibold text-(--beige)">
             YOUR BAG ({cart.reduce((s, i) => s + i.quantity, 0)})
           </span>
-          <button onClick={closeCart} className="text-[var(--beige)] hover:text-[var(--orange)] transition-colors">
-            <X size={18} strokeWidth={1.5} />
+          <button onClick={closeCart} className="text-(--beige) hover:text-(--orange) transition-colors">
+            <X size={20} strokeWidth={1} />
           </button>
         </div>
 
-        <div className="flex-1 overflow-y-auto px-6 py-6 no-scroll">
+        {/* Cart Items */}
+        <div className="flex-1 overflow-y-auto px-8 py-6 space-y-8 no-scroll">
           {cart.length === 0 ? (
             <div className="h-full flex flex-col items-center justify-center text-center">
-              <p className="label text-[var(--gray-200)] mb-6" style={{ fontSize: "11px" }}>Your bag is empty</p>
-              <button onClick={closeCart} className="label text-[var(--orange)] underline hover:opacity-75 transition-opacity" style={{ fontSize: "11px" }}>
-                Continue Shopping
+              <p className="font-sans text-[10px] tracking-[0.2em] uppercase text-(--gray-400) mb-6">Your bag is empty.</p>
+              <button onClick={closeCart} className="font-sans text-[10px] tracking-[0.2em] uppercase border-b border-(--beige) text-(--beige) pb-1 hover:text-(--orange) hover:border-(--orange) transition-colors">
+                Discover Collection
               </button>
             </div>
           ) : (
-            <div className="space-y-6">
-              {cart.map((item) => (
-                <div key={`${item.id}-${item.size}`} className="flex gap-4">
-                  <div className="w-24 flex-shrink-0 bg-[var(--gray-900)] border border-[var(--gray-800)]" style={{ aspectRatio: "3/4" }}>
-                    <img src={item.image} alt={item.name} className="w-full h-full object-cover" />
+            cart.map((item) => (
+              <div key={`${item.id}-${item.size}`} className="flex gap-6">
+                <div className="w-24 bg-(--gray-900) shrink-0" style={{ aspectRatio: "2/3" }}>
+                  <img src={item.image} alt={item.name} className="w-full h-full object-cover" />
+                </div>
+                <div className="flex-1 flex flex-col justify-between py-1">
+                  <div>
+                    <div className="flex justify-between items-start">
+                      <Link href={`/products/${item.id}`} onClick={closeCart} className="font-sans text-[11px] tracking-[0.1em] uppercase text-(--beige) hover:text-(--orange) transition-colors">
+                        {item.name}
+                      </Link>
+                      <button onClick={() => removeFromCart(item.id, item.size)} className="text-(--gray-600) hover:text-(--orange) transition-colors">
+                        <X size={14} strokeWidth={1} />
+                      </button>
+                    </div>
+                    {item.size && <p className="font-sans text-[9px] tracking-[0.15em] uppercase text-(--gray-400) mt-2">Size: {item.size}</p>}
                   </div>
-                  <div className="flex-1 flex flex-col justify-between py-1 text-[var(--beige)]">
-                    <div>
-                      <div className="flex justify-between items-start">
-                        <div>
-                          <p className="label" style={{ fontSize: "11px", lineHeight: 1.4 }}>{item.name}</p>
-                          {item.size && <p className="label text-[var(--gray-200)] mt-1" style={{ fontSize: "10px" }}>Size: {item.size}</p>}
-                        </div>
-                        <button onClick={() => removeFromCart(item.id)} className="hover:text-[var(--orange)] ml-2 flex-shrink-0 transition-colors">
-                          <X size={14} strokeWidth={1.5} />
-                        </button>
-                      </div>
+                  <div className="flex justify-between items-center mt-4 border-t border-(--gray-800) pt-4">
+                    <div className="flex items-center gap-4 text-(--beige)">
+                      <button onClick={() => updateQuantity(item.id, item.size, item.quantity - 1)} className="hover:text-(--orange)">
+                        <Minus size={12} strokeWidth={1} />
+                      </button>
+                      <span className="font-sans text-[11px] w-4 text-center">{item.quantity}</span>
+                      <button onClick={() => updateQuantity(item.id, item.size, item.quantity + 1)} className="hover:text-(--orange)">
+                        <Plus size={12} strokeWidth={1} />
+                      </button>
                     </div>
-                    <div className="flex items-center justify-between mt-4">
-                      <div className="flex items-center gap-3 border border-[var(--gray-600)]">
-                        <button onClick={() => updateQuantity(item.id, item.quantity - 1)} className="px-3 py-2 hover:bg-[var(--gray-800)] transition-colors">
-                          <Minus size={12} strokeWidth={1.5} />
-                        </button>
-                        <span className="label" style={{ fontSize: "11px", minWidth: "16px", textAlign: "center" }}>{item.quantity}</span>
-                        <button onClick={() => updateQuantity(item.id, item.quantity + 1)} className="px-3 py-2 hover:bg-[var(--gray-800)] transition-colors">
-                          <Plus size={12} strokeWidth={1.5} />
-                        </button>
-                      </div>
-                      <span className="label text-[var(--orange)]" style={{ fontSize: "11px" }}>
-                        ${(item.price * item.quantity).toFixed(2)}
-                      </span>
-                    </div>
+                    <span className="font-sans text-[11px] tracking-[0.1em] text-(--orange)">
+                      ${(item.price * item.quantity).toFixed(2)}
+                    </span>
                   </div>
                 </div>
-              ))}
-            </div>
+              </div>
+            ))
           )}
         </div>
 
+        {/* Footer / Checkout */}
         {cart.length > 0 && (
-          <div className="border-t border-[var(--gray-800)] px-6 py-6 bg-[var(--black)]">
-            <div className="flex justify-between items-center mb-2 text-[var(--beige)]">
-              <span className="label" style={{ fontSize: "11px" }}>Subtotal</span>
-              <span className="label text-[var(--orange)]" style={{ fontSize: "11px" }}>${cartTotal.toFixed(2)}</span>
+          <div className="border-t border-(--gray-800) px-8 py-8 bg-(--black)">
+            <div className="flex justify-between items-center mb-3 text-(--beige)">
+              <span className="font-sans text-[11px] uppercase tracking-[0.15em]">Subtotal</span>
+              <span className="font-sans text-[11px] tracking-[0.1em] text-(--orange)">${cartTotal.toFixed(2)}</span>
             </div>
-            <p className="label text-[var(--gray-400)] mb-6" style={{ fontSize: "9px", letterSpacing: "0.08em" }}>
+            <p className="font-sans text-[9px] tracking-[0.1em] text-(--gray-400) mb-8 uppercase">
               Shipping & taxes calculated at checkout
             </p>
-            <Link href="/checkout" onClick={closeCart} className="block w-full bg-[var(--orange)] text-black text-center font-bold py-4 hover:bg-[var(--beige)] transition-colors" style={{ fontSize: "10px", letterSpacing: "0.2em", textTransform: "uppercase" }}>
+            <Link 
+              href="/checkout" 
+              onClick={closeCart} 
+              className="block w-full bg-(--beige) text-(--black) text-center py-5 font-sans text-[10px] font-bold tracking-[0.2em] uppercase hover:bg-(--orange) transition-colors"
+            >
               Checkout
             </Link>
-            <button onClick={closeCart} className="block w-full text-center label mt-3 text-[var(--gray-200)] hover:text-[var(--beige)] transition-colors" style={{ fontSize: "10px" }}>
-              Continue Shopping
-            </button>
           </div>
         )}
       </div>
     </>
   );
-};
+}

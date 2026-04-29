@@ -3,6 +3,7 @@
 import { useState, useMemo, useEffect } from "react";
 import { SlidersHorizontal, X, ChevronDown } from "lucide-react";
 import { getAllCategories, getAllProducts } from "@/services/products";
+import Link from "next/link";
 import { useQuickView } from "@/lib/QuickViewContext";
 import Image from "next/image";
 
@@ -110,20 +111,31 @@ export default function ProductsPage() {
   }, [products, activeCategory, activeType, sortBy]);
 
   return (
-    <div className="bg-(--black) min-h-screen text-(--beige) pt-14" style={{ fontFamily: "'Helvetica Neue', Helvetica, Arial, sans-serif" }}>
+    <div className="bg-(--black) min-h-screen text-(--beige) pt-16">
 
-      {/* FILTER SIDEBAR (mobile & desktop) */}
-      {filterOpen && (
-        <div
-          className="fixed inset-0 bg-black/70 z-[75] backdrop-blur-sm transition-opacity"
-          onClick={() => setFilterOpen(false)}
-        />
-      )}
-      <aside className={`filter-sidebar ${filterOpen ? "open" : ""}`} style={{ zIndex: 80 }}>
-        <div className="flex items-center justify-between mb-12 text-(--beige)">
-          <span className="label" style={{ fontSize: "12px", letterSpacing: "0.15em" }}>FILTERS</span>
-          <button onClick={() => setFilterOpen(false)} className="hover:text-(--orange) transition-colors">
-            <X size={22} strokeWidth={1.5} />
+      {/* FILTER DRAWER OVERLAY */}
+      <div
+        className={`fixed inset-0 bg-black/80 z-[90] backdrop-blur-sm transition-opacity duration-300 ${
+          filterOpen ? "opacity-100 visible" : "opacity-0 invisible"
+        }`}
+        onClick={() => setFilterOpen(false)}
+      />
+
+      {/* FILTER DRAWER - DARK THEME */}
+      <aside
+        className={`fixed top-0 right-0 h-full w-full max-w-[400px] bg-(--black) border-l border-(--gray-800) z-[100] transform transition-transform duration-500 ease-[cubic-bezier(0.25,1,0.5,1)] flex flex-col ${
+          filterOpen ? "translate-x-0" : "translate-x-full"
+        }`}
+      >
+        <div className="flex items-center justify-between px-8 py-6 border-b border-(--gray-800)">
+          <span className="font-sans text-[11px] font-semibold tracking-[0.2em] uppercase text-(--beige)">
+            Filter & Sort
+          </span>
+          <button
+            onClick={() => setFilterOpen(false)}
+            className="text-(--beige) hover:text-(--orange) transition-colors"
+          >
+            <X size={24} strokeWidth={1} />
           </button>
         </div>
 
@@ -187,14 +199,13 @@ export default function ProductsPage() {
             </button>
           ))}
         </div>
-
+        
         {/* Filter + Sort row */}
-        <div className="flex items-center justify-between px-6 md:px-12 py-5 border-t border-[var(--gray-900)]">
+        <div className="flex items-center justify-between px-6 md:px-12 py-5 border-t border-(--gray-900)">
           <div className="flex items-center gap-6 md:gap-10">
             <button
               onClick={() => setFilterOpen(true)}
-              className="flex items-center gap-3 label text-(--beige) hover:text-(--orange) transition-colors"
-              style={{ fontSize: "11px", letterSpacing: "0.15em" }}
+              className="flex items-center gap-3 font-sans text-[11px] uppercase tracking-[0.15em] text-(--beige) hover:text-(--orange) transition-colors"
             >
               <SlidersHorizontal size={16} strokeWidth={1.5} />
               FILTERS
@@ -204,10 +215,9 @@ export default function ProductsPage() {
             </span>
           </div>
 
-          {/* Sort dropdown */}
           <div className="relative group">
-            <button className="flex items-center gap-3 label text-(--beige) hover:text-(--orange) transition-colors" style={{ fontSize: "11px", letterSpacing: "0.15em" }}>
-              {sortBy.toUpperCase()} <ChevronDown size={14} strokeWidth={1.5} />
+            <button className="flex items-center gap-3 font-sans text-[11px] uppercase tracking-[0.15em] text-(--beige) hover:text-(--orange) transition-colors">
+              {sortBy} <ChevronDown size={14} strokeWidth={1.5} />
             </button>
 
             {/* Dropdown Menu - Spacious */}
@@ -216,10 +226,11 @@ export default function ProductsPage() {
                 <button
                   key={s}
                   onClick={() => setSortBy(s)}
-                  className="block w-full text-left px-8 py-4 label text-(--beige) hover:bg-(--black) hover:text-(--orange) transition-colors"
-                  style={{ fontSize: "11px", fontWeight: sortBy === s ? 500 : 400, letterSpacing: "0.12em" }}
+                  className={`block w-full text-left px-8 py-4 font-sans text-[11px] uppercase tracking-[0.12em] transition-colors ${
+                    sortBy === s ? "font-medium text-(--orange)" : "text-(--beige) hover:bg-(--black) hover:text-(--orange)"
+                  }`}
                 >
-                  {s.toUpperCase()}
+                  {s}
                 </button>
               ))}
             </div>
@@ -234,8 +245,7 @@ export default function ProductsPage() {
             <p className="label text-(--gray-400) mb-6" style={{ fontSize: "12px", letterSpacing: "0.15em" }}>No items found</p>
             <button
               onClick={() => { setActiveCategory("All"); setActiveType("All"); setSearch(""); }}
-              className="label text-(--orange) border-b border-(--orange) pb-1 hover:opacity-75 transition-opacity"
-              style={{ fontSize: "11px", letterSpacing: "0.15em" }}
+              className="text-(--orange) border-b border-(--orange) pb-1 hover:opacity-75 transition-opacity"
             >
               CLEAR FILTERS
             </button>
@@ -245,7 +255,7 @@ export default function ProductsPage() {
             {products.map((product) => (
               <div
                 key={product.id}
-                className="group cursor-pointer"
+                className="group relative border-r border-b border-(--gray-800) overflow-hidden bg-(--gray-900) block cursor-pointer"
                 onMouseEnter={() => setHoveredId(product.id)}
                 onMouseLeave={() => setHoveredId(null)}
               >
@@ -272,10 +282,10 @@ export default function ProductsPage() {
                   </div>
                 </div>
 
-                {/* Product info */}
-                <div className="mt-5 flex justify-between items-start">
-                  <div>
-                    <p className="label text-(--beige) group-hover:text-(--orange) transition-colors" style={{ fontSize: "11px", lineHeight: 1.5 }}>
+                {/* Overlaid Info (Product Name & Price) */}
+                <div className="absolute bottom-6 left-4 right-4 flex justify-between items-end z-10 pointer-events-none">
+                  <div className="max-w-[70%]">
+                    <p className="font-sans text-[10px] tracking-[0.15em] uppercase text-(--beige) leading-relaxed">
                       {product.name}
                     </p>
                     <p className="label text-(--gray-400) mt-1.5" style={{ fontSize: "10px", letterSpacing: "0.15em" }}>
@@ -286,6 +296,19 @@ export default function ProductsPage() {
                     ₹{product.price}/-
                   </p>
                 </div>
+
+                {/* Quick Add Overlay: Clicking this triggers your original QuickViewContext logic */}
+                <button
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    openQuickView({ ...product, quantity: 1 });
+                  }}
+                  className="absolute bottom-0 left-0 right-0 bg-(--orange) text-(--black) font-bold text-center py-4 font-sans text-[11px] tracking-[0.15em] uppercase transition-transform duration-300 z-20"
+                  style={{ transform: hoveredId === product.id ? "translateY(0)" : "translateY(100%)" }}
+                >
+                  Quick Add
+                </button>
               </div>
             ))}
           </div>

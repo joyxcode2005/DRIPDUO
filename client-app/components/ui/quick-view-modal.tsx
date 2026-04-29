@@ -23,7 +23,7 @@ export const QuickViewModal = () => {
   useEffect(() => {
     if (isQuickViewOpen) {
       setSelectedSize(null);
-      setSelectedGSM("240"); // Default premium weight
+      setSelectedGSM("240");
       setSizeError(false);
       document.body.style.overflow = "hidden";
     } else {
@@ -32,144 +32,115 @@ export const QuickViewModal = () => {
     return () => { document.body.style.overflow = ""; };
   }, [isQuickViewOpen]);
 
+  if (!selectedProduct) return null;
+
   const handleAdd = () => {
     if (!selectedSize) {
       setSizeError(true);
       return;
     }
-    if (selectedProduct) {
-      // Pass the selected GSM along with the size
-      addToCart({ ...selectedProduct, size: `${selectedSize} (${selectedGSM} GSM)` });
-      closeQuickView();
-    }
+    addToCart({
+      id: selectedProduct.id,
+      name: selectedProduct.name,
+      price: selectedProduct.price,
+      image: selectedProduct.image,
+      size: `${selectedSize} (${selectedGSM} GSM)`,
+      quantity: selectedProduct.quantity || 1,
+    });
+    closeQuickView();
   };
 
   return (
     <>
-      <div
-        className={`qv-backdrop ${isQuickViewOpen ? "open" : ""}`}
-        onClick={closeQuickView}
+      {/* Backdrop */}
+      <div 
+        className={`fixed inset-0 bg-black/80 z-[110] backdrop-blur-md transition-opacity duration-500 ${
+          isQuickViewOpen ? "opacity-100 visible" : "opacity-0 invisible"
+        }`} 
+        onClick={closeQuickView} 
       />
-      <div
-        className={`qv-panel ${isQuickViewOpen ? "open" : ""}`}
-        style={{ fontFamily: "'Helvetica Neue', Helvetica, Arial, sans-serif" }}
+
+      {/* Zara-Style Edge-to-Edge Panel */}
+      <div 
+        className={`fixed left-1/2 top-1/2 z-[120] w-[95vw] max-w-[1000px] h-[90vh] md:h-[600px] bg-(--black) border border-(--gray-800) shadow-2xl transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] ${
+          isQuickViewOpen ? "opacity-100 visible -translate-x-1/2 -translate-y-1/2 scale-100" : "opacity-0 invisible -translate-x-1/2 -translate-y-1/2 scale-[0.98]"
+        }`}
       >
-        {/* Image Side */}
-        <div className="w-full md:w-1/2 flex-shrink-0 bg-[var(--gray-900)] border-r border-[var(--gray-800)]" style={{ aspectRatio: "3/4", maxHeight: "90vh" }}>
-          {selectedProduct && (
-            <img
-              src={selectedProduct.image}
-              alt={selectedProduct.name}
-              className="w-full h-full object-cover"
+        <button
+          onClick={closeQuickView}
+          className="absolute top-4 right-4 z-50 text-(--black) md:text-(--beige) hover:text-(--orange) transition-colors bg-(--beige) md:bg-transparent p-2 md:p-0 rounded-full md:rounded-none"
+        >
+          <X size={24} strokeWidth={1} />
+        </button>
+
+        <div className="flex flex-col md:flex-row h-full w-full">
+          {/* Left: Full Bleed Image */}
+          <div className="w-full md:w-1/2 h-[45%] md:h-full bg-(--gray-900) relative overflow-hidden border-b md:border-b-0 md:border-r border-(--gray-800)">
+            <img 
+              src={selectedProduct.image} 
+              alt={selectedProduct.name} 
+              className="absolute inset-0 w-full h-full object-cover"
             />
-          )}
-        </div>
+          </div>
 
-        {/* Details Side */}
-        <div className="flex-1 flex flex-col overflow-y-auto no-scroll relative bg-[var(--black)] text-[var(--beige)]">
-          {/* Close Button */}
-          <button
-            onClick={closeQuickView}
-            className="absolute top-5 right-5 text-[var(--beige)] hover:text-[var(--orange)] transition-colors z-10"
-          >
-            <X size={20} strokeWidth={1.5} />
-          </button>
-
-          <div className="p-8 md:p-10 flex-1 flex flex-col">
+          {/* Right: Product Details */}
+          <div className="w-full md:w-1/2 h-[55%] md:h-full flex flex-col p-8 md:p-12 overflow-y-auto no-scroll">
             
-            {/* Header: Name & Price */}
-            <div className="mb-8 pr-8">
-              <p className="label text-[var(--orange)] mb-2" style={{ fontSize: "10px", letterSpacing: "0.2em" }}>
-                {selectedProduct?.category?.toUpperCase() || "ARCHIVE"}
-              </p>
-              <h2 style={{
-                fontFamily: "'EB Garamond', Georgia, serif",
-                fontSize: "clamp(1.8rem, 4vw, 2.8rem)",
-                fontWeight: 400,
-                lineHeight: 1.1,
-                marginBottom: "8px",
-              }}>
-                {selectedProduct?.name}
+            <div className="mb-8">
+              <h2 className="font-serif text-[clamp(2rem,4vw,3rem)] leading-[0.9] text-(--beige) mb-4">
+                {selectedProduct.name}
               </h2>
-              <p className="label" style={{ fontSize: "13px" }}>
-                ${selectedProduct?.price}
+              <p className="font-sans text-[11px] tracking-[0.15em] uppercase text-(--orange) mb-6">
+                ${selectedProduct.price} USD
+              </p>
+              <p className="font-sans text-[11px] tracking-[0.05em] leading-relaxed text-(--gray-400)">
+                Premium oversized silhouette constructed from ultra-dense cotton. Featuring drop shoulders, tight neckline, and structural integrity that holds its shape.
               </p>
             </div>
 
-            {/* Description */}
-            <p className="label text-[var(--gray-200)] mb-8 leading-relaxed" style={{ fontSize: "11px", lineHeight: 1.7, textTransform: "none", letterSpacing: "0.08em" }}>
-              Engineered with meticulous attention to detail. This garment embodies our dedication to architectural silhouettes and uncompromising fabric quality.
-            </p>
-
-            {/* GSM / Fabric Weight Selector */}
+            {/* Weight / GSM Selection */}
             <div className="mb-8">
-              <span className="label text-[var(--beige)] block mb-4" style={{ fontSize: "10px", letterSpacing: "0.15em" }}>
-                FABRIC WEIGHT
-              </span>
-              <div className="grid grid-cols-2 gap-3">
-                {WEIGHTS.map((weight) => (
+              <span className="block font-sans text-[9px] uppercase tracking-[0.2em] text-(--gray-400) mb-4">Fabric Weight</span>
+              <div className="grid grid-cols-2 gap-2">
+                {WEIGHTS.map((w) => (
                   <button
-                    key={weight.id}
-                    onClick={() => setSelectedGSM(weight.id)}
-                    className="border py-3 px-4 text-left transition-colors flex flex-col items-start gap-1"
-                    style={{
-                      borderColor: selectedGSM === weight.id ? "var(--orange)" : "var(--gray-800)",
-                      background: selectedGSM === weight.id ? "var(--orange)" : "transparent",
-                    }}
+                    key={w.id}
+                    onClick={() => setSelectedGSM(w.id)}
+                    className={`p-3 text-left border transition-colors ${
+                      selectedGSM === w.id ? "border-(--beige) bg-(--gray-900)" : "border-(--gray-800) hover:border-(--gray-600)"
+                    }`}
                   >
-                    <span 
-                      className="label" 
-                      style={{ 
-                        fontSize: "11px", 
-                        color: selectedGSM === weight.id ? "var(--black)" : "var(--beige)" 
-                      }}
-                    >
-                      {weight.label}
+                    <span className={`block font-sans text-[10px] uppercase tracking-[0.15em] ${selectedGSM === w.id ? "text-(--beige)" : "text-(--gray-400)"}`}>
+                      {w.label}
                     </span>
-                    <span 
-                      style={{ 
-                        fontSize: "9px", 
-                        color: selectedGSM === weight.id ? "rgba(0,0,0,0.7)" : "var(--gray-400)",
-                        textTransform: "none",
-                        letterSpacing: "0.05em"
-                      }}
-                    >
-                      {weight.desc}
-                    </span>
+                    <span className="block font-sans text-[9px] text-(--gray-600) mt-1">{w.desc}</span>
                   </button>
                 ))}
               </div>
             </div>
 
-            {/* Size Selector */}
+            {/* Size Selection */}
             <div className="mb-10">
               <div className="flex justify-between items-center mb-4">
-                <span className="label text-[var(--beige)]" style={{ fontSize: "10px", letterSpacing: "0.15em" }}>
-                  SELECT SIZE
+                <span className="font-sans text-[9px] uppercase tracking-[0.2em] text-(--gray-400)">
+                  Select Size
                 </span>
-                <button className="label text-[var(--gray-400)] hover:text-[var(--orange)] transition-colors underline" style={{ fontSize: "10px" }}>
-                  Size Guide
-                </button>
+                {sizeError && (
+                  <span className="font-sans text-[9px] uppercase tracking-[0.15em] text-(--orange) animate-pulse">
+                    Please select a size
+                  </span>
+                )}
               </div>
-
-              {sizeError && (
-                <p className="label text-[var(--orange)] mb-3" style={{ fontSize: "10px" }}>
-                  Please select a size to continue.
-                </p>
-              )}
-
               <div className="grid grid-cols-3 gap-2">
                 {SIZES.map((size) => (
                   <button
                     key={size}
                     onClick={() => { setSelectedSize(size); setSizeError(false); }}
-                    className="border py-3.5 label transition-colors"
-                    style={{
-                      fontSize: "11px",
-                      borderColor: selectedSize === size ? "var(--beige)" : "var(--gray-800)",
-                      background: selectedSize === size ? "var(--beige)" : "transparent",
-                      color: selectedSize === size ? "var(--black)" : "var(--gray-400)",
-                    }}
+                    className={`py-4 font-sans text-[10px] uppercase tracking-[0.15em] border transition-colors ${
+                      selectedSize === size 
+                        ? "border-(--beige) bg-(--beige) text-(--black) font-bold" 
+                        : "border-(--gray-800) text-(--gray-400) hover:border-(--gray-600) hover:text-(--beige)"
+                    }`}
                   >
                     {size}
                   </button>
@@ -177,24 +148,16 @@ export const QuickViewModal = () => {
               </div>
             </div>
 
-            {/* Action Buttons */}
-            <div className="mt-auto space-y-3">
+            {/* Sticky Action Button */}
+            <div className="mt-auto pt-6 border-t border-(--gray-800)">
               <button
                 onClick={handleAdd}
-                className="w-full bg-[var(--orange)] text-[var(--black)] font-bold label py-4.5 hover:bg-[var(--beige)] transition-colors duration-300"
-                style={{ fontSize: "11px", letterSpacing: "0.2em" }}
+                className="w-full bg-(--orange) text-(--black) font-sans text-[11px] font-bold uppercase tracking-[0.2em] py-5 hover:bg-(--beige) transition-colors duration-300"
               >
-                ADD TO BAG
-              </button>
-              <button
-                onClick={closeQuickView}
-                className="w-full border border-[var(--gray-800)] text-[var(--beige)] label py-4 hover:border-[var(--beige)] transition-colors duration-300"
-                style={{ fontSize: "11px", letterSpacing: "0.2em" }}
-              >
-                VIEW DETAILS
+                Add to Bag
               </button>
             </div>
-
+            
           </div>
         </div>
       </div>
