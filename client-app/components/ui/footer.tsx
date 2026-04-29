@@ -142,8 +142,8 @@ export const Footer = () => {
         <h1
           className={`font-black tracking-tighter w-full text-center transition-all duration-700 cursor-default
             text-[var(--gray-900)] 
-            md:hover:text-[var(--orange)] md:hover:drop-shadow-[0_0_15px_rgba(238,60,36,0.5)]
-            ${isScrolling ? "max-md:text-[var(--orange)] max-md:drop-shadow-[0_0_15px_rgba(238,60,36,0.5)]" : ""}
+            md:hover:text-[var(--orange)] 
+            ${isScrolling ? "max-md:text-[var(--orange)]" : ""}
           `}
           style={{ fontSize: "16vw", lineHeight: 0.75, marginTop: "-1.5vw", marginBottom: "-1.5vw" }}
         >

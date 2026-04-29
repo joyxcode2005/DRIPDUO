@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import Link from "next/link";
 import { ArrowLeft, Check } from "lucide-react";
-import { useGlobal } from "@/lib/GlobalContext";
+
 
 const SIZES = ["XS", "S", "M", "L", "XL", "XXL"];
 const WEIGHTS = [

@@ -1,3 +1,4 @@
+// app/layout.tsx
 import type { Metadata } from "next";
 import "./globals.css";
 import { CartProvider } from "@/lib/CartContext";
@@ -24,13 +25,11 @@ export default function RootLayout({
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
       </head>
-      <body className="min-h-screen bg-white text-black" style={{ fontFamily: "'Helvetica Neue', Helvetica, Arial, sans-serif" }}>
+      <body className="min-h-screen overflow-x-hidden bg-[var(--black)] text-[var(--beige)]">
         <CartProvider>
           <QuickViewProvider>
             <Navbar />
-            <div className="pb-16 md:pb-0">
-              {children}
-            </div>
+            <div className="pb-16 md:pb-0">{children}</div>
             <Footer />
             <BottomNav />
             <CartDrawer />
