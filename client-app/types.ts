@@ -5,13 +5,5 @@ export type Testimonial = {
   src: string;
 };
 
-export interface Product {
-  hoverImage: string;
-  id: number;
-  name: string;
-  price: number;
-  type: string;
-  category: string;
-  image: string;
-}
+
 

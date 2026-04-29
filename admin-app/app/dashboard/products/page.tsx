@@ -3,7 +3,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { toast } from "react-toastify";
 import { Edit3, Plus, RefreshCw, Trash2, ChevronDown, List, Tag } from "lucide-react";
-
 import Button from "@/components/Button";
 import Input from "@/components/Input";
 import AdminShell, { AdminPanel } from "@/components/admin/AdminShell";
@@ -33,7 +32,11 @@ const emptyForm = {
 
 export default function ProductsPage() {
   const [activeTab, setActiveTab] = useState<"list" | "form">("list");
-  
+
+  // State variables to handle image uploading
+  const [imageFiles, setImageFiles] = useState<File[]>([]);
+  const [uploadingImages, setUploadingImages] = useState(false);
+
   const [products, setProducts] = useState<ProductRow[]>([]);
   const [categories, setCategories] = useState<{ id: string; name: string }[]>([]);
   const [productTypes, setProductTypes] = useState<ProductTypeRow[]>([]);
@@ -111,17 +114,18 @@ export default function ProductsPage() {
       product_type_id: product.product_type_id ?? "",
       price: String(product.price ?? ""),
       discount: String(product.discount ?? 0),
-      isActive: product.is_active ?? true, 
+      isActive: product.is_active ?? true,
       categoryIds: categoriesByProduct[product.id] ?? [],
       imageText: (imagesByProduct[product.id] ?? []).join("\n"),
     });
-    
+
     setActiveTab("form");
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
   const resetForm = () => {
     setForm(emptyForm);
+    setImageFiles([]);
   };
 
   const handleCancelEdit = () => {
@@ -132,8 +136,34 @@ export default function ProductsPage() {
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setSaving(true);
+    setUploadingImages(true);
 
     try {
+      let uploadedUrls: string[] = [];
+
+      if (imageFiles.length > 0) {
+        for (const file of imageFiles) {
+          const formData = new FormData();
+          formData.append("file", file);
+
+
+          const uploadRes = await fetch("/api/upload", {
+            method: "POST",
+            body: formData,
+          });
+
+          if (!uploadRes.ok) throw new Error("Image upload failed");
+
+          const data = await uploadRes.json();
+          uploadedUrls.push(data.url);
+        }
+      }
+
+
+      // 2. Combine with any existing text URLs (if you keep the textarea)
+      const existingUrls = (form.imageText || "").split("\n").map(url => url.trim()).filter(Boolean);
+      const finalImageUrls = [...existingUrls, ...uploadedUrls];
+
       await upsertProduct({
         id: form.id || undefined,
         name: form.name.trim(),
@@ -143,7 +173,7 @@ export default function ProductsPage() {
         discount: Number(form.discount || 0),
         isActive: form.isActive,
         categoryIds: form.categoryIds,
-        imageUrls: (form.imageText || "").split("\n").map(url => url.trim()).filter(Boolean),
+        imageUrls: finalImageUrls,
       });
 
       toast.success(form.id ? "Product updated" : "Product created");
@@ -154,6 +184,7 @@ export default function ProductsPage() {
       toast.error(error instanceof Error ? error.message : "Failed to save product");
     } finally {
       setSaving(false);
+      setUploadingImages(false);
     }
   };
 
@@ -197,11 +228,11 @@ export default function ProductsPage() {
       title="Products"
       description="Manage your product catalog, pricing, media, and categorization."
       actions={
-        <Button 
+        <Button
           onClick={() => {
             resetForm();
             setActiveTab("form");
-          }} 
+          }}
           className="gap-2"
         >
           <Plus className="h-4 w-4" />
@@ -213,18 +244,16 @@ export default function ProductsPage() {
       <div className="mb-6 inline-flex rounded-xl bg-black/5 p-1">
         <button
           onClick={() => setActiveTab("list")}
-          className={`inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition-all ${
-            activeTab === "list" ? "bg-white text-black shadow-sm" : "text-black/60 hover:text-black"
-          }`}
+          className={`inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition-all ${activeTab === "list" ? "bg-white text-black shadow-sm" : "text-black/60 hover:text-black"
+            }`}
         >
           <List className="h-4 w-4" />
           Catalog List
         </button>
         <button
           onClick={() => setActiveTab("form")}
-          className={`inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition-all ${
-            activeTab === "form" ? "bg-white text-black shadow-sm" : "text-black/60 hover:text-black"
-          }`}
+          className={`inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition-all ${activeTab === "form" ? "bg-white text-black shadow-sm" : "text-black/60 hover:text-black"
+            }`}
         >
           <Tag className="h-4 w-4" />
           {form.id ? "Edit Product" : "Create Product"}
@@ -248,7 +277,7 @@ export default function ProductsPage() {
 
             <form onSubmit={handleSubmit}>
               <fieldset disabled={saving} className="space-y-8 disabled:opacity-70 disabled:cursor-not-allowed">
-                
+
                 {/* Section: Basic Details */}
                 <div className="space-y-4">
                   <h4 className="text-sm font-semibold text-black border-b border-black/5 pb-2 uppercase tracking-wider">1. Basic Details</h4>
@@ -395,19 +424,32 @@ export default function ProductsPage() {
                 <div className="space-y-4">
                   <h4 className="text-sm font-semibold text-black border-b border-black/5 pb-2 uppercase tracking-wider">4. Media & Visibility</h4>
                   <div className="grid gap-4 sm:grid-cols-2">
+                    {/* Replace the div containing the "imageText" textarea (around line 304) with this: */}
                     <div className="space-y-2 sm:col-span-2">
-                      <label htmlFor="imageText" className="text-sm font-medium text-black flex justify-between">
-                        <span>Image URLs</span>
-                        <span className="text-black/40 text-xs font-normal">Paste one URL per line</span>
+                      <label htmlFor="images" className="text-sm font-medium text-black">
+                        Upload Images
                       </label>
-                      <textarea
-                        id="imageText"
-                        name="imageText"
-                        value={form.imageText}
-                        placeholder="https://example.com/image1.jpg&#10;https://example.com/image2.jpg"
-                        onChange={(event) => setForm((current) => ({ ...current, imageText: event.target.value }))}
-                        className="min-h-28 w-full rounded-lg border border-black/10 bg-white px-3 py-2 text-sm text-black outline-none transition-all placeholder:text-black/30 focus:border-black focus:ring-2 focus:ring-black/10 font-mono text-xs"
+                      <input
+                        id="images"
+                        type="file"
+                        multiple
+                        accept="image/*"
+                        onChange={(event) => {
+                          if (event.target.files) {
+                            setImageFiles(Array.from(event.target.files));
+                          }
+                        }}
+                        className="w-full rounded-lg border border-black/10 bg-white px-3 py-2 text-sm text-black outline-none file:mr-4 file:rounded-md file:border-0 file:bg-black/5 file:px-4 file:py-2 file:text-sm file:font-semibold hover:file:bg-black/10 transition-all focus:border-black focus:ring-2 focus:ring-black/10"
                       />
+
+                      {/* Preview of selected files */}
+                      {imageFiles.length > 0 && (
+                        <div className="mt-2 text-xs text-black/60 flex flex-col gap-1">
+                          {imageFiles.map((file, idx) => (
+                            <span key={idx}>• {file.name}</span>
+                          ))}
+                        </div>
+                      )}
                     </div>
                     <div className="flex items-center gap-3 sm:col-span-2 bg-black/5 p-4 rounded-xl border border-black/5 mt-2">
                       <input
@@ -430,8 +472,9 @@ export default function ProductsPage() {
                   <Button type="button" onClick={handleCancelEdit} className="bg-white text-black border border-black/10 hover:bg-black/5 shadow-none">
                     Cancel
                   </Button>
-                  <Button type="submit" disabled={saving} className="gap-2 px-8">
-                    {saving ? "Saving..." : form.id ? "Save Changes" : "Create Product"}
+                  {/* Update the submit button inside the Actions section (around line 329) */}
+                  <Button type="submit" disabled={saving || uploadingImages} className="gap-2 px-8">
+                    {uploadingImages ? "Uploading Media..." : saving ? "Saving..." : form.id ? "Save Changes" : "Create Product"}
                   </Button>
                 </div>
               </fieldset>
@@ -506,9 +549,8 @@ export default function ProductsPage() {
                             )}
                           </td>
                           <td className="px-4 py-4">
-                            <div className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${
-                              product.is_active ? 'bg-emerald-100 text-emerald-700' : 'bg-black/10 text-black/60'
-                            }`}>
+                            <div className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${product.is_active ? 'bg-emerald-100 text-emerald-700' : 'bg-black/10 text-black/60'
+                              }`}>
                               {product.is_active ? 'Active' : 'Draft'}
                             </div>
                           </td>

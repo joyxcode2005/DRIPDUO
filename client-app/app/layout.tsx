@@ -25,7 +25,7 @@ export default function RootLayout({
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
       </head>
-      <body className="min-h-screen overflow-x-hidden bg-[var(--black)] text-[var(--beige)]">
+      <body className="min-h-screen overflow-x-hidden bg-(--black) text-(--beige)">
         <CartProvider>
           <QuickViewProvider>
             <Navbar />

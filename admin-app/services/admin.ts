@@ -1,12 +1,12 @@
-import { 
-  CategoryRow, 
-  OrderItemRow, 
-  OrderRow, 
-  ProductCategoryRow, 
-  ProductImageRow, 
-  ProductRow, 
-  ProductTypeRow, 
-  ProductVariantRow 
+import {
+  CategoryRow,
+  OrderItemRow,
+  OrderRow,
+  ProductCategoryRow,
+  ProductImageRow,
+  ProductRow,
+  ProductTypeRow,
+  ProductVariantRow
 } from "@/types";
 import { createClient } from "@/utils/supabse";
 
@@ -53,7 +53,7 @@ export async function upsertProduct(payload: {
   const productPayload = {
     name: payload.name,
     description: payload.description || null,
-    product_type_id: payload.product_type_id || null,
+    product_type_id: payload.product_type_id,
     price: payload.price,
     discount: payload.discount || 0,
     final_price: calculatedFinalPrice < 0 ? 0 : calculatedFinalPrice,
@@ -87,30 +87,41 @@ export async function upsertProduct(payload: {
   // 2. Handle Categories 
   // Wipe existing links and insert new ones
   await mutate(supabase.from("product_categories").delete().eq("product_id", productId).select("id"));
-  
+
   if (payload.categoryIds && payload.categoryIds.length > 0) {
     await mutate(
       supabase.from("product_categories").insert(
-        payload.categoryIds.map((categoryId) => ({ product_id: productId, category_id: categoryId }))
+        payload.categoryIds.map((categoryId) => ({ product_id: productId, category_id: categoryId, product_type_id: payload.product_type_id }))
       )
     );
   }
 
   // 3. Handle Images
   // Wipe existing images and insert new ones
-  await mutate(supabase.from("product_images").delete().eq("product_id", productId).select("id"));
-  
-  const filteredImageUrls = payload.imageUrls ? payload.imageUrls.map((url) => url.trim()).filter(Boolean) : [];
-  
+  await mutate(
+    supabase.from("product_images")
+      .delete()
+      .eq("product_id", productId)
+      .select("id")
+  );
+
+  const filteredImageUrls = payload.imageUrls
+    ? payload.imageUrls.map((url) => url.trim()).filter(Boolean)
+    : [];
+
   if (filteredImageUrls.length > 0) {
     await mutate(
-      supabase.from("product_images").insert(
-        filteredImageUrls.map((url, index) => ({ 
-          product_id: productId, 
-          url, 
-          is_primary: index === 0 // First image is marked primary
-        }))
-      )
+      supabase.from("product_images")
+        .insert(
+          filteredImageUrls.map((url) => ({
+            product_id: productId,
+            url: url,
+            // NOTE: I removed 'is_primary' here. 
+            // If you actually DO have an 'is_primary' column in your Supabase table, 
+            // you can add it back as: is_primary: index === 0
+          }))
+        )
+        .select() // <-- CRITICAL: Add .select() so the mutate wrapper doesn't fail
     );
   }
 

@@ -14,6 +14,8 @@ export type CategoryRow = {
 
 // Adding Product Row Type based on your schema
 export interface ProductRow {
+    discount: number;
+    description: string;
     id: string;
     name: string;
     price: number;

@@ -16,9 +16,9 @@ export function toNumber(value: string | number | null | undefined, fallback = 0
 }
 
 export function formatCurrency(value: number) {
-  return new Intl.NumberFormat("en-US", {
+  return new Intl.NumberFormat("en-IN", {
     style: "currency",
-    currency: "USD",
+    currency: "INR",
     maximumFractionDigits: 0,
   }).format(value);
 }
@@ -28,7 +28,7 @@ export function formatDateTime(value?: string | null) {
     return "—";
   }
 
-  return new Intl.DateTimeFormat("en-US", {
+  return new Intl.DateTimeFormat("en-IN", {
     dateStyle: "medium",
     timeStyle: "short",
   }).format(new Date(value));
