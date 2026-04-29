@@ -51,6 +51,23 @@
   --radius-4xl: calc(var(--radius) * 2.6);
 }
 
+@keyframes autoColorChange {
+
+  /* Using hex fallbacks so the animation works even if the variables fail */
+  0%,
+  100% {
+    color: var(--gray-900, #111827);
+  }
+
+  50% {
+    color: var(--orange, #f97316);
+  }
+}
+
+.animate-auto-color {
+  animation: autoColorChange 4s ease-in-out infinite;
+}
+
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
@@ -131,9 +148,11 @@
   * {
     @apply border-border outline-ring/50;
   }
+
   body {
     @apply bg-background text-foreground;
   }
+
   html {
     @apply font-sans;
   }

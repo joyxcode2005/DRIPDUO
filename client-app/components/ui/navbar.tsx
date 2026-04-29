@@ -3,9 +3,9 @@
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { useCart } from "@/lib/CartContext";
-import { Search, X, User, ShoppingBag } from "lucide-react";
+import { Search, X, User, ShoppingBag, Menu } from "lucide-react";
+import { NAV_LINKS } from "@/constants";
 
-const NAV_LINKS = ["Woman", "Man", "Kids", "Beauty", "Sport", "Home"];
 
 export const Navbar = () => {
   const { cart, openCart } = useCart();
@@ -15,54 +15,80 @@ export const Navbar = () => {
   const [menuOpen, setMenuOpen] = useState(false);
 
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 10);
+    const onScroll = () => setScrolled(window.scrollY > 20);
     window.addEventListener("scroll", onScroll);
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
+
+  // Lock body scroll when overlays are open
+  useEffect(() => {
+    if (searchOpen || menuOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "unset";
+    }
+  }, [searchOpen, menuOpen]);
 
   const cartCount = cart.reduce((s, i) => s + i.quantity, 0);
 
   return (
     <>
-      <nav className={scrolled ? "scrolled" : ""} style={{ fontFamily: "'Helvetica Neue', Helvetica, Arial, sans-serif" }}>
-        <div className="flex items-center justify-between h-14 px-4 md:px-8">
-          
-          {/* LEFT SIDE: Hamburger (mobile/tablet) & Links (desktop) */}
-          <div className="flex items-center gap-6 flex-1">
-            <button onClick={() => setMenuOpen(true)} className="lg:hidden flex flex-col gap-1 p-1" aria-label="Menu">
-              <span className="w-5 h-px bg-[var(--beige)] block" />
-              <span className="w-5 h-px bg-[var(--beige)] block" />
-              <span className="w-5 h-px bg-[var(--beige)] block" />
+      {/* ── MAIN NAVBAR ── */}
+      <nav
+        className={`fixed top-0 left-0 w-full z-100 transition-all duration-500 ease-in-out ${scrolled ? "bg-[#050505]/95 backdrop-blur-md py-4 border-b border-white/5" : "bg-transparent p-5" 
+          }`}
+        style={{ fontFamily: "'Helvetica Neue', Helvetica, Arial, sans-serif" }}
+      >
+        {/* Added lg:px-20 and md:px-12 for wide side margins */}
+        <div className="flex items-center justify-end px-6 md:px-12 lg:px-12 h-10">
+
+          {/* LEFT SIDE: Hamburger (mobile) & Links (desktop) */}
+          <div className="flex items-center gap-2 flex-1">
+            <button
+              onClick={() => setMenuOpen(true)}
+              className="lg:hidden p-2 -ml-2 text-(--beige) hover:text-(--orange) transition-colors"
+              aria-label="Menu"
+            >
+              <Menu size={22} strokeWidth={1.5} />
             </button>
 
-            <div className="hidden lg:flex items-center gap-6">
+            <div className="hidden lg:flex items-center gap-8">
               {NAV_LINKS.map((link) => (
-                <Link key={link} href="/products" className="label line-hover text-[var(--beige)] hover:text-[var(--orange)] transition-colors" style={{ fontSize: "11px", letterSpacing: "0.12em" }}>
+                <Link
+                  key={link}
+                  href="/products"
+                  className="relative text-(--beige) hover:text-(--orange) [text-shadow:0_1px_2px_rgba(0,0,0)] transition-colors uppercase tracking-[0.15em] text-[10px] font-medium group"
+                >
                   {link}
+                  {/* Subtle hover underline effect */}
+                  <span className="absolute -bottom-1.5 left-0 w-0 h-px bg-(--orange) transition-all duration-300 group-hover:w-full"></span>
                 </Link>
               ))}
             </div>
           </div>
 
           {/* CENTER: Absolute Logo */}
-          <Link href="/" className="absolute left-1/2 -translate-x-1/2 flex items-center text-[var(--beige)] hover:text-[var(--orange)] transition-colors">
-            <span style={{ fontSize: "20px", fontWeight: "400", letterSpacing: "0.25em", textTransform: "uppercase" }}>
+          <Link
+            href="/"
+            className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 text-(--beige) hover:text-(--orange) transition-colors z-10"
+          >
+            <span style={{ fontSize: "22px", fontWeight: "900", letterSpacing: "0.2em", textTransform: "uppercase" }}>
               DRIPDUO
             </span>
           </Link>
 
           {/* RIGHT SIDE: Icons */}
-          <div className="flex items-center gap-4 flex-1 justify-end text-[var(--beige)]">
-            <button onClick={() => setSearchOpen(true)} className="p-1 hover:text-[var(--orange)] transition-colors">
-              <Search size={18} strokeWidth={1.5} />
+          <div className="flex items-center gap-5 flex-1 justify-end text-(--beige)">
+            <button onClick={() => setSearchOpen(true)} className="hover:text-(--orange) transition-transform hover:scale-110 duration-300">
+              <Search size={20} strokeWidth={1.5} />
             </button>
-            <Link href="/profile" className="p-1 hover:text-[var(--orange)] transition-colors hidden lg:block">
-              <User size={18} strokeWidth={1.5} />
+            <Link href="/profile" className="hover:text-(--orange) transition-transform hover:scale-110 duration-300 hidden md:block">
+              <User size={20} strokeWidth={1.5} />
             </Link>
-            <button onClick={openCart} className="p-1 hover:text-[var(--orange)] transition-colors relative">
-              <ShoppingBag size={18} strokeWidth={1.5} />
+            <button onClick={openCart} className="hover:text-(--orange) transition-transform hover:scale-110 duration-300 relative">
+              <ShoppingBag size={20} strokeWidth={1.5} />
               {cartCount > 0 && (
-                <span className="absolute -top-1 -right-1 w-4 h-4 bg-[var(--orange)] text-[var(--black)] rounded-full flex items-center justify-center font-bold" style={{ fontSize: "9px" }}>
+                <span className="absolute -bottom-1.5 -right-2 w-4 h-4 bg-(--orange) text-[#050505] rounded-full flex items-center justify-center font-bold text-[9px] shadow-sm">
                   {cartCount}
                 </span>
               )}
@@ -71,23 +97,54 @@ export const Navbar = () => {
         </div>
       </nav>
 
-      {/* SEARCH OVERLAY */}
-      <div className="fixed inset-0 bg-[var(--black)] z-[150] flex flex-col" style={{ opacity: searchOpen ? 1 : 0, visibility: searchOpen ? "visible" : "hidden", transition: "opacity 0.3s ease" }}>
-        <div className="flex items-center justify-between h-14 px-4 md:px-8 border-b border-[var(--gray-800)] text-[var(--beige)]">
-          <span className="label text-[var(--beige)]" style={{ fontSize: "11px", letterSpacing: "0.12em" }}>Search</span>
-          <button onClick={() => setSearchOpen(false)} className="hover:text-[var(--orange)]">
-            <X size={20} strokeWidth={1.5} />
+      {/* ── SEARCH OVERLAY ── */}
+      <div
+        className={`fixed inset-0 bg-[#050505]/98 backdrop-blur-xl z-200 flex flex-col transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] ${searchOpen ? "opacity-100 visible" : "opacity-0 invisible pointer-events-none"
+          }`}
+      >
+        <div className="flex items-center justify-between h-20 px-4 md:px-8 border-b border-white/10 text-(--beige)">
+          <span className="uppercase tracking-[0.2em] text-[10px] font-medium">Search Archive</span>
+          <button onClick={() => setSearchOpen(false)} className="p-2 -mr-2 hover:text-(--orange) hover:rotate-90 transition-all duration-300">
+            <X size={24} strokeWidth={1.5} />
           </button>
         </div>
-        <div className="flex-1 flex flex-col px-4 md:px-8 pt-12">
-          <form onSubmit={(e) => { e.preventDefault(); if (searchQuery.trim()) { window.location.href = `/products?search=${encodeURIComponent(searchQuery)}`; setSearchOpen(false); } }}>
-            <input autoFocus={searchOpen} type="text" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} placeholder="Search for products..." className="w-full text-2xl md:text-4xl bg-transparent border-0 border-b border-[var(--gray-600)] text-[var(--beige)] outline-none pb-4 focus:border-[var(--orange)] placeholder:text-[var(--gray-600)] transition-colors" style={{ fontFamily: "'EB Garamond', Georgia, serif", fontWeight: 400 }} />
+
+        {/* Animated content wrapper */}
+        <div className={`flex-1 flex flex-col px-4 md:px-8 pt-16 transition-all duration-700 delay-100 ${searchOpen ? "translate-y-0 opacity-100" : "translate-y-10 opacity-0"}`}>
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+              if (searchQuery.trim()) {
+                window.location.href = `/products?search=${encodeURIComponent(searchQuery)}`;
+                setSearchOpen(false);
+              }
+            }}
+            className="relative"
+          >
+            <input
+              autoFocus={searchOpen}
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="What are you looking for?"
+              className="w-full text-3xl md:text-5xl bg-transparent border-0 border-b border-(--gray-800) text-(--beige) outline-none pb-4 focus:border-(--orange) placeholder:text-(--gray-600) transition-colors"
+              style={{ fontFamily: "'EB Garamond', Georgia, serif", fontWeight: 400 }}
+            />
           </form>
-          <div className="mt-12">
-            <p className="label text-[var(--orange)] mb-6" style={{ fontSize: "10px" }}>Trending</p>
+
+          <div className="mt-16">
+            <p className="uppercase tracking-[0.2em] text-(--orange) mb-6 text-[10px] font-medium">Trending Queries</p>
             <div className="flex flex-wrap gap-3">
-              {["Oversized Tee", "Gothic", "Anime Collection", "Heavyweight"].map((t) => (
-                <button key={t} onClick={() => { setSearchQuery(t); window.location.href = `/products?search=${encodeURIComponent(t)}`; setSearchOpen(false); }} className="border border-[var(--gray-600)] text-[var(--beige)] px-4 py-2 label hover:border-[var(--orange)] hover:bg-[var(--orange)] hover:text-[var(--black)] transition-colors" style={{ fontSize: "10px" }}>
+              {["Oversized Tee", "Gothic", "Anime Collection", "Heavyweight", "FW26"].map((t) => (
+                <button
+                  key={t}
+                  onClick={() => {
+                    setSearchQuery(t);
+                    window.location.href = `/products?search=${encodeURIComponent(t)}`;
+                    setSearchOpen(false);
+                  }}
+                  className="border border-white/20 text-(--beige) px-5 py-2.5 uppercase tracking-widest text-[10px] hover:border-(--orange) hover:bg-(--orange) hover:text-[#050505] transition-all duration-300"
+                >
                   {t}
                 </button>
               ))}
@@ -96,23 +153,42 @@ export const Navbar = () => {
         </div>
       </div>
 
-      {/* MOBILE MENU */}
-      <div className="fixed inset-0 bg-[var(--black)] z-[150] flex flex-col" style={{ opacity: menuOpen ? 1 : 0, visibility: menuOpen ? "visible" : "hidden", transition: "opacity 0.3s ease" }}>
-        <div className="flex items-center justify-between h-14 px-4 border-b border-[var(--gray-800)] text-[var(--beige)]">
-          <span className="label text-[var(--beige)]" style={{ fontSize: "11px", letterSpacing: "0.12em" }}>Menu</span>
-          <button onClick={() => setMenuOpen(false)} className="hover:text-[var(--orange)]">
-            <X size={20} strokeWidth={1.5} />
+      {/* ── MOBILE MENU OVERLAY ── */}
+      <div
+        className={`fixed inset-0 bg-[#050505] z-200 flex flex-col lg:hidden transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] ${menuOpen ? "opacity-100 visible" : "opacity-0 invisible pointer-events-none"
+          }`}
+      >
+        <div className="flex items-center justify-between h-20 px-4 border-b border-white/10 text-(--beige)">
+          <span className="uppercase tracking-[0.2em] text-[10px] font-medium">Menu</span>
+          <button onClick={() => setMenuOpen(false)} className="p-2 -mr-2 hover:text-(--orange) hover:rotate-90 transition-all duration-300">
+            <X size={24} strokeWidth={1.5} />
           </button>
         </div>
-        <div className="flex-1 px-6 pt-10 overflow-y-auto pb-24">
-          {NAV_LINKS.map((link) => (
-            <Link key={link} href="/products" onClick={() => setMenuOpen(false)} className="block py-5 border-b border-[var(--gray-900)] text-[var(--beige)] hover:text-[var(--orange)] transition-colors" style={{ fontFamily: "'EB Garamond', Georgia, serif", fontSize: "28px" }}>
+
+        {/* Animated content wrapper */}
+        <div className={`flex-1 px-6 pt-12 overflow-y-auto pb-24 transition-all duration-700 delay-100 ${menuOpen ? "translate-x-0 opacity-100" : "-translate-x-10 opacity-0"}`}>
+          {NAV_LINKS.map((link, index) => (
+            <Link
+              key={link}
+              href="/products"
+              onClick={() => setMenuOpen(false)}
+              className="block py-4 border-b border-white/5 text-(--beige) hover:text-(--orange) hover:pl-4 transition-all duration-300"
+              style={{ fontFamily: "'EB Garamond', Georgia, serif", fontSize: "32px", transitionDelay: `${index * 50}ms` }}
+            >
               {link}
             </Link>
           ))}
-          <div className="mt-8">
-            <Link href="/profile" onClick={() => setMenuOpen(false)} className="label block py-3 text-[var(--gray-200)] hover:text-[var(--orange)] transition-colors">My Account</Link>
-            <Link href="/checkout" onClick={() => setMenuOpen(false)} className="label block py-3 text-[var(--gray-200)] hover:text-[var(--orange)] transition-colors">Orders</Link>
+
+          <div className="mt-12 space-y-4">
+            <Link href="/profile" onClick={() => setMenuOpen(false)} className="uppercase tracking-[0.15em] block text-[11px] text-(--gray-200) hover:text-(--orange) transition-colors">
+              My Account
+            </Link>
+            <Link href="/checkout" onClick={() => setMenuOpen(false)} className="uppercase tracking-[0.15em] block text-[11px] text-(--gray-200) hover:text-(--orange) transition-colors">
+              Orders & Returns
+            </Link>
+            <button onClick={() => { setMenuOpen(false); setSearchOpen(true); }} className="uppercase tracking-[0.15em] block text-[11px] text-(--gray-200) hover:text-(--orange) transition-colors">
+              Search Archive
+            </button>
           </div>
         </div>
       </div>

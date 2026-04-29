@@ -14,6 +14,7 @@ const FOOTER_SECTIONS = [
 const FooterSection = ({ title, links }: { title: string; links: string[] }) => {
   const [open, setOpen] = useState(false);
 
+
   return (
     <div className="border-b border-[var(--gray-800)] md:border-none">
       <button

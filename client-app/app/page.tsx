@@ -1,9 +1,11 @@
 "use client";
 
-import React, { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import { useQuickView } from "@/lib/QuickViewContext";
+import Loading from "./loading";
+
 
 /* ─────────────────────────────────────────────────────────────────────────────
  * 1. INLINE SKETCH HIGHLIGHT COMPONENT
@@ -140,7 +142,7 @@ function useInView(threshold = 0.15) {
  * 3. MAIN HOME PAGE COMPONENT
  * ───────────────────────────────────────────────────────────────────────────── */
 export default function Home() {
-  const [splashGone, setSplashGone] = useState(false);
+  const [showSplash, setShowSplash] = useState(true);
   const [heroReady, setHeroReady] = useState(false);
   const { openQuickView } = useQuickView();
 
@@ -148,19 +150,22 @@ export default function Home() {
   const editorialSection = useInView();
 
   useEffect(() => {
-    const t1 = setTimeout(() => setSplashGone(true), 2200);
-    const t2 = setTimeout(() => setHeroReady(true), 2400);
+    // Timed to match the 3.5s duration of the Framer Motion sequence
+    const t1 = setTimeout(() => setShowSplash(false), 3500);
+    const t2 = setTimeout(() => setHeroReady(true), 3600);
     return () => { clearTimeout(t1); clearTimeout(t2); };
   }, []);
 
+  // Display the cinematic splash screen while loading
+  if (showSplash) {
+    return <Loading />;
+  }
+
+  // Once showSplash is false, the main page renders
   return (
     <main style={{ background: "var(--black)", color: "var(--beige)", fontFamily: "var(--font-sans)" }}>
 
-      {/* ── SPLASH ── */}
-      <div className={`splash-screen ${splashGone ? "gone" : ""}`}>
-        <div className="splash-wordmark">Dripduo</div>
-        <div className="splash-line" />
-      </div>
+
 
       {/* ── HERO ── */}
       <section style={{ position: "relative", height: "100svh", overflow: "hidden" }}>
@@ -221,7 +226,7 @@ export default function Home() {
 
       {/* ── EDITORIAL PRODUCT GRID ── */}
       <section style={{ padding: "clamp(60px, 8vw, 100px) clamp(16px, 4vw, 40px)" }}>
-        
+
         {/* ── HEADER ── */}
         <div className="flex flex-row items-center justify-between mb-10 md:mb-16">
           <h2 className="display-md text-[var(--beige)] text-left">
@@ -234,15 +239,15 @@ export default function Home() {
           </h2>
 
           {/* ── ROTATING CIRCULAR TEXT BADGE (Desktop Only - Top Right) ── */}
-          <div 
-            className="relative z-20 w-[140px] h-[140px] pointer-events-none flex-shrink-0 hidden md:block" 
+          <div
+            className="relative z-20 w-[140px] h-[140px] pointer-events-none flex-shrink-0 hidden md:block"
             style={{ animation: "spin 15s linear infinite" }}
           >
             <svg viewBox="0 0 100 100" className="w-full h-full overflow-visible">
               <path id="badgePathDesktop" d="M 50, 50 m -35, 0 a 35,35 0 1,1 70,0 a 35,35 0 1,1 -70,0" fill="none" />
               <text fontSize="10.5" fill="var(--orange)" fontWeight="500" letterSpacing="0.05em" className="uppercase font-sans">
                 <textPath href="#badgePathDesktop" startOffset="0%" textLength="219">
-                  ESTIMATED 2026 • DRIPDUO • 
+                  ESTIMATED 2026 • DRIPDUO •
                 </textPath>
               </text>
             </svg>
@@ -267,7 +272,7 @@ export default function Home() {
                 </div>
               </div>
             </div>
-            
+
             <div style={{ display: "flex", justifyContent: "space-between", marginTop: "10px" }}>
               <span className="label" style={{ fontSize: "10px", letterSpacing: "0.14em", color: "var(--beige)" }}>{FEATURED[0].name}</span>
               <span className="label" style={{ fontSize: "10px", color: "var(--orange)" }}>$ {FEATURED[0].price}</span>
@@ -275,15 +280,15 @@ export default function Home() {
 
             {/* ── ROTATING CIRCULAR TEXT BADGE (Mobile Only - Spaced further down) ── */}
             <div className="md:hidden flex justify-center mt-20 mb-8">
-              <div 
-                className="relative z-20 w-[95px] h-[95px] pointer-events-none flex-shrink-0" 
+              <div
+                className="relative z-20 w-[95px] h-[95px] pointer-events-none flex-shrink-0"
                 style={{ animation: "spin 15s linear infinite" }}
               >
                 <svg viewBox="0 0 100 100" className="w-full h-full overflow-visible">
                   <path id="badgePathMobile" d="M 50, 50 m -35, 0 a 35,35 0 1,1 70,0 a 35,35 0 1,1 -70,0" fill="none" />
                   <text fontSize="10.5" fill="var(--orange)" fontWeight="500" letterSpacing="0.05em" className="uppercase font-sans">
                     <textPath href="#badgePathMobile" startOffset="0%" textLength="219">
-                      ESTIMATED 2026 • DRIPDUO • 
+                      ESTIMATED 2026 • DRIPDUO •
                     </textPath>
                   </text>
                 </svg>
@@ -293,7 +298,7 @@ export default function Home() {
               </div>
             </div>
             {/* ───────────────────────────────────────────────────────────── */}
-            
+
           </div>
 
           {/* Top Right */}
@@ -347,7 +352,9 @@ export default function Home() {
                   <div style={{ position: "absolute", inset: 0, background: "rgba(0,0,0,0)", transition: "background 0.5s ease" }} className="group-hover:bg-black/30" />
                 </div>
                 <p className="label group-hover:text-[var(--orange)]" style={{ marginTop: "12px", fontSize: "10px", letterSpacing: "0.16em", transition: "color 0.25s", color: "var(--beige)" }}>
-                  {cat.name}
+                  <p className="label group-hover:text-[var(--orange)]" style={{ marginTop: "12px", fontSize: "10px", letterSpacing: "0.16em", transition: "color 0.25s" }}>
+                    {cat.name}
+                  </p>
                 </p>
               </Link>
             ))}

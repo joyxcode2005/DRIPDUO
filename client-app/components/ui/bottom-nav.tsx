@@ -23,7 +23,7 @@ export const BottomNav = () => {
           It physically pushes the bottom of the website down so the footer is never hidden. */}
       <div className="md:hidden w-full h-[calc(4rem+env(safe-area-inset-bottom))]" aria-hidden="true" />
 
-      <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-[var(--black)] border-t border-[var(--gray-800)] z-[65] pb-safe">
+      <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-(--black) border-t border-(--gray-800) z-65 pb-safe">
         <div className="flex items-center justify-around h-16">
           {navItems.map(({ href, icon: Icon, label }) => {
             const isActive = pathname === href;
