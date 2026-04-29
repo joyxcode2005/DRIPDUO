@@ -157,8 +157,7 @@ export const Footer = () => {
         </p>
         <div className="flex items-center gap-8">
           <button className="label text-[var(--gray-400)] hover:text-[var(--beige)] transition-colors" style={{ fontSize: "10px", letterSpacing: "0.12em" }}>INDIA</button>
-          <button className="label text-[var(--gray-400)] hover:text-[var(--beige)] transition-colors" style={{ fontSize: "10px", letterSpacing: "0.12em" }}>USD</button>
-        </div>
+          </div>
       </div>
 
     </footer>
