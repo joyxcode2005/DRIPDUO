@@ -55,3 +55,5 @@ export const MOCK_PRODUCTS = [
   { id: 5, name: "Bengal Bong Art", price: 35, type: "T-Shirt", category: "Bong", image: "https://images.unsplash.com/photo-1503342217505-b0a15ec3261c?w=800&q=80" },
   { id: 6, name: "Seoul Kpop Club", price: 40, type: "Oversized", category: "Kpop", image: "https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=800&q=80" },
 ];
+
+export const NAV_LINKS = ["Home", "Products", "About Us", "Contact"];
