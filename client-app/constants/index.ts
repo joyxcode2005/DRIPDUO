@@ -37,15 +37,6 @@ export const testimonials = [
 ]
 
 
-// The Categories you requested
-export const CATEGORIES = [
-  "All", "Trending memes", "Bong", "States", "Gym", "Spiritual",
-  "Anime", "Abstract", "Gothic", "Corporate", "Kpop"
-];
-
-// Product Types for Sidebar
-export const PRODUCT_TYPES = ["All", "T-Shirt", "Oversized", "Hoodies", "Accessories", "Others"];
-
 // Mock Data for UX demonstration
 export const MOCK_PRODUCTS = [
   { id: 1, name: "Gothic Skull Oversized", price: 45, type: "Oversized", category: "Gothic", image: "https://images.unsplash.com/photo-1583743814966-8936f5b7be1a?w=800&q=80" },

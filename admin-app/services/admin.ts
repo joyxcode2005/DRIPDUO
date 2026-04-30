@@ -174,7 +174,7 @@ export async function getCategories() {
   return mutate(
     supabase
       .from("categories")
-      .select("id, name, slug, is_active")
+      .select("id, name, slug, is_active, parent_id")
       .order("name", { ascending: true })
   ) as Promise<CategoryRow[]>;
 }
@@ -184,12 +184,13 @@ export async function upsertCategory(payload: {
   name: string;
   slug: string;
   isActive: boolean;
+  parentId?: string | null;
 }) {
   if (payload.id) {
     await mutate(
       supabase
         .from("categories")
-        .update({ name: payload.name, slug: payload.slug, is_active: payload.isActive })
+        .update({ name: payload.name, slug: payload.slug, is_active: payload.isActive, parent_id: payload.parentId || null })
         .eq("id", payload.id)
         .select("id")
     );
@@ -199,7 +200,7 @@ export async function upsertCategory(payload: {
   const created = await mutate<{ id: string }>(
     supabase
       .from("categories")
-      .insert({ name: payload.name, slug: payload.slug, is_active: payload.isActive })
+      .insert({ name: payload.name, slug: payload.slug, is_active: payload.isActive, parent_id: payload.parentId || null })
       .select("id")
       .single()
   );

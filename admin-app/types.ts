@@ -10,6 +10,7 @@ export type CategoryRow = {
     name: string;
     slug: string;
     is_active: boolean;
+    parent_id?: string | null;
 };
 
 // Adding Product Row Type based on your schema

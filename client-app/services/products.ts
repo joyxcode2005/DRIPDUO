@@ -28,7 +28,7 @@ export const getAllProducts = async (): Promise<Product[]> => {
 
 
     console.log("Raw products data from Supabase:", JSON.stringify(data, null, 2));
-    
+
     // 🛑 ALWAYS check the error object if data is null!
     if (error) {
         console.error("Supabase Error fetching products:", error);
@@ -60,6 +60,41 @@ export const getAllProducts = async (): Promise<Product[]> => {
     });
 
     return formattedProducts;
+};
+
+export const getProductById = async (id: string) => {
+    const { data, error } = await supabase
+        .from("products")
+        .select(`
+            *,
+            product_categories (
+                categories (
+                    id,
+                    name,
+                    slug,
+                    is_active
+                )
+            ),
+            product_images (
+                id,
+                url,
+                is_primary
+            )
+        `)
+        .eq("id", id)
+        .single();
+
+    if (error) {
+        console.error(`Supabase Error fetching product with id ${id}:`, error);
+        return null;
+    }
+
+    return {
+        ...data,
+        categories: data.product_categories?.map((pc: any) => pc.categories) || [],
+        images: data.product_images || [],
+        primary_image_url: (data.product_images || []).find((img: any) => img.is_primary)?.url || "/images/placeholder.jpg"
+    };
 };
 
 // To fetch all the categories

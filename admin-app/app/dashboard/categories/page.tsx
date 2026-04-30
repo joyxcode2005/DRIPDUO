@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import { Edit3, Plus, RefreshCw, Trash2, FolderTree, Tags } from "lucide-react";
 
@@ -13,16 +13,17 @@ import { slugify } from "@/utils/admin";
 import { deleteCategory, getCategories, upsertCategory, upsertProductType, getProductTypes } from "@/services/admin";
 import { CategoryRow, ProductTypeRow } from "@/types";
 
-
 const deleteProductType = async (id: string) => { };
 
-const emptyCategoryForm = { id: "", name: "", slug: "", isActive: true };
+// Added parentId to the empty form state
+const emptyCategoryForm = { id: "", name: "", slug: "", isActive: true, parentId: "" };
 const emptyTypeForm = { id: "", name: "", slug: "", isActive: true };
 
 type TabMode = "categories" | "types";
 
 export default function TaxonomyPage() {
   const [activeTab, setActiveTab] = useState<TabMode>("categories");
+  
   // --- CATEGORY STATE ---
   const [categories, setCategories] = useState<CategoryRow[]>([]);
   const [catForm, setCatForm] = useState(emptyCategoryForm);
@@ -40,7 +41,6 @@ export default function TaxonomyPage() {
     setLoadingCats(true);
     try {
       setCategories(await getCategories());
-      console.log("Loaded categories:", categories);
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "Failed to load categories");
     } finally {
@@ -66,6 +66,7 @@ export default function TaxonomyPage() {
 
   // --- HANDLERS: CATEGORIES ---
   const resetCatForm = () => setCatForm(emptyCategoryForm);
+  
   const handleCatSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setSavingCat(true);
@@ -75,6 +76,8 @@ export default function TaxonomyPage() {
         name: catForm.name.trim(),
         slug: catForm.slug.trim() || slugify(catForm.name),
         isActive: catForm.isActive,
+        // Send parent_id to the backend (null if empty string)
+        parentId: catForm.parentId || null, 
       });
       toast.success(catForm.id ? "Category updated" : "Category created");
       resetCatForm();
@@ -100,6 +103,7 @@ export default function TaxonomyPage() {
 
   // --- HANDLERS: PRODUCT TYPES ---
   const resetTypeForm = () => setTypeForm(emptyTypeForm);
+  
   const handleTypeSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setSavingType(true);
@@ -140,16 +144,14 @@ export default function TaxonomyPage() {
         <div className="flex bg-black/5 p-1 rounded-lg">
           <button
             onClick={() => setActiveTab("categories")}
-            className={`flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-md transition-colors ${activeTab === "categories" ? "bg-white text-black shadow-sm" : "text-black/60 hover:text-black"
-              }`}
+            className={`flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-md transition-colors ${activeTab === "categories" ? "bg-white text-black shadow-sm" : "text-black/60 hover:text-black"}`}
           >
             <FolderTree className="h-4 w-4" />
             Categories
           </button>
           <button
             onClick={() => setActiveTab("types")}
-            className={`flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-md transition-colors ${activeTab === "types" ? "bg-white text-black shadow-sm" : "text-black/60 hover:text-black"
-              }`}
+            className={`flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-md transition-colors ${activeTab === "types" ? "bg-white text-black shadow-sm" : "text-black/60 hover:text-black"}`}
           >
             <Tags className="h-4 w-4" />
             Product Types
@@ -163,7 +165,7 @@ export default function TaxonomyPage() {
             <div className="flex items-center justify-between gap-3">
               <div>
                 <h3 className="text-lg font-semibold text-black">Category form</h3>
-                <p className="mt-1 text-sm text-black/60">Maintain names and slugs.</p>
+                <p className="mt-1 text-sm text-black/60">Maintain names, slugs, and hierarchy.</p>
               </div>
               <button
                 type="button"
@@ -194,6 +196,7 @@ export default function TaxonomyPage() {
                   }
                 />
               </div>
+              
               <div className="space-y-2">
                 <label htmlFor="cat-slug" className="text-sm font-medium text-black">Slug</label>
                 <Input
@@ -205,7 +208,29 @@ export default function TaxonomyPage() {
                   onChange={(e) => setCatForm((prev) => ({ ...prev, slug: e.target.value }))}
                 />
               </div>
-              <div className="flex items-center gap-3">
+
+              {/* NEW PARENT CATEGORY DROPDOWN */}
+              <div className="space-y-2">
+                <label htmlFor="cat-parent" className="text-sm font-medium text-black">Parent Category (Optional)</label>
+                <select
+                  id="cat-parent"
+                  value={catForm.parentId}
+                  onChange={(e) => setCatForm((prev) => ({ ...prev, parentId: e.target.value }))}
+                  className="w-full rounded-lg border border-black/10 bg-white px-3 py-2.5 text-sm text-black focus:border-black/30 focus:outline-none focus:ring-1 focus:ring-black/30"
+                >
+                  <option value="">None (Top-level Category)</option>
+                  {categories
+                    // Filter out the current category so it can't be its own parent
+                    .filter((c) => c.id !== catForm.id) 
+                    .map((c) => (
+                      <option key={c.id} value={c.id}>
+                        {c.name}
+                      </option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="flex items-center gap-3 pt-2">
                 <input
                   id="cat-isActive"
                   type="checkbox"
@@ -242,21 +267,26 @@ export default function TaxonomyPage() {
                   <thead className="bg-black/5 text-black">
                     <tr>
                       <th className="px-4 py-3 font-medium">Category</th>
-                      <th className="px-4 py-3 font-medium">Slug</th>
+                      <th className="px-4 py-3 font-medium">Parent</th>
                       <th className="px-4 py-3 font-medium">Status</th>
                       <th className="px-4 py-3 font-medium">Actions</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-black/10 bg-white">
                     {loadingCats ? (
-                      <tr><td className="px-4 py-6 text-black/60" colSpan={4}>Loading...</td></tr>
+                      <tr><td className="px-4 py-6 text-black/60 text-center" colSpan={4}>Loading...</td></tr>
                     ) : categories.length === 0 ? (
-                      <tr><td className="px-4 py-6 text-black/60" colSpan={4}>No categories yet.</td></tr>
+                      <tr><td className="px-4 py-6 text-black/60 text-center" colSpan={4}>No categories yet.</td></tr>
                     ) : (
                       categories.map((category) => (
                         <tr key={category.id}>
-                          <td className="px-4 py-4 text-black/60">{category.name}</td>
-                          <td className="px-4 py-4 text-black/60">{category.slug}</td>
+                          <td className="px-4 py-4 text-black/60 font-medium">{category.name}</td>
+                          <td className="px-4 py-4 text-black/50 text-xs">
+                            {/* Find and display the parent name if a parent_id exists */}
+                            {category.parent_id 
+                              ? categories.find(c => c.id === category.parent_id)?.name || "Unknown"
+                              : "—"}
+                          </td>
                           <td className="px-4 py-4 text-black">{category.is_active ? "Active" : "Disabled"}</td>
                           <td className="px-4 py-4">
                             <div className="flex flex-wrap gap-2">
@@ -267,13 +297,14 @@ export default function TaxonomyPage() {
                                     name: category.name,
                                     slug: category.slug,
                                     isActive: category.is_active,
+                                    parentId: category.parent_id || "", // Ensure empty string if null
                                   })
                                 }
-                                className="p-2 border rounded-xl hover:bg-black/5"
+                                className="p-2 border rounded-xl hover:bg-black/5 transition-colors"
                               >
                                 <Edit3 className="h-3.5 w-3.5" />
                               </button>
-                              <button onClick={() => handleCatDelete(category.id)} className="p-2 border rounded-xl hover:bg-black/5">
+                              <button onClick={() => handleCatDelete(category.id)} className="p-2 border rounded-xl hover:bg-black/5 transition-colors text-red-600">
                                 <Trash2 className="h-3.5 w-3.5" />
                               </button>
                             </div>
@@ -381,20 +412,21 @@ export default function TaxonomyPage() {
                   </thead>
                   <tbody className="divide-y divide-black/10 bg-white">
                     {loadingTypes ? (
-                      <tr><td className="px-4 py-6 text-black/60" colSpan={4}>Loading...</td></tr>
+                      <tr><td className="px-4 py-6 text-black/60 text-center" colSpan={4}>Loading...</td></tr>
                     ) : productTypes.length === 0 ? (
-                      <tr><td className="px-4 py-6 text-black/60" colSpan={4}>No product types yet.</td></tr>
+                      <tr><td className="px-4 py-6 text-black/60 text-center" colSpan={4}>No product types yet.</td></tr>
                     ) : (
                       productTypes.map((type) => (
                         <tr key={type.id}>
+                          <td className="px-4 py-4 text-black/60">{type.name}</td>
                           <td className="px-4 py-4 text-black/60">{type.slug}</td>
                           <td className="px-4 py-4 text-black">{type.is_active ? "Active" : "Disabled"}</td>
                           <td className="px-4 py-4">
                             <div className="flex flex-wrap gap-2">
-                              <button onClick={() => setTypeForm({ id: type.id, name: type.name, slug: type.slug, isActive: type.is_active })} className="p-2 border rounded-xl hover:bg-black/5">
+                              <button onClick={() => setTypeForm({ id: type.id, name: type.name, slug: type.slug, isActive: type.is_active })} className="p-2 border rounded-xl hover:bg-black/5 transition-colors">
                                 <Edit3 className="h-3.5 w-3.5" />
                               </button>
-                              <button onClick={() => handleTypeDelete(type.id)} className="p-2 border rounded-xl hover:bg-black/5">
+                              <button onClick={() => handleTypeDelete(type.id)} className="p-2 border rounded-xl hover:bg-black/5 transition-colors text-red-600">
                                 <Trash2 className="h-3.5 w-3.5" />
                               </button>
                             </div>
