@@ -255,6 +255,7 @@ export default function TaxonomyPage() {
                     ) : (
                       categories.map((category) => (
                         <tr key={category.id}>
+                          <td className="px-4 py-4 text-black/60">{category.name}</td>
                           <td className="px-4 py-4 text-black/60">{category.slug}</td>
                           <td className="px-4 py-4 text-black">{category.is_active ? "Active" : "Disabled"}</td>
                           <td className="px-4 py-4">
