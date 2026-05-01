@@ -192,7 +192,7 @@ export default function Home() {
           {HOME_CATEGORIES.map((cat, i) => (
             <Reveal key={cat.name} className="w-full h-full" threshold={0.14}>
               <Link href="/products" className="group block relative w-full h-full border-r border-b border-(--gray-800) overflow-hidden bg-(--black)">
-                <div className="relative aspect-[2/3] w-full h-full">
+                <div className="relative aspect-2/3 w-full h-full">
                   <img src={cat.img} alt={cat.name} className="absolute inset-0 h-full w-full object-cover transition-transform duration-[2s] ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:scale-105" />
                   <div className="absolute inset-0 bg-black/40 transition-colors duration-500 group-hover:bg-black/10" />
                   <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
@@ -220,7 +220,7 @@ export default function Home() {
               Editorial — FW26
             </p>
           </Reveal>
-          <Reveal className="delay-[120ms]">
+          <Reveal className="delay-120ms">
             <h2 className="font-serif text-[clamp(4rem,10vw,9rem)] leading-[0.8] tracking-tighter text-(--beige) mb-12">
               Redefine<br />
               <em>
@@ -230,7 +230,7 @@ export default function Home() {
               </em>
             </h2>
           </Reveal>
-          <Reveal className="delay-[220ms]">
+          <Reveal className="delay-220ms">
             <Link
               href="/products"
               className="inline-flex items-center justify-center bg-transparent border border-(--beige) px-12 py-5 font-sans text-[10px] font-bold tracking-[0.2em] uppercase text-(--beige) transition-all duration-500 hover:bg-(--beige) hover:text-(--black)"
