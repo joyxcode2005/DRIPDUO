@@ -72,7 +72,8 @@ export const getProductById = async (id: string) => {
                     id,
                     name,
                     slug,
-                    is_active
+                    is_active,
+                    parent_id
                 )
             ),
             product_images (
@@ -109,7 +110,7 @@ export async function getAllCategories() {
 
 // To fetch product types
 export async function getAllProductTypes() {
-    const { data, error } = await supabase.from("product_types").select("*");
+    const { data, error } = await supabase.from("product_type").select("*");
     if (error) {
         console.error("Error fetching product types:", error);
         throw error;

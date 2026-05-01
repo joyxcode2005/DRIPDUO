@@ -1,19 +1,16 @@
 "use client";
 
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import { useQuickView } from "@/lib/QuickViewContext";
 import Loading from "./loading";
 import { FEATURED, HOME_CATEGORIES, LOOKBOOK } from "@/constants";
+import RotatingBadge from "@/components/RotatingBadge";
+import { SketchHighlight } from "@/components/SktechHighlight";
+import HomeProductCard from "@/components/HomeProductCard";
 
-interface SketchHighlightProps {
-  children: React.ReactNode;
-  type?: "circle" | "underline" | "strike";
-  color?: string;
-  strokeWidth?: number;
-  delay?: number;
-}
+
 
 // THE ORIGINAL REVEAL COMPONENT
 function Reveal({
@@ -48,7 +45,7 @@ function Reveal({
       ref={setNode}
       className={[
         "will-change-transform transition-all duration-1000 ease-[cubic-bezier(0.16,1,0.3,1)]",
-        inView ? "translate-y-0 opacity-100 scale-100 blur-0" : "translate-y-12 opacity-0 scale-[0.98] blur-[4px]",
+        inView ? "translate-y-0 opacity-100 scale-100 blur-0" : "translate-y-12 opacity-0 scale-[0.98] blur-4px",
         className,
       ].join(" ")}
     >
@@ -57,128 +54,9 @@ function Reveal({
   );
 }
 
-const SketchHighlight = ({
-  children,
-  type = "underline",
-  color = "var(--orange)",
-  strokeWidth = 2,
-  delay = 100,
-}: SketchHighlightProps) => {
-  const [isVisible, setIsVisible] = useState(false);
-  const ref = useRef<HTMLSpanElement>(null);
 
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          setIsVisible(true);
-          observer.disconnect();
-        }
-      },
-      { threshold: 0.5 }
-    );
-    if (ref.current) observer.observe(ref.current);
-    return () => observer.disconnect();
-  }, []);
 
-  const paths = {
-    underline: "M 2 40 Q 50 48 98 38",
-    strike: "M 2 25 Q 50 20 98 28",
-    circle: "M 10 25 C 10 5, 90 5, 90 25 C 90 45, 10 45, 10 25 C 10 15, 30 5, 50 5",
-  };
 
-  return (
-    <span ref={ref} className="relative inline-block whitespace-nowrap">
-      <span className="relative z-10">{children}</span>
-      <svg
-        className="pointer-events-none absolute inset-0 z-0 h-full w-full overflow-visible"
-        viewBox="0 0 100 50"
-        preserveAspectRatio="none"
-      >
-        <defs>
-          <filter id={`pencil-sketch-${type}`} x="-20%" y="-20%" width="140%" height="140%">
-            <feTurbulence type="fractalNoise" baseFrequency="0.04" numOctaves="3" result="noise" />
-            <feDisplacementMap in="SourceGraphic" in2="noise" scale="2.5" xChannelSelector="R" yChannelSelector="G" />
-          </filter>
-        </defs>
-        <path
-          d={paths[type]}
-          fill="none"
-          stroke={color}
-          strokeWidth={strokeWidth}
-          strokeLinecap="round"
-          filter={`url(#pencil-sketch-${type})`}
-          className={`[stroke-dasharray:300] transition-[stroke-dashoffset] duration-[1200ms] ease-[cubic-bezier(0.16,1,0.3,1)] ${isVisible ? "[stroke-dashoffset:0]" : "[stroke-dashoffset:300]"
-            }`}
-          style={{ transitionDelay: `${delay}ms` }}
-        />
-      </svg>
-    </span>
-  );
-};
-
-// ZERO-GAP PRODUCT CARD
-function ProductCard({
-  item,
-  onClick,
-  className = "",
-  imageClassName = "",
-}: {
-  item: { id: string; image: string; name: string; category?: string; price: number };
-  onClick: () => void;
-  className?: string;
-  imageClassName?: string;
-}) {
-  return (
-    <button onClick={onClick} className={`group block min-w-0 w-full text-left relative overflow-hidden bg-(--black) border-r border-b border-(--gray-800) ${className}`}>
-      <div className={`relative w-full h-full ${imageClassName}`}>
-        <img
-          src={item.image}
-          alt={item.name}
-          className="absolute inset-0 h-full w-full object-cover transition-transform duration-[2s] ease-[cubic-bezier(0.25,1,0.5,1)] group-hover:scale-[1.03]"
-        />
-        <div className="absolute inset-x-0 bottom-0 h-1/2 bg-linear-to-t from-black/80 to-transparent pointer-events-none opacity-50 transition-opacity duration-700 group-hover:opacity-100" />
-
-        <div className="absolute bottom-4 left-4 right-4 flex flex-col items-start z-10 pointer-events-none">
-          <p className="font-sans text-[10px] tracking-[0.2em] uppercase text-(--beige) drop-shadow-md">
-            {item.name}
-          </p>
-          <div className="flex w-full items-center justify-between mt-1">
-            <p className="font-sans text-[9px] tracking-[0.2em] uppercase text-(--gray-400) transition-colors group-hover:text-(--orange)">
-              {item.category || "Archive"}
-            </p>
-            <p className="font-sans text-[10px] tracking-[0.15em] uppercase text-(--beige)">
-              ${item.price}
-            </p>
-          </div>
-        </div>
-      </div>
-    </button>
-  );
-}
-
-function RotatingBadge({ mobile = false }: { mobile?: boolean }) {
-  const sizeClass = mobile ? "h-[92px] w-[92px]" : "h-[140px] w-[140px]";
-  const textLength = mobile ? "204" : "219";
-  const textSize = mobile ? 9 : 10.5;
-  const pathId = mobile ? "badgePathMobile" : "badgePathDesktop";
-
-  return (
-    <div className={`relative flex-shrink-0 pointer-events-none animate-[spin_15s_linear_infinite] ${sizeClass}`}>
-      <svg viewBox="0 0 100 100" className="h-full w-full overflow-visible">
-        <path id={pathId} d="M 50, 50 m -35, 0 a 35,35 0 1,1 70,0 a 35,35 0 1,1 -70,0" fill="none" />
-        <text fontSize={textSize} fill="var(--orange)" fontWeight="500" letterSpacing="0.05em" className="font-sans uppercase">
-          <textPath href={`#${pathId}`} startOffset="0%" textLength={textLength}>
-            ESTIMATED 2026 • DRIPDUO •
-          </textPath>
-        </text>
-      </svg>
-      <div className="absolute inset-0 flex items-center justify-center">
-        <div className={`rounded-full bg-(--orange) ${mobile ? "h-1.5 w-1.5" : "h-2 w-2"}`} />
-      </div>
-    </div>
-  );
-}
 
 export default function Home() {
   const [splashGone, setSplashGone] = useState(false);
@@ -207,7 +85,7 @@ export default function Home() {
           className={`absolute inset-0 h-full w-full object-cover object-[center_25%] transition-transform duration-2000 ease-[cubic-bezier(0.16,1,0.3,1)] ${heroReady ? "scale-100" : "scale-[1.08]"
             }`}
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent" />
+        <div className="absolute inset-0 bg-linear-to-t from-black/90 via-black/20 to-transparent" />
 
         <div className="absolute inset-x-0 bottom-0 flex flex-col items-start justify-end p-6 md:p-12 z-10 pb-16 md:pb-16">
           <Reveal>
@@ -224,7 +102,7 @@ export default function Home() {
             </h1>
           </Reveal>
 
-          <Reveal className="delay-[600ms]">
+          <Reveal className="delay-600">
             <Link
               href="/products"
               className="inline-flex items-center gap-4 border border-(--beige) bg-transparent text-(--beige) font-sans text-[10px] font-bold uppercase tracking-[0.2em] px-12 py-5 hover:bg-(--beige) hover:text-(--black) transition-all duration-500"
@@ -271,35 +149,26 @@ export default function Home() {
         {/* 0-Gap Abstract Grid, Edge to Edge */}
         <div className="grid grid-cols-4 gap-0 w-full border-t border-l border-(--gray-800)">
           <Reveal className="col-span-2 row-span-2 h-full w-full">
-            <ProductCard
-              item={FEATURED[0]}
-              onClick={() => openQuickView(FEATURED[0])}
-              className="h-full w-full"
-              imageClassName="aspect-[3/4] sm:aspect-auto sm:h-full"
+            <HomeProductCard
+              product={FEATURED[0]}
             />
           </Reveal>
 
           <Reveal className="col-span-1 w-full delay-80">
-            <ProductCard
-              item={FEATURED[1]}
-              onClick={() => openQuickView(FEATURED[1])}
-              imageClassName="aspect-[3/4]"
+            <HomeProductCard
+              product={FEATURED[1]}
             />
           </Reveal>
 
           <Reveal className="col-span-1 w-full delay-140">
-            <ProductCard
-              item={FEATURED[2]}
-              onClick={() => openQuickView(FEATURED[2])}
-              imageClassName="aspect-[3/4]"
+            <HomeProductCard
+              product={FEATURED[2]}
             />
           </Reveal>
 
           <Reveal className="col-span-2 col-start-3 row-start-2 w-full delay-200">
-            <ProductCard
-              item={FEATURED[3]}
-              onClick={() => openQuickView(FEATURED[3])}
-              imageClassName="aspect-[4/3] md:aspect-[2/1]"
+            <HomeProductCard
+              product={FEATURED[3]}
             />
           </Reveal>
         </div>
@@ -399,7 +268,7 @@ export default function Home() {
           <div className="scroll-row w-max pl-6 md:pl-12 flex" style={{ gap: "0" }}>
             {[...LOOKBOOK, ...LOOKBOOK].map((img, i) => (
               <Reveal key={i} className="shrink-0" threshold={0.12}>
-                <div className="relative aspect-[2/3] w-[75vw] sm:w-[45vw] md:w-[30vw] lg:w-[22vw] border-r border-y border-(--gray-800) overflow-hidden bg-(--gray-900) first:border-l">
+                <div className="relative aspect-2/3 w-[75vw] sm:w-[45vw] md:w-[30vw] lg:w-[22vw] border-r border-y border-(--gray-800) overflow-hidden bg-(--gray-900) first:border-l">
                   <img src={img} alt={`Look ${(i % LOOKBOOK.length) + 1}`} className="h-full w-full object-cover transition-transform duration-[2s] hover:scale-105" />
                 </div>
               </Reveal>

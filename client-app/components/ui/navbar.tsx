@@ -4,7 +4,7 @@ import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { useCart } from "@/lib/CartContext";
 import { Search, X, User, ShoppingBag, Menu } from "lucide-react";
-import { NAV_LINKS } from "@/constants";
+import { Nav_links } from "@/constants";
 
 
 export const Navbar = () => {
@@ -53,13 +53,13 @@ export const Navbar = () => {
             </button>
 
             <div className="hidden lg:flex items-center gap-8">
-              {NAV_LINKS.map((link) => (
+              {Nav_links.map((link) => (
                 <Link
-                  key={link}
-                  href="/products"
+                  key={link.name}
+                  href={link.href}
                   className="relative text-(--beige) hover:text-(--orange) [text-shadow:0_1px_2px_rgba(0,0,0)] transition-colors uppercase tracking-[0.15em] text-[10px] font-medium group hover:text-shadow:0_2px_4px_rgba(255,0,0,1) hover:underline-offset-4"
                 >
-                  {link}
+                  {link.name}
                   {/* Subtle hover underline effect */}
                   <span className="absolute -bottom-1.5 left-0 w-0 h-px bg-(--orange) transition-all duration-300 group-hover:w-full"></span>
                 </Link>
@@ -167,15 +167,15 @@ export const Navbar = () => {
 
         {/* Animated content wrapper */}
         <div className={`flex-1 px-6 pt-12 overflow-y-auto pb-24 transition-all duration-700 delay-100 ${menuOpen ? "translate-x-0 opacity-100" : "-translate-x-10 opacity-0"}`}>
-          {NAV_LINKS.map((link, index) => (
+          {Nav_links.map((link, index) => (
             <Link
-              key={link}
-              href="/products"
+              key={link.name}
+              href={link.href}
               onClick={() => setMenuOpen(false)}
               className="block py-4 border-b border-white/5 text-(--beige) hover:text-(--orange) hover:pl-4 transition-all duration-300"
               style={{ fontFamily: "'EB Garamond', Georgia, serif", fontSize: "32px", transitionDelay: `${index * 50}ms` }}
             >
-              {link}
+              {link.name}
             </Link>
           ))}
 

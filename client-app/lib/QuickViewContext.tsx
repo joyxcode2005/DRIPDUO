@@ -23,7 +23,6 @@ export const QuickViewProvider = ({ children }: { children: React.ReactNode }) =
 
   const closeQuickView = () => {
     setIsQuickViewOpen(false);
-    // Slight delay to allow animation to finish before clearing data
     setTimeout(() => setSelectedProduct(null), 700);
   };
 

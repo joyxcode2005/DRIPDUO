@@ -37,17 +37,24 @@ export const testimonials = [
 ]
 
 
-// Mock Data for UX demonstration
-export const MOCK_PRODUCTS = [
-  { id: 1, name: "Gothic Skull Oversized", price: 45, type: "Oversized", category: "Gothic", image: "https://images.unsplash.com/photo-1583743814966-8936f5b7be1a?w=800&q=80" },
-  { id: 2, name: "Tokyo Drift Anime Tee", price: 30, type: "T-Shirt", category: "Anime", image: "https://images.unsplash.com/photo-1529374255404-311a2a4f1fd9?w=800&q=80" },
-  { id: 3, name: "Corporate Slave Meme", price: 25, type: "T-Shirt", category: "Corporate", image: "https://images.unsplash.com/photo-1618517351616-38fb9c52ce37?w=800&q=80" },
-  { id: 4, name: "Heavyweight Pump Gym", price: 50, type: "Oversized", category: "Gym", image: "https://images.unsplash.com/photo-1571945153237-4929e783af4a?w=800&q=80" },
-  { id: 5, name: "Bengal Bong Art", price: 35, type: "T-Shirt", category: "Bong", image: "https://images.unsplash.com/photo-1503342217505-b0a15ec3261c?w=800&q=80" },
-  { id: 6, name: "Seoul Kpop Club", price: 40, type: "Oversized", category: "Kpop", image: "https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=800&q=80" },
-];
-
-export const NAV_LINKS = ["Home", "Products", "About Us", "Contact"];
+export const Nav_links = [
+  {
+    name: "Home",
+    href: "/",
+  },
+  {
+    name: "Products",
+    href: "/products",
+  },
+  {
+    name: "About Us",
+    href: "/about",
+  },
+  {
+    name: "Contact",
+    href: "/contact",
+  },
+]
 
 export const FEATURED = [
   {
