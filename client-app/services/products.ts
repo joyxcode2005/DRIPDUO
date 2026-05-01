@@ -1,12 +1,52 @@
 
-import { Product } from "@/app/products/page";
 import { createClient } from "@supabase/supabase-js"
 
 
 // Init supabse client
-const supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!)
+const supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!);
 
-export const getAllProducts = async (): Promise<Product[]> => {
+export const getProductsForLookbookSection = async () => {
+    const { data, error } = await supabase
+        .from("products")
+        .select(`
+            id,
+            name,
+            product_images (
+                url,
+                is_primary
+            )
+        `)
+
+    if (error) {
+        console.error("Supabase Error fetching lookbook products:", error);
+        return [];
+    }
+
+    return data;
+}
+
+export const getProductsforFeaturedSection = async () => {
+    const { data, error } = await supabase
+        .from("products")
+        .select(`
+            id,
+            name,
+            product_images (
+                url,
+                is_primary
+            )
+        `)
+        .limit(5);
+
+    if (error) {
+        console.error("Supabase Error fetching featured products:", error);
+        return [];
+    }
+
+    return data;
+}
+
+export const getAllProducts = async () => {
     const { data, error } = await supabase
         .from("products")
         .select(`
@@ -35,7 +75,7 @@ export const getAllProducts = async (): Promise<Product[]> => {
         return [];
     }
 
-    const formattedProducts: Product[] = data.map((product: any) => {
+    const formattedProducts = data.map((product: any) => {
 
         // --- BULLETPROOF CATEGORY MAPPING ---
         const rawCategories = product.product_categories || [];
@@ -100,7 +140,7 @@ export const getProductById = async (id: string) => {
 
 // To fetch all the categories
 export async function getAllCategories() {
-    const { data, error } = await supabase.from("categories").select("id, name, slug, is_active");
+    const { data, error } = await supabase.from("categories").select("id, name, slug, is_active, parent_id");
     if (error) {
         console.error("Error fetching categories:", error);
         throw error;

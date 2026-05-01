@@ -3,7 +3,6 @@
 import Link from "next/link";
 import { useState } from "react";
 import { useCart } from "@/lib/CartContext";
-import { Heart } from "lucide-react";
 import Image from "next/image";
 
 export interface SupabaseCategory {
@@ -24,7 +23,7 @@ export interface Product {
   name: string;
   description: string | null;
   product_type_id: string;
-  product_type?: { name: string }; // add this to your query
+  product_type?: { name: string };
   price: number;
   discount: number;
   final_price: number;
@@ -39,7 +38,6 @@ export interface Product {
 export default function ProductCard({ product }: { product: Product }) {
   const { addToCart } = useCart();
   const [isHovered, setIsHovered] = useState(false);
-  const [isWishlisted, setIsWishlisted] = useState(false);
 
   const imageUrl = product.product_images?.[0]?.url || "";
   const hoverImage = product.product_images?.[1]?.url || imageUrl;
@@ -53,12 +51,14 @@ export default function ProductCard({ product }: { product: Product }) {
 
   const savings = product.price - product.final_price;
 
+
+  // Show appropriate stock status based on inventory levels
   const stockStatus =
     product.stock === 0
       ? { label: "Out of Stock", color: "text-red-400" }
       : product.stock <= 5
-      ? { label: `Only ${product.stock} left`, color: "text-amber-400" }
-      : { label: "In Stock", color: "text-green-400" };
+        ? { label: `Only ${product.stock} left`, color: "text-amber-400" }
+        : { label: "In Stock", color: "text-green-400" };
 
   const handleQuickAdd = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -71,12 +71,6 @@ export default function ProductCard({ product }: { product: Product }) {
       size: "M",
       quantity: 1,
     });
-  };
-
-  const toggleWishlist = (e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setIsWishlisted(!isWishlisted);
   };
 
   return (
@@ -93,9 +87,8 @@ export default function ProductCard({ product }: { product: Product }) {
             src={imageUrl}
             alt={product.name}
             fill
-            className={`object-cover transition-opacity duration-700 ${
-              isHovered && hoverImage !== imageUrl ? "opacity-0" : "opacity-100"
-            }`}
+            className={`object-cover transition-opacity duration-700 ${isHovered && hoverImage !== imageUrl ? "opacity-0" : "opacity-100"
+              }`}
           />
         )}
         {hoverImage !== imageUrl && (
@@ -103,15 +96,14 @@ export default function ProductCard({ product }: { product: Product }) {
             src={hoverImage}
             alt={`${product.name} Alt`}
             fill
-            className={`object-cover transition-opacity duration-700 ${
-              isHovered ? "opacity-100" : "opacity-0"
-            }`}
+            className={`object-cover transition-opacity duration-700 ${isHovered ? "opacity-100" : "opacity-0"
+              }`}
           />
         )}
 
         {/* Multi-layer dark gradient overlay — ensures text always readable */}
         <div
-          className="absolute inset-0 pointer-events-none z-[5]"
+          className="absolute inset-0 pointer-events-none z-5"
           style={{
             background:
               "linear-gradient(to top, rgba(0,0,0,0.92) 0%, rgba(0,0,0,0.6) 35%, rgba(0,0,0,0.15) 60%, transparent 100%)",
@@ -134,26 +126,6 @@ export default function ProductCard({ product }: { product: Product }) {
             </span>
           )}
         </div>
-
-        {/* ── Wishlist Button ── */}
-        <button
-          onClick={toggleWishlist}
-          className={`absolute top-3 right-3 z-20 w-8 h-8 rounded-full flex items-center justify-center backdrop-blur-sm border transition-all duration-200 ${
-            isWishlisted
-              ? "border-(--orange) bg-orange-500/15"
-              : "border-white/10 bg-black/40 hover:border-(--orange)"
-          }`}
-        >
-          <Heart
-            size={13}
-            strokeWidth={1.5}
-            className={
-              isWishlisted
-                ? "text-(--orange) fill-(--orange)"
-                : "text-(--beige) fill-transparent"
-            }
-          />
-        </button>
 
         {/* ── Stock Status Indicator ── */}
         <div
@@ -208,7 +180,7 @@ export default function ProductCard({ product }: { product: Product }) {
         {/* ── Quick Add CTA ── */}
         <button
           onClick={handleQuickAdd}
-          className="absolute bottom-0 left-0 right-0 bg-(--orange) text-(--black) font-bold text-center py-3.5 font-sans text-[10px] tracking-[0.18em] uppercase z-20 disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2 transition-transform duration-300 ease-[cubic-bezier(0.4,0,0.2,1)]"
+          className="absolute bottom-0 left-0 right-0 bg-(--orange) text-(--black) font-bold text-center py-3.5 font-sans text-[10px] tracking-[0.18em] uppercase z-20 disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2 transition-transform duration-300 ease-in-out"
           style={{ transform: isHovered ? "translateY(0)" : "translateY(100%)" }}
           disabled={product.stock === 0}
         >
