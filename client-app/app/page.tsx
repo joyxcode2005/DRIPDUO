@@ -3,69 +3,59 @@
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
-import { useQuickView } from "@/lib/QuickViewContext";
+// import { useQuickView } from "@/lib/QuickViewContext";
 import Loading from "./loading";
-import { FEATURED, HOME_CATEGORIES, LOOKBOOK } from "@/constants";
+import { HOME_CATEGORIES, LOOKBOOK } from "@/constants";
 import RotatingBadge from "@/components/RotatingBadge";
 import { SketchHighlight } from "@/components/SktechHighlight";
 import HomeProductCard from "@/components/HomeProductCard";
+import { getProductsforFeaturedSection, getProductsForLookbookSection } from "@/services/products";
+import Reveal from "@/components/Reveal";
+import LookbookGallery from "@/components/Lookbook";
+import Lookbook from "@/components/Lookbook";
 
 
-
-// THE ORIGINAL REVEAL COMPONENT
-function Reveal({
-  children,
-  className = "",
-  threshold = 0.18,
-}: {
-  children: React.ReactNode;
-  className?: string;
-  threshold?: number;
-}) {
-  const [node, setNode] = useState<HTMLDivElement | null>(null);
-  const [inView, setInView] = useState(false);
-
-  useEffect(() => {
-    if (!node) return;
-    const obs = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          setInView(true);
-          obs.disconnect();
-        }
-      },
-      { threshold }
-    );
-    obs.observe(node);
-    return () => obs.disconnect();
-  }, [node, threshold]);
-
-  return (
-    <div
-      ref={setNode}
-      className={[
-        "will-change-transform transition-all duration-1000 ease-[cubic-bezier(0.16,1,0.3,1)]",
-        inView ? "translate-y-0 opacity-100 scale-100 blur-0" : "translate-y-12 opacity-0 scale-[0.98] blur-4px",
-        className,
-      ].join(" ")}
-    >
-      {children}
-    </div>
-  );
+export type FeaturedProduct = {
+  id: string;
+  name: string;
+  product_images: {
+    url: string,
+    is_primary: boolean,
+  }[];
 }
-
-
-
-
 
 export default function Home() {
   const [splashGone, setSplashGone] = useState(false);
   const [heroReady, setHeroReady] = useState(false);
-  const { openQuickView } = useQuickView();
+  const [featuredProducts, setFeaturedProducts] = useState<FeaturedProduct[]>([]);
+  const [lookbookProducts, setLookbookProducts] = useState<FeaturedProduct[]>([]);
+  // const { openQuickView } = useQuickView();
 
   useEffect(() => {
     const t1 = setTimeout(() => setSplashGone(true), 3500);
     const t2 = setTimeout(() => setHeroReady(true), 3700);
+
+    const fetchFeaturedProducts = async () => {
+      try {
+        const featuredProductData = await getProductsforFeaturedSection();
+        setFeaturedProducts(featuredProductData);
+      } catch (error) {
+        console.error("Error fetching featured products:", error);
+      };
+    }
+
+    const fetchLookbookProducts = async () => {
+      try {
+        const lookbookProductData = await getProductsForLookbookSection();
+        setLookbookProducts(lookbookProductData);
+      } catch (error) {
+        console.error("Error fetching lookbook products:", error);
+      };
+    }
+
+    fetchFeaturedProducts();
+    fetchLookbookProducts();
+
     return () => {
       clearTimeout(t1);
       clearTimeout(t2);
@@ -147,31 +137,31 @@ export default function Home() {
         </div>
 
         {/* 0-Gap Abstract Grid, Edge to Edge */}
-        <div className="grid grid-cols-4 gap-0 w-full border-t border-l border-(--gray-800)">
-          <Reveal className="col-span-2 row-span-2 h-full w-full">
-            <HomeProductCard
-              product={FEATURED[0]}
-            />
-          </Reveal>
+        {featuredProducts.length >= 4 ? (
+          <div className="grid grid-cols-4 gap-0 w-full border-t border-l border-(--gray-800)">
+            <Reveal className="col-span-2 row-span-2 h-full w-full min-h-0">
+              <HomeProductCard product={featuredProducts[0]} />
+            </Reveal>
 
-          <Reveal className="col-span-1 w-full delay-80">
-            <HomeProductCard
-              product={FEATURED[1]}
-            />
-          </Reveal>
+            <Reveal className="col-span-1 w-full delay-80 min-h-0">
+              <HomeProductCard product={featuredProducts[1]} />
+            </Reveal>
 
-          <Reveal className="col-span-1 w-full delay-140">
-            <HomeProductCard
-              product={FEATURED[2]}
-            />
-          </Reveal>
+            <Reveal className="col-span-1 w-full delay-140 min-h-0">
+              <HomeProductCard product={featuredProducts[2]} />
+            </Reveal>
 
-          <Reveal className="col-span-2 col-start-3 row-start-2 w-full delay-200">
-            <HomeProductCard
-              product={FEATURED[3]}
-            />
-          </Reveal>
-        </div>
+            <Reveal className="col-span-2 h-full w-full delay-160 min-h-0">
+              <HomeProductCard product={featuredProducts[3]} />
+            </Reveal>
+          </div>
+        ) : (
+          <div className="w-full h-[60vh] flex items-center justify-center border-t border-(--gray-800)">
+            <p className="font-sans text-[10px] tracking-[0.2em] uppercase text-(--gray-400)">
+              Loading Archive...
+            </p>
+          </div>
+        )}
 
         <Reveal className="mt-8 flex justify-center md:hidden delay-220">
           <RotatingBadge mobile />
@@ -202,7 +192,7 @@ export default function Home() {
           {HOME_CATEGORIES.map((cat, i) => (
             <Reveal key={cat.name} className="w-full h-full" threshold={0.14}>
               <Link href="/products" className="group block relative w-full h-full border-r border-b border-(--gray-800) overflow-hidden bg-(--black)">
-                <div className="relative aspect-[2/3] w-full h-full">
+                <div className="relative aspect-2/3 w-full h-full">
                   <img src={cat.img} alt={cat.name} className="absolute inset-0 h-full w-full object-cover transition-transform duration-[2s] ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:scale-105" />
                   <div className="absolute inset-0 bg-black/40 transition-colors duration-500 group-hover:bg-black/10" />
                   <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
@@ -230,7 +220,7 @@ export default function Home() {
               Editorial — FW26
             </p>
           </Reveal>
-          <Reveal className="delay-[120ms]">
+          <Reveal className="delay-120ms">
             <h2 className="font-serif text-[clamp(4rem,10vw,9rem)] leading-[0.8] tracking-tighter text-(--beige) mb-12">
               Redefine<br />
               <em>
@@ -240,7 +230,7 @@ export default function Home() {
               </em>
             </h2>
           </Reveal>
-          <Reveal className="delay-[220ms]">
+          <Reveal className="delay-220ms">
             <Link
               href="/products"
               className="inline-flex items-center justify-center bg-transparent border border-(--beige) px-12 py-5 font-sans text-[10px] font-bold tracking-[0.2em] uppercase text-(--beige) transition-all duration-500 hover:bg-(--beige) hover:text-(--black)"
@@ -266,13 +256,17 @@ export default function Home() {
 
         <div className="overflow-hidden w-full">
           <div className="scroll-row w-max pl-6 md:pl-12 flex" style={{ gap: "0" }}>
-            {[...LOOKBOOK, ...LOOKBOOK].map((img, i) => (
-              <Reveal key={i} className="shrink-0" threshold={0.12}>
-                <div className="relative aspect-2/3 w-[75vw] sm:w-[45vw] md:w-[30vw] lg:w-[22vw] border-r border-y border-(--gray-800) overflow-hidden bg-(--gray-900) first:border-l">
-                  <img src={img} alt={`Look ${(i % LOOKBOOK.length) + 1}`} className="h-full w-full object-cover transition-transform duration-[2s] hover:scale-105" />
-                </div>
-              </Reveal>
-            ))}
+            {lookbookProducts.length > 0 ? (
+              lookbookProducts.map((product) => (
+                <Lookbook key={product.id} product={product} />
+              ))
+            ) : (
+              <div className="w-full h-[60vh] flex items-center justify-center border-t border-(--gray-800)">
+                <p className="font-sans text-[10px] tracking-[0.2em] uppercase text-(--gray-400)">
+                  Loading Lookbook...
+                </p>
+              </div>
+            )}
           </div>
         </div>
       </section>
