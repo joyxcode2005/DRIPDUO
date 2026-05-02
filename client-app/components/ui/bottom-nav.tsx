@@ -3,7 +3,7 @@
 import React from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Home, Search, ShoppingBag, User } from "lucide-react";
+import { Home, ShoppingBag, User } from "lucide-react";
 import { useCart } from "@/lib/CartContext";
 
 export const BottomNav = () => {
@@ -13,7 +13,6 @@ export const BottomNav = () => {
 
   const navItems = [
     { href: "/", icon: Home, label: "Home" },
-    { href: "/products", icon: Search, label: "Search" },
   ];
 
   return (
