@@ -10,7 +10,7 @@ type Category = {
   name: string;
   slug: string;
   is_active: boolean;
-  parent_id: string | null; // Added parent_id
+  parent_id: string | null;
 };
 
 // Helper type for our structured category tree

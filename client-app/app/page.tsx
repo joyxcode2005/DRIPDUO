@@ -48,11 +48,11 @@ function Stat({ value, suffix, label, trigger }: { value: number; suffix: string
   const count = useCounter(value, 1800, trigger);
   return (
     <div className="flex flex-col gap-1">
-      <span className="font-serif text-[clamp(2.8rem,5vw,5rem)] leading-none text-[var(--beige)] tabular-nums">
+      <span className="font-serif text-[clamp(2.8rem,5vw,5rem)] leading-none text-(--beige) tabular-nums">
         {count}
-        <span className="text-[var(--orange)]">{suffix}</span>
+        <span className="text-(--orange)">{suffix}</span>
       </span>
-      <span className="font-sans text-[9px] tracking-[0.25em] uppercase text-[var(--gray-400)]">{label}</span>
+      <span className="font-sans text-[9px] tracking-[0.25em] uppercase text-(--gray-400)">{label}</span>
     </div>
   );
 }
@@ -119,7 +119,7 @@ export default function Home() {
   if (!splashGone) return <Loading />;
 
   return (
-    <main className="w-full overflow-x-clip bg-[var(--black)] text-[var(--beige)]">
+    <main className="w-full overflow-x-clip bg-(--black) text-(--beige)">
 
       {/* ══════════════════════════════════════════════
           HERO — full bleed with magnetic cursor glow
@@ -139,8 +139,8 @@ export default function Home() {
         />
 
         {/* Gradient layers */}
-        <div className="absolute inset-0 bg-gradient-to-t from-black via-black/30 to-transparent" />
-        <div className="absolute inset-0 bg-gradient-to-r from-black/60 via-transparent to-transparent" />
+        <div className="absolute inset-0 bg-linear-to-t from-black via-black/30 to-transparent" />
+        <div className="absolute inset-0 bg-linear-to-r from-black/60 via-transparent to-transparent" />
 
         {/* Noise grain overlay */}
         <div className="absolute inset-0 opacity-30 mix-blend-overlay pointer-events-none" style={{ backgroundImage: NOISE_SVG }} />
@@ -163,7 +163,7 @@ export default function Home() {
         {/* Top bar */}
         <div className="absolute top-24 left-0 right-0 flex items-center justify-between px-6 md:px-12 z-10">
           <Reveal>
-            <span className="font-sans text-[9px] tracking-[0.35em] uppercase text-[var(--orange)] border border-[var(--orange)]/30 px-3 py-1.5 backdrop-blur-sm bg-[var(--orange)]/5">
+            <span className="font-sans text-[9px] tracking-[0.35em] uppercase text-(--orange) border border-(--orange)/30 px-3 py-1.5 backdrop-blur-sm bg-(--orange)/5">
               FW 2026 — New Collection
             </span>
           </Reveal>
@@ -176,8 +176,8 @@ export default function Home() {
         {/* Hero text */}
         <div className="absolute inset-x-0 bottom-0 flex flex-col items-start justify-end px-6 md:px-12 pb-20 md:pb-24 z-10">
           <Reveal>
-            <p className="font-sans text-[10px] tracking-[0.4em] uppercase text-[var(--gray-200)] mb-6 flex items-center gap-3">
-              <span className="w-8 h-px bg-[var(--orange)]" />
+            <p className="font-sans text-[10px] tracking-[0.4em] uppercase text-(--gray-200) mb-6 flex items-center gap-3">
+              <span className="w-8 h-px bg-(--orange)" />
               Engineered for those who demand excellence
             </p>
           </Reveal>
@@ -185,7 +185,7 @@ export default function Home() {
           <div className="overflow-hidden">
             <Reveal>
               <h1
-                className="font-serif leading-[0.82] tracking-[-0.03em] text-[var(--beige)] drop-shadow-2xl"
+                className="font-serif leading-[0.82] tracking-[-0.03em] text-(--beige) drop-shadow-2xl"
                 style={{ fontSize: "clamp(5rem,16vw,13rem)" }}
               >
                 New
@@ -195,7 +195,7 @@ export default function Home() {
           <div className="overflow-hidden">
             <Reveal className="delay-100">
               <h1
-                className="font-serif italic leading-[0.82] tracking-[-0.03em] text-[var(--beige)] drop-shadow-2xl"
+                className="font-serif italic leading-[0.82] tracking-[-0.03em] text-(--beige) drop-shadow-2xl"
                 style={{ fontSize: "clamp(5rem,16vw,13rem)" }}
               >
                 <SketchHighlight type="underline" delay={1200} color="var(--orange)">
@@ -208,14 +208,14 @@ export default function Home() {
           <Reveal className="delay-300 mt-10 flex flex-col sm:flex-row items-start sm:items-center gap-4">
             <Link
               href="/products"
-              className="group inline-flex items-center gap-4 bg-[var(--orange)] text-[var(--black)] font-sans text-[10px] font-bold uppercase tracking-[0.25em] px-10 py-5 hover:bg-[var(--beige)] transition-all duration-500 relative overflow-hidden"
+              className="group inline-flex items-center gap-4 bg-(--orange) text-(--black) font-sans text-[10px] font-bold uppercase tracking-[0.25em] px-10 py-5 hover:bg-(--beige) transition-all duration-500 relative overflow-hidden"
             >
               <span className="relative z-10">Discover Now</span>
               <ArrowRight size={13} strokeWidth={2} className="relative z-10 transition-transform duration-300 group-hover:translate-x-1" />
             </Link>
             <Link
               href="/products"
-              className="font-sans text-[10px] tracking-[0.25em] uppercase text-[var(--gray-200)] hover:text-[var(--beige)] transition-colors flex items-center gap-2 border-b border-[var(--gray-600)] pb-px hover:border-[var(--beige)]"
+              className="font-sans text-[10px] tracking-[0.25em] uppercase text-(--gray-200) hover:text-(--beige) transition-colors flex items-center gap-2 border-b border-(--gray-600) pb-px hover:border-(--beige)"
             >
               View Lookbook
             </Link>
@@ -224,18 +224,18 @@ export default function Home() {
 
         {/* Scroll indicator */}
         <div className="absolute bottom-8 right-8 md:right-12 z-10 flex flex-col items-center gap-2 animate-bounce">
-          <span className="font-sans text-[8px] tracking-[0.3em] uppercase text-[var(--gray-400)] rotate-90 origin-center mb-2" style={{ writingMode: "vertical-rl" }}>Scroll</span>
-          <ArrowDown size={12} strokeWidth={1} className="text-[var(--gray-400)]" />
+          <span className="font-sans text-[8px] tracking-[0.3em] uppercase text-(--gray-400) rotate-90 origin-center mb-2" style={{ writingMode: "vertical-rl" }}>Scroll</span>
+          <ArrowDown size={12} strokeWidth={1} className="text-(--gray-400)" />
         </div>
       </section>
 
       {/* ══════════════════════════════════════════════
           MARQUEE TICKER
       ══════════════════════════════════════════════ */}
-      <div className="overflow-hidden bg-[var(--orange)] py-3">
+      <div className="overflow-hidden bg-(--orange) py-3">
         <div className="marquee-track">
-          {[...Array(10)].map((_, i) => (
-            <span key={i} className="font-sans whitespace-nowrap px-8 text-[9px] tracking-[0.3em] uppercase text-[var(--black)] font-semibold">
+          {[...Array(7)].map((_, i) => (
+            <span key={i} className="font-sans whitespace-nowrap px-8 text-[9px] tracking-[0.3em] uppercase text-(--black) font-semibold">
               Free Shipping Over ₹2000 &nbsp;★&nbsp; New Arrivals Weekly &nbsp;★&nbsp; Easy 30-Day Returns &nbsp;★&nbsp; Premium Heavyweight Cotton &nbsp;★&nbsp;
             </span>
           ))}
@@ -245,8 +245,8 @@ export default function Home() {
       {/* ══════════════════════════════════════════════
           STATS STRIP
       ══════════════════════════════════════════════ */}
-      <div ref={statsRef} className="border-b border-[var(--gray-800)] bg-[var(--gray-900)]">
-        <div className="max-w-7xl mx-auto px-6 md:px-12 py-14 grid grid-cols-2 md:grid-cols-4 gap-8 md:gap-0 md:divide-x divide-[var(--gray-800)]">
+      <div ref={statsRef} className="border-b border-(--gray-800) bg-(--gray-900)">
+        <div className="max-w-7xl mx-auto px-6 md:px-12 py-14 grid grid-cols-2 md:grid-cols-4 gap-8 md:gap-0 md:divide-x divide-(--gray-800)">
           {[
             { value: 240, suffix: "+", label: "GSM Heavyweight" },
             { value: 100, suffix: "%", label: "Premium Cotton" },
@@ -268,11 +268,11 @@ export default function Home() {
         <div className="px-6 md:px-12 mb-12 flex items-end justify-between">
           <Reveal>
             <div>
-              <p className="font-sans text-[9px] tracking-[0.35em] uppercase text-[var(--orange)] mb-3 flex items-center gap-2">
-                <span className="w-6 h-px bg-[var(--orange)]" />
+              <p className="font-sans text-[9px] tracking-[0.35em] uppercase text-(--orange) mb-3 flex items-center gap-2">
+                <span className="w-6 h-px bg-(--orange)" />
                 Archive
               </p>
-              <h2 className="font-serif leading-[0.95] text-[var(--beige)]" style={{ fontSize: "clamp(2.5rem,6vw,5rem)" }}>
+              <h2 className="font-serif leading-[0.95] text-(--beige)" style={{ fontSize: "clamp(2.5rem,6vw,5rem)" }}>
                 Featured<br />
                 <em>
                   <SketchHighlight type="underline" delay={300} color="var(--orange)">
@@ -283,7 +283,7 @@ export default function Home() {
             </div>
           </Reveal>
           <Reveal className="delay-200 hidden md:block">
-            <Link href="/products" className="group font-sans text-[10px] tracking-[0.2em] uppercase text-[var(--gray-400)] hover:text-[var(--orange)] transition-colors flex items-center gap-2">
+            <Link href="/products" className="group font-sans text-[10px] tracking-[0.2em] uppercase text-(--gray-400) hover:text-(--orange) transition-colors flex items-center gap-2">
               View All
               <ArrowRight size={12} strokeWidth={1.5} className="transition-transform group-hover:translate-x-1" />
             </Link>
@@ -292,23 +292,36 @@ export default function Home() {
 
         {/* Gapless grid */}
         {featuredProducts.length >= 4 ? (
-          <div className="grid grid-cols-4 gap-0 w-full border-t border-l border-[var(--gray-800)]">
-            <Reveal className="col-span-2 row-span-2 h-full w-full min-h-0">
-              <HomeProductCard product={featuredProducts[0]} />
-            </Reveal>
-            <Reveal className="col-span-1 w-full delay-100 min-h-0">
-              <HomeProductCard product={featuredProducts[1]} />
-            </Reveal>
-            <Reveal className="col-span-1 w-full delay-150 min-h-0">
-              <HomeProductCard product={featuredProducts[2]} />
-            </Reveal>
-            <Reveal className="col-span-2 h-full w-full delay-200 min-h-0">
-              <HomeProductCard product={featuredProducts[3]} />
-            </Reveal>
+          <div className="w-full">
+
+            {/* Replaced 75vh and min-h-[800px] with a strict max-height (500px to 600px max) */}
+            <div className="grid grid-cols-1 md:grid-cols-4 md:grid-rows-2 gap-0 w-full h-auto md:h-[500px] lg:h-[600px] border-t border-l border-(--gray-800)">
+
+              {/* Product 1: Large square (Left half) */}
+              <Reveal className="md:col-span-2 md:row-span-2 h-full w-full min-h-0 border-r border-b border-(--gray-800)">
+                <HomeProductCard product={featuredProducts[0]} />
+              </Reveal>
+
+              {/* Product 2: Top middle */}
+              <Reveal className="md:col-span-1 h-full w-full delay-100 min-h-0 border-r border-b border-(--gray-800)">
+                <HomeProductCard product={featuredProducts[1]} />
+              </Reveal>
+
+              {/* Product 3: Top right */}
+              <Reveal className="md:col-span-1 h-full w-full delay-150 min-h-0 border-r border-b border-(--gray-800)">
+                <HomeProductCard product={featuredProducts[2]} />
+              </Reveal>
+
+              {/* Product 4: Bottom wide */}
+              <Reveal className="md:col-span-2 h-full w-full delay-200 min-h-0 border-r border-b border-(--gray-800)">
+                <HomeProductCard product={featuredProducts[3]} />
+              </Reveal>
+
+            </div>
           </div>
         ) : (
-          <div className="w-full h-[50vh] flex items-center justify-center border-t border-[var(--gray-800)]">
-            <p className="font-sans text-[10px] tracking-[0.2em] uppercase text-[var(--gray-400)] animate-pulse">
+          <div className="w-full h-[50vh] flex items-center justify-center border-t border-(--gray-800)">
+            <p className="font-sans text-[10px] tracking-[0.2em] uppercase text-(--gray-400) animate-pulse">
               Loading Archive…
             </p>
           </div>
@@ -318,30 +331,30 @@ export default function Home() {
       {/* ══════════════════════════════════════════════
           EDITORIAL SPLIT — two column brand statement
       ══════════════════════════════════════════════ */}
-      <section className="w-full border-t border-[var(--gray-800)] mt-20 md:mt-32 grid grid-cols-1 md:grid-cols-2">
+      <section className="w-full border-t border-(--gray-800) mt-20 md:mt-32 grid grid-cols-1 md:grid-cols-2">
         {/* Left: Bold type */}
-        <Reveal className="flex flex-col justify-between px-6 md:px-12 py-16 md:py-24 border-r border-[var(--gray-800)]">
-          <p className="font-sans text-[9px] tracking-[0.35em] uppercase text-[var(--orange)] flex items-center gap-2 mb-12">
-            <span className="w-6 h-px bg-[var(--orange)]" />
+        <Reveal className="flex flex-col justify-between px-6 md:px-12 py-16 md:py-24 border-r border-(--gray-800)">
+          <p className="font-sans text-[9px] tracking-[0.35em] uppercase text-(--orange) flex items-center gap-2 mb-12">
+            <span className="w-6 h-px bg-(--orange)" />
             Our Philosophy
           </p>
           <div>
             <h2
-              className="font-serif leading-[0.88] tracking-[-0.02em] text-[var(--beige)] mb-8"
+              className="font-serif leading-[0.88] tracking-[-0.02em] text-(--beige) mb-8"
               style={{ fontSize: "clamp(3rem,6vw,6rem)" }}
             >
               Unapologetic<br />
-              <em className="text-[var(--orange)]">Style.</em><br />
+              <em className="text-(--orange)">Style.</em><br />
               Uncompromising<br />
               <em>Quality.</em>
             </h2>
-            <p className="font-sans text-[11px] leading-[1.9] tracking-[0.04em] text-[var(--gray-200)] max-w-sm">
+            <p className="font-sans text-[11px] leading-[1.9] tracking-[0.04em] text-(--gray-200) max-w-sm">
               Every thread is a choice. Every silhouette, a statement. We build garments for those who refuse to settle — constructed from ultra-dense cotton, engineered to hold shape through every season.
             </p>
           </div>
           <Link
             href="/products"
-            className="group mt-12 inline-flex items-center gap-3 font-sans text-[10px] tracking-[0.25em] uppercase text-[var(--beige)] border-b border-[var(--beige)] pb-px w-fit hover:text-[var(--orange)] hover:border-[var(--orange)] transition-all duration-300"
+            className="group mt-12 inline-flex items-center gap-3 font-sans text-[10px] tracking-[0.25em] uppercase text-(--beige) border-b border-(--beige) pb-px w-fit hover:text-(--orange) hover:border-(--orange) transition-all duration-300"
           >
             Shop the Collection
             <ArrowRight size={12} strokeWidth={1.5} className="transition-transform group-hover:translate-x-1" />
@@ -349,16 +362,16 @@ export default function Home() {
         </Reveal>
 
         {/* Right: Large image with overlay tag */}
-        <Reveal className="delay-150 relative h-[60vw] md:h-auto overflow-hidden bg-[var(--gray-900)]">
+        <Reveal className="delay-150 relative h-[60vw] md:h-auto overflow-hidden bg-(--gray-900)">
           <img
             src="/images/mockup.png"
             alt="Editorial"
             className="absolute inset-0 w-full h-full object-cover transition-transform duration-[3s] ease-[cubic-bezier(0.16,1,0.3,1)] hover:scale-105"
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent" />
+          <div className="absolute inset-0 bg-linear-to-t from-black/70 via-transparent to-transparent" />
           <div className="absolute bottom-6 left-6 right-6 flex items-end justify-between">
-            <span className="font-sans text-[9px] tracking-[0.25em] uppercase text-[var(--gray-200)]">Editorial — FW26</span>
-            <span className="font-serif italic text-[var(--orange)] text-lg">Origins</span>
+            <span className="font-sans text-[9px] tracking-[0.25em] uppercase text-(--gray-200)">Editorial — FW26</span>
+            <span className="font-serif italic text-(--orange) text-lg">Origins</span>
           </div>
         </Reveal>
       </section>
@@ -366,15 +379,15 @@ export default function Home() {
       {/* ══════════════════════════════════════════════
           SHOP BY CATEGORY — hover-reveal grid
       ══════════════════════════════════════════════ */}
-      <section className="w-full pt-20 md:pt-32 border-t border-[var(--gray-800)] mt-20 md:mt-32">
+      <section className="w-full pt-20 md:pt-32 border-t border-(--gray-800) mt-20 md:mt-32">
         <div className="px-6 md:px-12 mb-12 flex items-end justify-between">
           <Reveal>
             <div>
-              <p className="font-sans text-[9px] tracking-[0.35em] uppercase text-[var(--orange)] mb-3 flex items-center gap-2">
-                <span className="w-6 h-px bg-[var(--orange)]" />
+              <p className="font-sans text-[9px] tracking-[0.35em] uppercase text-(--orange) mb-3 flex items-center gap-2">
+                <span className="w-6 h-px bg-(--orange)" />
                 Categories
               </p>
-              <h2 className="font-serif leading-[1.02] text-[var(--beige)]" style={{ fontSize: "clamp(2.5rem,5vw,4.5rem)" }}>
+              <h2 className="font-serif leading-[1.02] text-(--beige)" style={{ fontSize: "clamp(2.5rem,5vw,4.5rem)" }}>
                 Shop by<br />
                 <em>
                   <SketchHighlight type="circle" delay={300} color="var(--orange)">
@@ -384,17 +397,17 @@ export default function Home() {
               </h2>
             </div>
           </Reveal>
-          <Link href="/products" className="hidden md:inline font-sans text-[10px] tracking-[0.2em] uppercase text-[var(--orange)] hover:underline underline-offset-4 transition-all">
+          <Link href="/products" className="hidden md:inline font-sans text-[10px] tracking-[0.2em] uppercase text-(--orange) hover:underline underline-offset-4 transition-all">
             View All
           </Link>
         </div>
 
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-0 w-full border-t border-l border-[var(--gray-800)]">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-0 w-full border-t border-l border-(--gray-800)">
           {HOME_CATEGORIES.map((cat, i) => (
             <Reveal key={cat.name} className="w-full h-full" threshold={0.14}>
               <Link
                 href="/products"
-                className="group block relative w-full h-full border-r border-b border-[var(--gray-800)] overflow-hidden bg-[var(--black)]"
+                className="group block relative w-full h-full border-r border-b border-(--gray-800) overflow-hidden bg-(--black)  "
               >
                 <div className="relative w-full" style={{ aspectRatio: "3/4" }}>
                   <img
@@ -404,22 +417,22 @@ export default function Home() {
                   />
                   {/* Darkening layers */}
                   <div className="absolute inset-0 bg-black/50 transition-opacity duration-500 group-hover:opacity-20" />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
+                  <div className="absolute inset-0 bg-linear-to-t from-black/80 via-black/20 to-transparent" />
 
                   {/* Bottom label */}
                   <div className="absolute inset-x-0 bottom-0 px-5 pb-6 flex items-end justify-between">
-                    <p className="font-sans text-[10px] tracking-[0.25em] uppercase text-[var(--beige)] transition-colors duration-200 group-hover:text-[var(--orange)]">
+                    <p className="font-sans text-[10px] tracking-[0.25em] uppercase text-(--beige) transition-colors duration-200 group-hover:text-(--orange)">
                       {cat.name}
                     </p>
                     <ArrowRight
                       size={14}
                       strokeWidth={1.5}
-                      className="text-[var(--gray-400)] opacity-0 group-hover:opacity-100 transition-all duration-300 translate-x-[-6px] group-hover:translate-x-0 group-hover:text-[var(--orange)]"
+                      className="text-(--gray-400) opacity-0 group-hover:opacity-100 transition-all duration-300 -translate-x-1.5 group-hover:translate-x-0 group-hover:text-(--orange)"
                     />
                   </div>
 
                   {/* Index number */}
-                  <div className="absolute top-4 left-4 font-sans text-[9px] tracking-[0.2em] text-[var(--gray-600)] group-hover:text-[var(--orange)] transition-colors duration-300">
+                  <div className="absolute top-4 left-4 font-sans text-[9px] tracking-[0.2em] text-(--gray-600) group-hover:text-(--orange) transition-colors duration-300">
                     0{i + 1}
                   </div>
                 </div>
@@ -432,16 +445,16 @@ export default function Home() {
       {/* ══════════════════════════════════════════════
           PROCESS / WHY US — horizontal feature list
       ══════════════════════════════════════════════ */}
-      <section className="w-full border-t border-[var(--gray-800)] mt-20 md:mt-32">
+      <section className="w-full border-t border-(--gray-800) mt-20 md:mt-32">
         <div className="max-w-7xl mx-auto px-6 md:px-12 py-20 md:py-32">
           <Reveal>
-            <p className="font-sans text-[9px] tracking-[0.35em] uppercase text-[var(--orange)] mb-4 flex items-center gap-2">
-              <span className="w-6 h-px bg-[var(--orange)]" />
+            <p className="font-sans text-[9px] tracking-[0.35em] uppercase text-(--orange) mb-4 flex items-center gap-2">
+              <span className="w-6 h-px bg-(--orange)" />
               The DRIPDUO Difference
             </p>
           </Reveal>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-0 mt-12 border-t border-[var(--gray-800)]">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-0 mt-12 border-t border-(--gray-800)">
             {[
               {
                 num: "01",
@@ -459,8 +472,8 @@ export default function Home() {
                 body: "From sourcing to stitching — every step is held to the highest possible standard.",
               },
             ].map((feat) => (
-              <Reveal key={feat.num} className="border-b md:border-b-0 md:border-r border-[var(--gray-800)] py-10 pr-0 md:pr-10 last:border-r-0 last:pl-0 md:first:pl-0 md:pl-10 flex flex-col gap-5">
-                <span className="font-sans text-[9px] tracking-[0.3em] uppercase text-[var(--orange)]">{feat.num}</span>
+              <Reveal key={feat.num} className="border-b md:border-b-0 md:border-r border-(--gray-800) py-10 pr-0 md:pr-10 last:border-r-0 last:pl-0 md:first:pl-0 md:pl-10 flex flex-col gap-5">
+                <span className="font-sans text-[9px] tracking-[0.3em] uppercase text-(--orange)">{feat.num}</span>
                 <h3 className="font-serif text-2xl md:text-3xl text-[var(--beige)] leading-tight">{feat.title}</h3>
                 <p className="font-sans text-[11px] leading-[1.85] tracking-[0.04em] text-[var(--gray-200)]">{feat.body}</p>
               </Reveal>
@@ -499,14 +512,14 @@ export default function Home() {
             </h2>
           </Reveal>
           <Reveal className="delay-200">
-            <p className="font-sans text-[11px] leading-[1.8] tracking-[0.04em] text-[var(--gray-100)] max-w-sm mb-10">
+            <p className="font-sans text-[11px] leading-[1.8] tracking-[0.04em] text-(--gray-100) max-w-sm mb-10">
               A collection built from obsession. Drop into the archive and find your next statement piece.
             </p>
           </Reveal>
           <Reveal className="delay-300 flex gap-4 flex-wrap">
             <Link
               href="/products"
-              className="group inline-flex items-center gap-4 border border-[var(--beige)] px-10 py-5 font-sans text-[10px] font-bold tracking-[0.2em] uppercase text-[var(--beige)] hover:bg-[var(--beige)] hover:text-[var(--black)] transition-all duration-500"
+              className="group inline-flex items-center gap-4 border border-(--beige) px-10 py-5 font-sans text-[10px] font-bold tracking-[0.2em] uppercase text-(--beige) hover:bg-(--beige) hover:text-(--black) transition-all duration-500"
             >
               Shop the Look
               <ArrowRight size={13} strokeWidth={2} className="transition-transform group-hover:translate-x-1" />
@@ -515,7 +528,7 @@ export default function Home() {
         </div>
 
         {/* Corner watermark */}
-        <div className="absolute top-8 right-8 md:top-12 md:right-16 font-serif text-[var(--gray-800)] select-none pointer-events-none" style={{ fontSize: "clamp(4rem,10vw,9rem)", lineHeight: 1 }}>
+        <div className="absolute top-8 right-8 md:top-12 md:right-16 font-serif text-(--gray-800) select-none pointer-events-none" style={{ fontSize: "clamp(4rem,10vw,9rem)", lineHeight: 1 }}>
           FW26
         </div>
       </section>
@@ -536,7 +549,7 @@ export default function Home() {
               </h2>
             </div>
           </Reveal>
-          <Link href="/products" className="hidden md:inline font-sans text-[10px] tracking-[0.2em] uppercase text-[var(--orange)] hover:underline underline-offset-4 transition-all">
+          <Link href="/products" className="hidden md:inline font-sans text-[10px] tracking-[0.2em] uppercase text-(--orange) hover:underline underline-offset-4 transition-all">
             Full Collection
           </Link>
         </div>

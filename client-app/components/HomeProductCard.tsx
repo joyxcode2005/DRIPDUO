@@ -1,27 +1,28 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
-// import { useCart } from "@/lib/CartContext";
 import Image from "next/image";
 import { FeaturedProduct } from "@/app/page";
 
 export default function HomeProductCard({ product }: { product: FeaturedProduct }) {
-
-
     return (
         <Link
             href={`/products/${product.id}`}
-            className="group relative border-r border-b border-(--gray-800) overflow-hidden bg-(--gray-900) block cursor-pointer"
+            // Added h-full and w-full here to ensure the link fills the grid cell
+            className="group relative border-r border-b border-(--gray-800) overflow-hidden bg-(--gray-900) block cursor-pointer w-full h-full"
         >
-            <div className="w-full relative" style={{ aspectRatio: "2/3" }}>
+            {/* 1. Removed aspectRatio: "2/3" and added h-full so it takes the grid's shape */}
+            <div className="w-full h-full relative">
+
+                {/* 2. Replaced width/height with `fill` and `sizes` */}
                 <Image
-                    width={100}
-                    height={100}
+                    fill
+                    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                     src={product.product_images[0]?.url || "/images/placeholder.jpg"}
                     alt={product.name}
-                    className="absolute inset-0 w-full h-full object-cover transition-opacity duration-700"
+                    className="object-cover transition-opacity duration-700"
                 />
+
                 <div className="absolute inset-x-0 bottom-0 h-32 bg-linear-to-t from-black/70 to-transparent pointer-events-none" />
             </div>
 
@@ -33,7 +34,6 @@ export default function HomeProductCard({ product }: { product: FeaturedProduct 
                     </p>
                 </div>
             </div>
-
         </Link>
     );
 }

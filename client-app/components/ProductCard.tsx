@@ -112,7 +112,7 @@ export default function ProductCard({ product }: { product: Product }) {
 
         {/* ── Top Tags: Category + Type + Sale badge ── */}
         <div className="absolute top-3 left-3 z-20 flex flex-wrap gap-1.5">
-          <span className="font-sans text-[8px] tracking-[0.12em] uppercase px-2 py-1 text-(--beige) backdrop-blur-sm bg-white/[0.07] border border-white/10">
+          <span className="font-sans text-[8px] tracking-[0.12em] uppercase px-2 py-1 text-(--beige) backdrop-blur-sm bg-black/40 border border-white/10">
             {categoryName}
           </span>
           {productTypeName && (
@@ -202,11 +202,6 @@ export default function ProductCard({ product }: { product: Product }) {
         <p className="font-sans text-[8px] tracking-[0.14em] uppercase text-(--gray-400)">
           {productTypeName || categoryName}
         </p>
-        {/* Optional: plug in real rating data */}
-        <div className="flex items-center gap-1">
-          <span className="text-(--orange) text-[9px]">★</span>
-          <span className="font-sans text-[8px] tracking-widest text-(--gray-400)">4.8</span>
-        </div>
       </div>
     </Link>
   );
