@@ -1,17 +1,21 @@
 "use client";
 
 import { useState, useMemo, useEffect } from "react";
-import { SlidersHorizontal, X, ChevronDown } from "lucide-react";
+import { X, ChevronDown } from "lucide-react";
 import { getAllCategories, getAllProducts, getAllProductTypes } from "@/services/products";
-import ProductCard, { Product } from "@/components/ProductCard"; // Adjust this import path as needed
-
-const SORT_OPTIONS = ["New In", "Price: Low to High", "Price: High to Low"];
+import ProductCard, { Product } from "@/components/ProductCard";
 
 type Category = {
   id: string;
   name: string;
   slug: string;
   is_active: boolean;
+  parent_id: string | null; // Added parent_id
+};
+
+// Helper type for our structured category tree
+type CategoryWithSubs = Category & {
+  subcategories: Category[];
 };
 
 type Product_Type = {
@@ -24,7 +28,6 @@ type Product_Type = {
 export default function ProductsPage() {
   const [activeCategory, setActiveCategory] = useState("All");
   const [activeType, setActiveType] = useState("All");
-  const [sortBy, setSortBy] = useState("New In");
   const [filterOpen, setFilterOpen] = useState(false);
 
   const [products, setProducts] = useState<Product[]>([]);
@@ -64,49 +67,61 @@ export default function ProductsPage() {
     fetchProductTypes();
   }, []);
 
+  // Process flat categories into a structured Parent -> Children tree
+  const categoryTree = useMemo<CategoryWithSubs[]>(() => {
+    const parents = categories.filter((c) => !c.parent_id);
+    return parents.map((p) => ({
+      ...p,
+      subcategories: categories.filter((c) => c.parent_id === p.id),
+    }));
+  }, [categories]);
+
   const filteredAndSortedProducts = useMemo(() => {
     let result = [...products];
 
-    // 1. Filter by Category (Matching Supabase nested structure)
     if (activeCategory !== "All") {
-      result = result.filter(p => 
-        p.product_categories?.some(c => c.categories?.slug === activeCategory)
+      const parentCat = categoryTree.find((c) => c.slug === activeCategory);
+
+      let targetSlugs = [activeCategory];
+
+      if (parentCat) {
+        targetSlugs = [
+          activeCategory,
+          ...parentCat.subcategories.map((sub) => sub.slug),
+        ];
+      }
+
+      result = result.filter((p) =>
+        p.product_categories?.some((c) =>
+          targetSlugs.includes(c.categories?.slug)
+        )
       );
     }
 
     // 2. Filter by Product Type (Sidebar drawer)
     if (activeType !== "All") {
-      // Depending on your join, we check either the slug or the id
-      result = result.filter(p => p.product_type?.name === activeType || p.product_type_id === activeType);
+      result = result.filter(
+        (p) => p.product_type?.name === activeType || p.product_type_id === activeType
+      );
     }
 
-    // 3. Apply Sorting
-    if (sortBy === "Price: Low to High") {
-      result.sort((a, b) => a.final_price - b.final_price);
-    } else if (sortBy === "Price: High to Low") {
-      result.sort((a, b) => b.final_price - a.final_price);
-    } else if (sortBy === "New In") {
-      result.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
-    }
 
     return result;
-  }, [products, activeCategory, activeType, sortBy]);
+  }, [products, activeCategory, activeType, categoryTree]);
 
   return (
     <div className="bg-(--black) min-h-screen text-(--beige) pt-16">
       {/* FILTER DRAWER OVERLAY */}
       <div
-        className={`fixed inset-0 bg-black/80 z-90 backdrop-blur-sm transition-opacity duration-300 ${
-          filterOpen ? "opacity-100 visible" : "opacity-0 invisible"
-        }`}
+        className={`fixed inset-0 bg-black/80 z-90 backdrop-blur-sm transition-opacity duration-300 ${filterOpen ? "opacity-100 visible" : "opacity-0 invisible"
+          }`}
         onClick={() => setFilterOpen(false)}
       />
 
       {/* FILTER DRAWER - DARK THEME */}
       <aside
-        className={`fixed top-0 right-0 h-full w-full max-w-[400px] bg-(--black) border-l border-(--gray-800) z-100 transform transition-transform duration-500 ease-[cubic-bezier(0.25,1,0.5,1)] flex flex-col ${
-          filterOpen ? "translate-x-0" : "translate-x-full"
-        }`}
+        className={`fixed top-0 right-0 h-full w-full max-w-400px bg-(--black) border-l border-(--gray-800) z-100 transform transition-transform duration-500 ease-[cubic-bezier(0.25,1,0.5,1)] flex flex-col ${filterOpen ? "translate-x-0" : "translate-x-full"
+          }`}
       >
         <div className="flex items-center justify-between px-8 py-6 border-b border-(--gray-800)">
           <span className="font-sans text-[11px] font-semibold tracking-[0.2em] uppercase text-(--beige)">
@@ -122,7 +137,9 @@ export default function ProductsPage() {
 
         {/* Type filter */}
         <div className="mb-10 px-8 py-6">
-          <p className="label text-(--orange) mb-6" style={{ fontSize: "11px" }}>Product Type</p>
+          <p className="label text-(--orange) mb-6" style={{ fontSize: "11px" }}>
+            Product Type
+          </p>
 
           <button
             onClick={() => setActiveType("All")}
@@ -131,7 +148,7 @@ export default function ProductsPage() {
               fontSize: "12px",
               letterSpacing: "0.12em",
               color: activeType === "All" ? "var(--orange)" : "var(--beige)",
-              fontWeight: activeType === "All" ? 600 : 400
+              fontWeight: activeType === "All" ? 600 : 400,
             }}
           >
             ALL TYPES
@@ -146,30 +163,10 @@ export default function ProductsPage() {
                 fontSize: "12px",
                 letterSpacing: "0.12em",
                 color: activeType === t.slug ? "var(--orange)" : "var(--beige)",
-                fontWeight: activeType === t.slug ? 600 : 400
+                fontWeight: activeType === t.slug ? 600 : 400,
               }}
             >
               {t.name}
-            </button>
-          ))}
-        </div>
-
-        {/* Sort */}
-        <div className="px-8">
-          <p className="label text-(--orange) mb-6" style={{ fontSize: "11px" }}>Sort By</p>
-          {SORT_OPTIONS.map((s) => (
-            <button
-              key={s}
-              onClick={() => setSortBy(s)}
-              className="block w-full text-left py-3 label hover:text-(--orange) transition-colors"
-              style={{
-                fontSize: "12px",
-                fontWeight: sortBy === s ? 500 : 400,
-                color: sortBy === s ? "var(--orange)" : "var(--beige)",
-                letterSpacing: "0.12em"
-              }}
-            >
-              {s.toUpperCase()}
             </button>
           ))}
         </div>
@@ -177,72 +174,76 @@ export default function ProductsPage() {
 
       {/* TOP BAR */}
       <div className="z-40 bg-(--black) border-b border-(--gray-800) pt-6">
-        {/* Category tabs */}
-        <div className="flex items-center overflow-x-auto no-scroll px-6 md:px-12 gap-8 md:gap-12">
+        {/* Changed from overflow-x-auto to flex-wrap so the dropdown menu isn't clipped */}
+        <div className="flex flex-wrap items-center px-6 md:px-12 gap-x-8 md:gap-x-12 gap-y-2">
           <button
             onClick={() => setActiveCategory("All")}
-            className="shrink-0 label pb-5 border-b-[3px] transition-colors hover:text-(--orange)"
-            style={{
-              fontSize: "11.5px",
-              letterSpacing: "0.15em",
-              borderColor: activeCategory === "All" ? "var(--orange)" : "transparent",
-              color: activeCategory === "All" ? "var(--orange)" : "var(--gray-400)",
-            }}
+            className={`shrink-0 label pb-5 border-b-[3px] transition-colors hover:text-(--orange) ${activeCategory === "All"
+              ? "border-(--orange) text-(--orange)"
+              : "border-transparent text-(--gray-400)"
+              }`}
+            style={{ fontSize: "11.5px", letterSpacing: "0.15em" }}
           >
             ALL
           </button>
-          {categories.map((cat) => (
-            <button
-              key={cat.id}
-              onClick={() => setActiveCategory(cat.slug)}
-              className="shrink-0 label pb-5 border-b-[3px] transition-colors hover:text-(--orange)"
-              style={{
-                fontSize: "11.5px",
-                letterSpacing: "0.15em",
-                borderColor: activeCategory === cat.slug ? "var(--orange)" : "transparent",
-                color: activeCategory === cat.slug ? "var(--orange)" : "var(--gray-400)",
-              }}
-            >
-              {cat.name.toUpperCase()}
-            </button>
-          ))}
-        </div>
 
-        {/* Filter + Sort row */}
-        <div className="flex items-center justify-between px-6 md:px-12 py-5 border-t border-(--gray-900)">
-          <div className="flex items-center gap-6 md:gap-10">
-            <button
-              onClick={() => setFilterOpen(true)}
-              className="flex items-center gap-3 font-sans text-[11px] uppercase tracking-[0.15em] text-(--beige) hover:text-(--orange) transition-colors"
-            >
-              <SlidersHorizontal size={16} strokeWidth={1.5} />
-              FILTERS
-            </button>
-            <span className="label text-(--gray-400)" style={{ fontSize: "11px", letterSpacing: "0.15em" }}>
-              {filteredAndSortedProducts.length} ITEMS
-            </span>
-          </div>
+          {categoryTree.map((cat) => {
+            const isActiveParent = activeCategory === cat.slug;
+            const isActiveSub = cat.subcategories.some(
+              (sub) => sub.slug === activeCategory
+            );
+            const isHighlighted = isActiveParent || isActiveSub;
 
-          <div className="relative group">
-            <button className="flex items-center gap-3 font-sans text-[11px] uppercase tracking-[0.15em] text-(--beige) hover:text-(--orange) transition-colors">
-              {sortBy} <ChevronDown size={14} strokeWidth={1.5} />
-            </button>
-
-            {/* Dropdown Menu - Spacious */}
-            <div className="absolute right-0 top-full mt-3 bg-(--gray-900) border border-(--gray-800) shadow-lg z-50 hidden group-hover:block min-w-max py-2">
-              {SORT_OPTIONS.map((s) => (
+            return (
+              <div key={cat.id} className="relative group pb-5">
                 <button
-                  key={s}
-                  onClick={() => setSortBy(s)}
-                  className={`block w-full text-left px-8 py-4 font-sans text-[11px] uppercase tracking-[0.12em] transition-colors ${
-                    sortBy === s ? "font-medium text-(--orange)" : "text-(--beige) hover:bg-(--black) hover:text-(--orange)"
-                  }`}
+                  onClick={() => setActiveCategory(cat.slug)}
+                  className={`flex items-center gap-1.5 shrink-0 label border-b-[3px] transition-colors hover:text-(--orange) ${isHighlighted
+                    ? "border-(--orange) text-(--orange)"
+                    : "border-transparent text-(--gray-400)"
+                    }`}
+                  style={{ fontSize: "11.5px", letterSpacing: "0.15em" }}
                 >
-                  {s}
+                  {cat.name.toUpperCase()}
+                  {/* Rotate icon on group hover */}
+                  {cat.subcategories.length > 0 && (
+                    <ChevronDown
+                      size={14}
+                      className="transition-transform duration-300 group-hover:-rotate-180"
+                    />
+                  )}
                 </button>
-              ))}
-            </div>
-          </div>
+
+                {/* ANIMATED DROPDOWN */}
+                {cat.subcategories.length > 0 && (
+                  <div
+                    className="absolute left-0 top-full w-48 bg-(--black) border border-(--gray-800) shadow-2xl z-50 
+                    opacity-0 invisible translate-y-2 pointer-events-none
+                    transition-all duration-300 ease-[cubic-bezier(0.25,1,0.5,1)] 
+                    group-hover:opacity-100 group-hover:visible group-hover:translate-y-0 group-hover:pointer-events-auto"
+                  >
+                    <div className="flex flex-col py-2">
+                      {cat.subcategories.map((sub) => (
+                        <button
+                          key={sub.id}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setActiveCategory(sub.slug);
+                          }}
+                          className={`text-left px-5 py-3 font-sans text-[11px] tracking-[0.15em] transition-colors uppercase hover:bg-(--gray-900) hover:text-(--orange) ${activeCategory === sub.slug
+                            ? "text-(--orange) font-semibold"
+                            : "text-(--beige)"
+                            }`}
+                        >
+                          {sub.name}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            );
+          })}
         </div>
       </div>
 
@@ -250,11 +251,17 @@ export default function ProductsPage() {
       <div className="px-6 md:px-12 py-12 md:py-16">
         {filteredAndSortedProducts.length === 0 ? (
           <div className="text-center py-32">
-            <p className="label text-(--gray-400) mb-6" style={{ fontSize: "12px", letterSpacing: "0.15em" }}>
+            <p
+              className="label text-(--gray-400) mb-6"
+              style={{ fontSize: "12px", letterSpacing: "0.15em" }}
+            >
               No items found
             </p>
             <button
-              onClick={() => { setActiveCategory("All"); setActiveType("All"); }}
+              onClick={() => {
+                setActiveCategory("All");
+                setActiveType("All");
+              }}
               className="text-(--orange) border-b border-(--orange) pb-1 hover:opacity-75 transition-opacity font-sans text-[11px] tracking-[0.15em] uppercase"
             >
               CLEAR FILTERS
