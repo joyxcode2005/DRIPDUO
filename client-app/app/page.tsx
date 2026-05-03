@@ -4,13 +4,14 @@ import React, { useEffect, useState, useRef } from "react";
 import Link from "next/link";
 import { ArrowRight, ArrowDown } from "lucide-react";
 import Loading from "./loading";
-import { HOME_CATEGORIES, LOOKBOOK } from "@/constants";
+import { HOME_CATEGORIES } from "@/constants";
 import RotatingBadge from "@/components/RotatingBadge";
 import { SketchHighlight } from "@/components/SktechHighlight";
 import HomeProductCard from "@/components/HomeProductCard";
 import { getProductsforFeaturedSection, getProductsForLookbookSection } from "@/services/products";
 import Reveal from "@/components/Reveal";
 import Lookbook from "@/components/Lookbook";
+import Image from "next/image";
 
 export type FeaturedProduct = {
   id: string;
@@ -132,9 +133,11 @@ export default function Home() {
         className="relative h-screen w-full overflow-hidden"
       >
         {/* Background image */}
-        <img
+        <Image
           src="/images/drip.png"
           alt="FW26 Collection"
+          fill
+          priority
           className={`absolute inset-0 h-full w-full object-cover object-[center_25%] transition-transform duration-[2.5s] ease-[cubic-bezier(0.16,1,0.3,1)] will-change-transform ${heroReady ? "scale-100" : "scale-[1.1]"}`}
         />
 
@@ -293,27 +296,32 @@ export default function Home() {
         {/* Gapless grid */}
         {featuredProducts.length >= 4 ? (
           <div className="w-full">
+            {/* 
+              Mobile layout (abstract): 2 columns.
+              Item 1: Spans 2 cols (Full width, tall)
+              Item 2: Spans 1 col (Half width, short)
+              Item 3: Spans 1 col (Half width, short)
+              Item 4: Spans 2 cols (Full width, medium)
+            */}
+            <div className="grid grid-cols-2 md:grid-cols-4 md:grid-rows-2 gap-0 w-full h-auto md:h-125 lg:h-150 border-t border-l border-(--gray-800)">
 
-            {/* Replaced 75vh and min-h-[800px] with a strict max-height (500px to 600px max) */}
-            <div className="grid grid-cols-1 md:grid-cols-4 md:grid-rows-2 gap-0 w-full h-auto md:h-[500px] lg:h-600px border-t border-l border-(--gray-800)">
-
-              {/* Product 1: Large square (Left half) */}
-              <Reveal className="md:col-span-2 md:row-span-2 h-full w-full min-h-0 border-r border-b border-(--gray-800)">
+              {/* Product 1: Top full width (Mobile) / Large square left (Desktop) */}
+              <Reveal className="col-span-2 md:col-span-2 md:row-span-2 h-[50vh] md:h-full w-full min-h-0 border-r border-b border-(--gray-800)">
                 <HomeProductCard product={featuredProducts[0]} />
               </Reveal>
 
-              {/* Product 2: Top middle */}
-              <Reveal className="md:col-span-1 h-full w-full delay-100 min-h-0 border-r border-b border-(--gray-800)">
+              {/* Product 2: Middle left half (Mobile) / Top middle (Desktop) */}
+              <Reveal className="col-span-1 h-[30vh] md:h-full w-full delay-100 min-h-0 border-r border-b border-(--gray-800)">
                 <HomeProductCard product={featuredProducts[1]} />
               </Reveal>
 
-              {/* Product 3: Top right */}
-              <Reveal className="md:col-span-1 h-full w-full delay-150 min-h-0 border-r border-b border-(--gray-800)">
+              {/* Product 3: Middle right half (Mobile) / Top right (Desktop) */}
+              <Reveal className="col-span-1 h-[30vh] md:h-full w-full delay-150 min-h-0 border-r border-b border-(--gray-800)">
                 <HomeProductCard product={featuredProducts[2]} />
               </Reveal>
 
-              {/* Product 4: Bottom wide */}
-              <Reveal className="md:col-span-2 h-full w-full delay-200 min-h-0 border-r border-b border-(--gray-800)">
+              {/* Product 4: Bottom full width (Mobile) / Bottom wide (Desktop) */}
+              <Reveal className="col-span-2 h-[40vh] md:h-full w-full delay-200 min-h-0 border-r border-b border-(--gray-800)">
                 <HomeProductCard product={featuredProducts[3]} />
               </Reveal>
 
@@ -363,9 +371,10 @@ export default function Home() {
 
         {/* Right: Large image with overlay tag */}
         <Reveal className="delay-150 relative h-[60vw] md:h-auto overflow-hidden bg-(--gray-900)">
-          <img
+          <Image
             src="/images/mockup.png"
             alt="Editorial"
+            fill
             className="absolute inset-0 w-full h-full object-cover transition-transform duration-[3s] ease-[cubic-bezier(0.16,1,0.3,1)] hover:scale-105"
           />
           <div className="absolute inset-0 bg-linear-to-t from-black/70 via-transparent to-transparent" />
@@ -404,37 +413,37 @@ export default function Home() {
 
         <div className="grid grid-cols-2 md:grid-cols-4 gap-0 w-full border-t border-l border-(--gray-800)">
           {HOME_CATEGORIES.map((cat, i) => (
-            <Reveal key={cat.name} className="w-full h-full" threshold={0.14}>
+            <Reveal key={cat.name} className="w-full h-[40vh] md:h-[60vh]" threshold={0.14}>
               <Link
                 href="/products"
                 className="group block relative w-full h-full border-r border-b border-(--gray-800) overflow-hidden bg-(--black)  "
               >
-                <div className="relative w-full" style={{ aspectRatio: "3/4" }}>
-                  <img
-                    src={cat.img}
-                    alt={cat.name}
-                    className="absolute inset-0 h-full w-full object-cover transition-transform duration-[2.5s] ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:scale-108"
+                <Image
+                  fill
+                  src={cat.img}
+                  alt={cat.name}
+                  objectFit="cover"
+                  className="absolute inset-0 h-full w-full object-cover transition-transform duration-[2.5s] ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:scale-108"
+                />
+                {/* Darkening layers */}
+                <div className="absolute inset-0 bg-black/50 transition-opacity duration-500 group-hover:opacity-20" />
+                <div className="absolute inset-0 bg-linear-to-t from-black/80 via-black/20 to-transparent" />
+
+                {/* Bottom label */}
+                <div className="absolute inset-x-0 bottom-0 px-5 pb-6 flex items-end justify-between">
+                  <p className="font-sans text-[10px] tracking-[0.25em] uppercase text-(--beige) transition-colors duration-200 group-hover:text-(--orange)">
+                    {cat.name}
+                  </p>
+                  <ArrowRight
+                    size={14}
+                    strokeWidth={1.5}
+                    className="text-(--gray-400) opacity-0 group-hover:opacity-100 transition-all duration-300 -translate-x-1.5 group-hover:translate-x-0 group-hover:text-(--orange)"
                   />
-                  {/* Darkening layers */}
-                  <div className="absolute inset-0 bg-black/50 transition-opacity duration-500 group-hover:opacity-20" />
-                  <div className="absolute inset-0 bg-linear-to-t from-black/80 via-black/20 to-transparent" />
+                </div>
 
-                  {/* Bottom label */}
-                  <div className="absolute inset-x-0 bottom-0 px-5 pb-6 flex items-end justify-between">
-                    <p className="font-sans text-[10px] tracking-[0.25em] uppercase text-(--beige) transition-colors duration-200 group-hover:text-(--orange)">
-                      {cat.name}
-                    </p>
-                    <ArrowRight
-                      size={14}
-                      strokeWidth={1.5}
-                      className="text-(--gray-400) opacity-0 group-hover:opacity-100 transition-all duration-300 -translate-x-1.5 group-hover:translate-x-0 group-hover:text-(--orange)"
-                    />
-                  </div>
-
-                  {/* Index number */}
-                  <div className="absolute top-4 left-4 font-sans text-[9px] tracking-[0.2em] text-(--gray-600) group-hover:text-(--orange) transition-colors duration-300">
-                    0{i + 1}
-                  </div>
+                {/* Index number */}
+                <div className="absolute top-4 left-4 font-sans text-[9px] tracking-[0.2em] text-(--gray-600) group-hover:text-(--orange) transition-colors duration-300">
+                  0{i + 1}
                 </div>
               </Link>
             </Reveal>
@@ -486,9 +495,10 @@ export default function Home() {
           FULL-BLEED EDITORIAL BANNER
       ══════════════════════════════════════════════ */}
       <section className="relative h-[90svh] w-full overflow-hidden border-t border-b border-(--gray-800)">
-        <img
+        <Image
           src="/images/mockup.png"
           alt="Editorial"
+          fill
           className="absolute inset-0 h-full w-full object-cover"
         />
         <div className="absolute inset-0 bg-linear-to-br from-black/80 via-black/40 to-transparent" />
@@ -534,8 +544,8 @@ export default function Home() {
       </section>
 
       {/* ══════════════════════════════════════════════
-            LOOKBOOK HORIZONTAL SCROLL
-        ══════════════════════════════════════════════ */}
+          LOOKBOOK HORIZONTAL SCROLL
+      ══════════════════════════════════════════════ */}
       <section className="w-full py-24 md:py-40">
         <div className="flex items-end justify-between px-6 md:px-12 mb-12">
           <Reveal>
@@ -605,7 +615,7 @@ export default function Home() {
               />
               <button
                 type="submit"
-                className="bg-(--orange) text-(--black) font-sans text-[9px] font-bold uppercase tracking-[0.2em] px-6 py-4 hover:bg-(--beige) transition-colors duration-300 flex-shrink-0"
+                className="bg-(--orange) text-(--black) font-sans text-[9px] font-bold uppercase tracking-[0.2em] px-6 py-4 hover:bg-(--beige) transition-colors duration-300 shrink-0"
               >
                 Join
               </button>
@@ -614,6 +624,6 @@ export default function Home() {
         </div>
       </section>
 
-    </main >
+    </main>
   );
 }

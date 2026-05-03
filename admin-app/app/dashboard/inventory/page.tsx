@@ -274,9 +274,24 @@ export default function InventoryPage() {
 
                 {/* DYNAMIC VARIANT ROWS */}
                 <div className="space-y-4 border-t border-black/5 pt-4">
-                  <div className="flex items-center justify-between">
-                    <label className="text-sm font-medium text-black">Variant Configurations</label>
+                  <div className="flex w-full items-center justify-between">
+                    <label className="text-sm font-medium text-black">
+                      Variant Configurations
+                    </label>
+
+                    {!form.id && (
+                      <Button
+                        type="button"
+                        onClick={addVariantRow}
+                        // Stripped the background, borders, and margins. 
+                        // Added p-1 and a subtle rounded hover effect for a clean icon look.
+                        className="h-auto w-auto p-1 bg-black shadow-none text-white rounded-full"
+                      >
+                        <Plus className="h-4 w-4" />
+                      </Button>
+                    )}
                   </div>
+
 
                   {form.variants.map((v, index) => (
                     <div key={index} className="grid grid-cols-1 sm:grid-cols-[1fr_1fr_1fr_1fr_auto] gap-3 items-end border border-black/10 p-4 rounded-xl bg-black/2 relative transition-all">
@@ -341,20 +356,11 @@ export default function InventoryPage() {
                   ))}
 
                   {/* Add Row Button (Hidden during Edit Mode) */}
-                  {!form.id && (
-                    <Button
-                      type="button"
-                      onClick={addVariantRow}
-                      className="mt-4 gap-2 bg-black/5 text-black hover:bg-black/10 border-none shadow-none w-full border border-black/20"
-                    >
-                      <Plus className="h-4 w-4" />
-                      Add another variant
-                    </Button>
-                  )}
+
                 </div>
 
                 <div className="flex flex-wrap justify-end gap-3 pt-6 border-t border-black/5">
-                  <Button type="button" onClick={handleCancelEdit} className="bg-white text-black border border-black/10 hover:bg-black/5 shadow-none">
+                  <Button type="button" onClick={handleCancelEdit} className="h-auto w-auto p-1 bg-red-400 shadow-none hover:bg-red-400 text-white rounded-full">
                     Cancel
                   </Button>
                   <Button type="submit" disabled={saving || products.length === 0} className="gap-2 px-8">
