@@ -1,8 +1,8 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
-import { Plus, Minus, ArrowRight } from "lucide-react";
+import { Plus, Minus } from "lucide-react";
 import { SketchHighlight } from "@/components/ui/sketch-highlight";
 
 const FOOTER_SECTIONS = [
@@ -28,13 +28,13 @@ const FooterSection = ({ title, links }: { title: string; links: string[] }) => 
         {title}
       </p>
 
-      <div className={`overflow-hidden transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] md:max-h-none md:opacity-100 ${open ? "max-h-[400px] opacity-100 mb-6" : "max-h-0 opacity-0"}`}>
+      <div className={`overflow-hidden transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] md:max-h-none md:opacity-100 ${open ? "max-h-100 opacity-100 mb-6" : "max-h-0 opacity-0"}`}>
         <div className="flex flex-col space-y-4">
           {links.map((link) => (
             <Link
               key={link}
               href="#"
-              className="font-sans text-[10px] tracking-[0.1em] text-(--gray-400) hover:text-(--orange) hover:translate-x-2 transition-all duration-300 w-fit"
+              className="font-sans text-[10px] tracking-widest text-(--gray-400) hover:text-(--orange) hover:translate-x-2 transition-all duration-300 w-fit"
             >
               {link}
             </Link>
@@ -70,24 +70,7 @@ export const Footer = () => {
   return (
     <footer className="bg-(--black) pt-16 md:pt-20 border-t border-(--gray-800) overflow-hidden flex flex-col">
 
-      {/* ── NEWSLETTER SECTION ── */}
-      <div className="px-6 md:px-12 mb-16">
-        <div className="max-w-4xl">
-          <h3 className="text-(--beige) font-serif text-[clamp(2.5rem,5vw,4.5rem)] mb-8 leading-[0.9]">
-            Stay ahead of the curve. <br className="hidden md:block" /> Join the edit.
-          </h3>
-          <form onSubmit={(e) => e.preventDefault()} className="flex items-end border-b border-(--gray-600) hover:border-(--orange) transition-colors pb-3 group max-w-xl">
-            <input
-              type="email"
-              placeholder="ENTER YOUR EMAIL"
-              className="w-full bg-transparent border-none outline-none font-sans text-[11px] uppercase tracking-[0.2em] text-(--beige) placeholder-(--gray-600)"
-            />
-            <button type="submit" className="text-(--gray-600) group-hover:text-(--orange) transition-colors px-2 pb-1">
-              <ArrowRight size={20} strokeWidth={1} />
-            </button>
-          </form>
-        </div>
-      </div>
+      
 
       {/* ── MAIN LINKS GRID ── */}
       <div className="px-6 md:px-12 mb-16 flex-1">
@@ -103,7 +86,7 @@ export const Footer = () => {
                   </SketchHighlight>
                 </span>
               </Link>
-              <p className="font-sans text-[11px] leading-relaxed tracking-[0.05em] text-(--gray-400) max-w-[280px]">
+              <p className="font-sans text-[11px] leading-relaxed tracking-[0.05em] text-(--gray-400) max-w-70">
                 Unapologetic style. Uncompromising quality. Engineered for those who demand excellence in every thread.
               </p>
             </div>
