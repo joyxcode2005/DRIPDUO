@@ -2,29 +2,31 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { toast } from "react-toastify";
-import { Edit3, Plus, RefreshCw, Trash2, ChevronDown, Package, Check, List, Tag } from "lucide-react";
+import { Edit3, Plus, RefreshCw, Trash2, ChevronDown, Package, List, Tag } from "lucide-react";
 
 import Button from "@/components/Button";
 import Input from "@/components/Input";
 import AdminShell, { AdminPanel } from "@/components/admin/AdminShell";
-import { deleteVariant, getProducts, getVariants, upsertVariant } from "@/services/admin";
-import { ProductRow, ProductVariantRow } from "@/types";
+import { deleteVariant, getCategories, getProducts, getVariants, upsertVariant } from "@/services/admin";
+import { CategoryRow, ProductRow, ProductVariantRow } from "@/types";
+
+const AVAILABLE_GSMS = ["180", "210", "230", "240"];
+const AVAILABLE_SIZES = ["XS", "S", "M", "L", "XL", "XXL", "XXXL"];
 
 const emptyForm = {
   id: "",
   product_id: "",
-  size: "",
-  stock: "0",
-  gsms: [] as string[],
+  variants: [
+    { gsm: "", size: "", stock: "0" }
+  ],
 };
-
-const AVAILABLE_GSMS = ["180", "210", "230", "240"];
 
 export default function InventoryPage() {
   const [activeTab, setActiveTab] = useState<"list" | "form">("list");
-  
+
   const [products, setProducts] = useState<ProductRow[]>([]);
   const [variants, setVariants] = useState<ProductVariantRow[]>([]);
+
   const [form, setForm] = useState(emptyForm);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -36,7 +38,7 @@ export default function InventoryPage() {
       const [productData, variantData] = await Promise.all([getProducts(), getVariants()]);
       setProducts(productData);
       setVariants(variantData);
-      
+
       setForm((current) => ({
         ...current,
         product_id: current.product_id || productData[0]?.id || "",
@@ -48,6 +50,7 @@ export default function InventoryPage() {
     }
   };
 
+
   useEffect(() => {
     void reload();
   }, []);
@@ -57,13 +60,38 @@ export default function InventoryPage() {
     [products]
   );
 
+  // --- ROW MANAGEMENT HELPERS ---
+  const addVariantRow = () => {
+    setForm((curr) => ({
+      ...curr,
+      variants: [...curr.variants, { gsm: "", size: "", stock: "0" }],
+    }));
+  };
+
+  const removeVariantRow = (index: number) => {
+    setForm((curr) => ({
+      ...curr,
+      variants: curr.variants.filter((_, i) => i !== index),
+    }));
+  };
+
+  const updateVariantRow = (index: number, field: string, value: string) => {
+    setForm((curr) => {
+      const newVariants = [...curr.variants];
+      newVariants[index] = { ...newVariants[index], [field]: value };
+      return { ...curr, variants: newVariants };
+    });
+  };
+
   const beginEdit = (variant: ProductVariantRow) => {
     setForm({
       id: variant.id,
       product_id: variant.product_id,
-      size: variant.size,
-      stock: String(variant.stock),
-      gsms: variant.gsm ? [String(variant.gsm)] : [],
+      variants: [{
+        gsm: variant.gsm ? String(variant.gsm) : "",
+        size: variant.size,
+        stock: String(variant.stock),
+      }],
     });
     setActiveTab("form");
     window.scrollTo({ top: 0, behavior: "smooth" });
@@ -73,7 +101,6 @@ export default function InventoryPage() {
     setForm((current) => ({
       ...emptyForm,
       product_id: current.product_id || products[0]?.id || "",
-      gsms: current.gsms, 
     }));
   };
 
@@ -82,76 +109,58 @@ export default function InventoryPage() {
     setActiveTab("list");
   };
 
-  const toggleGsm = (gsm: string) => {
-    if (form.id) {
-      setForm((curr) => ({ ...curr, gsms: [gsm] }));
-    } else {
-      setForm((curr) => ({
-        ...curr,
-        gsms: curr.gsms.includes(gsm) ? curr.gsms.filter((g) => g !== gsm) : [...curr.gsms, gsm],
-      }));
-    }
-  };
-
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    
-    // FIX 1: Use a Set to strip out duplicate sizes if the user accidentally types "M, M"
-    const rawSizes = form.size.split(",").map((s) => s.trim().toUpperCase()).filter(Boolean);
-    const sizesArray = [...new Set(rawSizes)];
-    
-    if (sizesArray.length === 0) return toast.error("Please enter at least one size.");
-    if (form.gsms.length === 0) return toast.error("Please select at least one GSM.");
-    
+
+    // Validate that all rows have required selections
+    for (const v of form.variants) {
+      if (!v.size || !v.gsm) {
+        return toast.error("Please complete GSM and Size for all variants.");
+      }
+    }
+
     setSaving(true);
 
     try {
       if (form.id) {
         // EDIT MODE: Update single variant
+        const v = form.variants[0];
         await upsertVariant({
           id: form.id,
           product_id: form.product_id,
-          size: sizesArray[0], 
-          stock: Number(form.stock || 0),
-          gsm: form.gsms[0], 
-        });
+          size: v.size,
+          stock: Number(v.stock || 0),
+          gsm: v.gsm,
+        } as any); // Remove 'as any' once your backend types are updated
         toast.success("Variant updated successfully");
       } else {
-        // BULK CREATE MODE: Safely generate or update the matrix
-        const promises = [];
-        
-        for (const size of sizesArray) {
-          for (const gsm of form.gsms) {
-            
-            // FIX 2: Check if this exact variant already exists in the local state
-            const existingVariant = variants.find(
-              (v) => v.product_id === form.product_id && v.size === size && String(v.gsm) === gsm
-            );
+        // BULK CREATE MODE: Process all rows dynamically
+        const promises = form.variants.map((v) => {
+          // Check if this exact variant already exists in the local state
+          const existingVariant = variants.find(
+            (ext) => ext.product_id === form.product_id && ext.size === v.size && String(ext.gsm) === v.gsm
+          );
 
-            // FIX 3: If it exists, add the new stock to the old stock. Otherwise, use the new stock.
-            const newStockAmount = Number(form.stock || 0);
-            const finalStock = existingVariant 
-              ? (existingVariant.stock || 0) + newStockAmount 
-              : newStockAmount;
+          const newStockAmount = Number(v.stock || 0);
+          const finalStock = existingVariant
+            ? (existingVariant.stock || 0) + newStockAmount
+            : newStockAmount;
 
-            promises.push(
-              upsertVariant({
-                id: existingVariant?.id, // Passing the ID forces an UPDATE instead of an INSERT
-                product_id: form.product_id,
-                size: size,
-                stock: finalStock,
-                gsm: gsm,
-              })
-            );
-          }
-        }
-        
+          return upsertVariant({
+            id: existingVariant?.id, // Passing the ID forces an UPDATE instead of an INSERT
+            product_id: form.product_id,
+            size: v.size,
+            stock: finalStock,
+            gsm: v.gsm,
+          } as any); // Remove 'as any' once your backend types are updated
+        });
+
         await Promise.all(promises);
         toast.success(`Processed ${promises.length} variant configuration${promises.length > 1 ? 's' : ''}!`);
       }
-      
+
       resetForm();
-      setActiveTab("list"); // Return to list after successful save
+      setActiveTab("list");
       await reload();
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "Failed to save variant(s)");
@@ -189,13 +198,13 @@ export default function InventoryPage() {
   return (
     <AdminShell
       title="Inventory"
-      description="Manage sizes, GSM types, and stock amounts. Bulk create multiple sizes and GSMs at once."
+      description="Manage sizes, GSM types, categories, and stock amounts. Add multiple variant configurations at once."
       actions={
-        <Button 
+        <Button
           onClick={() => {
             resetForm();
             setActiveTab("form");
-          }} 
+          }}
           className="gap-2"
         >
           <Plus className="h-4 w-4" />
@@ -207,21 +216,19 @@ export default function InventoryPage() {
       <div className="mb-6 inline-flex rounded-xl bg-black/5 p-1">
         <button
           onClick={() => setActiveTab("list")}
-          className={`inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition-all ${
-            activeTab === "list" ? "bg-white text-black shadow-sm" : "text-black/60 hover:text-black"
-          }`}
+          className={`inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition-all ${activeTab === "list" ? "bg-white text-black shadow-sm" : "text-black/60 hover:text-black"
+            }`}
         >
           <List className="h-4 w-4" />
           Stock Directory
         </button>
         <button
           onClick={() => {
-            if (!form.id) resetForm(); // Only reset if we aren't currently editing
+            if (!form.id) resetForm();
             setActiveTab("form");
           }}
-          className={`inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition-all ${
-            activeTab === "form" ? "bg-white text-black shadow-sm" : "text-black/60 hover:text-black"
-          }`}
+          className={`inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition-all ${activeTab === "form" ? "bg-white text-black shadow-sm" : "text-black/60 hover:text-black"
+            }`}
         >
           <Tag className="h-4 w-4" />
           {form.id ? "Edit Variant" : "Manage Variants"}
@@ -235,17 +242,17 @@ export default function InventoryPage() {
             <div className="flex items-center justify-between gap-3">
               <div>
                 <h3 className="text-lg font-semibold text-black">
-                  {form.id ? "Edit Variant" : "Bulk Create Variants"}
+                  {form.id ? "Edit Variant" : "Add Variants"}
                 </h3>
                 <p className="mt-1 text-sm text-black/60">
-                  {form.id ? "Update the size, stock, or GSM." : "Select multiple GSMs and type sizes separated by commas to create a matrix."}
+                  {form.id ? "Update the configuration or stock." : "Select the target product and add multiple specific variants below."}
                 </p>
               </div>
             </div>
 
             <form className="mt-6 space-y-5" onSubmit={handleSubmit}>
               <fieldset disabled={saving} className="space-y-6 disabled:opacity-70 disabled:cursor-not-allowed">
-                
+
                 <div className="space-y-2">
                   <label htmlFor="product_id" className="text-sm font-medium text-black">Target Product</label>
                   <div className="relative">
@@ -265,70 +272,85 @@ export default function InventoryPage() {
                   </div>
                 </div>
 
-                {/* Multi-Select GSM Pills */}
-                <div className="space-y-2 sm:col-span-2 border-t border-black/5 pt-4">
-                  <label className="text-sm font-medium text-black flex items-center justify-between">
-                    <span>Fabric GSM</span>
-                    {!form.id && <span className="text-xs font-normal text-black/40">Select multiple options</span>}
-                  </label>
-                  <div className="flex flex-wrap gap-2 mt-2">
-                    {AVAILABLE_GSMS.map((gsm) => {
-                      const isSelected = form.gsms.includes(gsm);
-                      return (
-                        <button
-                          key={gsm}
-                          type="button"
-                          onClick={() => toggleGsm(gsm)}
-                          className={`inline-flex items-center gap-1.5 rounded-lg px-4 py-2 text-sm font-medium border transition-colors outline-none focus:ring-2 focus:ring-black/10 ${
-                            isSelected 
-                              ? "bg-black text-white border-black" 
-                              : "bg-white text-black/70 border-black/10 hover:border-black/30 hover:bg-black/5"
-                          }`}
-                        >
-                          {isSelected && <Check className="h-3.5 w-3.5" />}
-                          {gsm} GSM
-                        </button>
-                      );
-                    })}
+                {/* DYNAMIC VARIANT ROWS */}
+                <div className="space-y-4 border-t border-black/5 pt-4">
+                  <div className="flex items-center justify-between">
+                    <label className="text-sm font-medium text-black">Variant Configurations</label>
                   </div>
-                </div>
 
-                <div className="grid gap-6 sm:grid-cols-2 border-t border-black/5 pt-4">
-                  <div className="space-y-2">
-                    <label htmlFor="size" className="text-sm font-medium text-black flex items-center justify-between">
-                      <span>{form.id ? "Size" : "Size(s)"}</span>
-                    </label>
-                    <Input
-                      id="size"
-                      name="size"
-                      type="text"
-                      value={form.size}
-                      placeholder={form.id ? "e.g. L" : "S, M, L, XL"}
-                      required
-                      onChange={(event) => setForm((current) => ({ ...current, size: event.target.value.toUpperCase() }))}
-                    />
-                    {!form.id && (
-                      <p className="text-[11px] text-black/40 mt-1">Comma separate for bulk creation</p>
-                    )}
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <label htmlFor="stock" className="text-sm font-medium text-black">
-                      {form.id ? "Quantity in Stock" : "Stock to Add"}
-                    </label>
-                    <Input
-                      id="stock"
-                      name="stock"
-                      type="number"
-                      min="0"
-                      value={form.stock}
-                      required
-                      onChange={(event) => setForm((current) => ({ ...current, stock: event.target.value }))}
-                    />
-                    {!form.id && (
-                      <p className="text-[11px] text-black/40 mt-1">Applied to each selected combination</p>
-                    )}
-                  </div>
+                  {form.variants.map((v, index) => (
+                    <div key={index} className="grid grid-cols-1 sm:grid-cols-[1fr_1fr_1fr_1fr_auto] gap-3 items-end border border-black/10 p-4 rounded-xl bg-black/[0.02] relative transition-all">
+
+                      {/* GSM Dropdown */}
+                      <div className="space-y-1">
+                        <label className="text-xs font-medium text-black/70">GSM</label>
+                        <div className="relative">
+                          <select
+                            value={v.gsm}
+                            required
+                            onChange={(e) => updateVariantRow(index, "gsm", e.target.value)}
+                            className="w-full appearance-none rounded-lg border border-black/10 bg-white px-3 py-2 pr-8 text-sm text-black outline-none transition-all focus:border-black focus:ring-2 focus:ring-black/10 cursor-pointer"
+                          >
+                            <option value="" disabled>Select...</option>
+                            {AVAILABLE_GSMS.map(g => <option key={g} value={g}>{g} GSM</option>)}
+                          </select>
+                          <ChevronDown className="pointer-events-none absolute right-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-black/50" />
+                        </div>
+                      </div>
+
+                      {/* Size Dropdown */}
+                      <div className="space-y-1">
+                        <label className="text-xs font-medium text-black/70">Size</label>
+                        <div className="relative">
+                          <select
+                            value={v.size}
+                            required
+                            onChange={(e) => updateVariantRow(index, "size", e.target.value)}
+                            className="w-full appearance-none rounded-lg border border-black/10 bg-white px-3 py-2 pr-8 text-sm text-black outline-none transition-all focus:border-black focus:ring-2 focus:ring-black/10 cursor-pointer"
+                          >
+                            <option value="" disabled>Select...</option>
+                            {AVAILABLE_SIZES.map(s => <option key={s} value={s}>{s}</option>)}
+                          </select>
+                          <ChevronDown className="pointer-events-none absolute right-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-black/50" />
+                        </div>
+                      </div>
+
+                      {/* Stock Input */}
+                      <div className="space-y-1">
+                        <label className="text-xs font-medium text-black/70">Stock Quantity</label>
+                        <Input
+                          type="number"
+                          min="0"
+                          value={v.stock}
+                          required
+                          onChange={(e) => updateVariantRow(index, "stock", e.target.value)} />
+                      </div>
+
+                      {/* Remove Button */}
+                      {!form.id && form.variants.length > 1 && (
+                        <button
+                          type="button"
+                          onClick={() => removeVariantRow(index)}
+                          className="h-9 w-9 flex items-center justify-center rounded-lg border border-red-200 text-red-500 bg-red-50 hover:bg-red-100 transition-colors mb-px"
+                          title="Remove Variant"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </button>
+                      )}
+                    </div>
+                  ))}
+
+                  {/* Add Row Button (Hidden during Edit Mode) */}
+                  {!form.id && (
+                    <Button
+                      type="button"
+                      onClick={addVariantRow}
+                      className="mt-4 gap-2 bg-black/5 text-black hover:bg-black/10 border-none shadow-none w-full border border-dashed border-black/20"
+                    >
+                      <Plus className="h-4 w-4" />
+                      Add another variant
+                    </Button>
+                  )}
                 </div>
 
                 <div className="flex flex-wrap justify-end gap-3 pt-6 border-t border-black/5">
@@ -409,12 +431,12 @@ export default function InventoryPage() {
                                   </div>
                                   <div>
                                     <div className="font-medium text-black">
-                                      {variant.gsm ? `${variant.gsm} GSM` : "Standard GSM"}
+                                      {/* Renders Category if available, else defaults to GSM */}
+                                      {[(variant as any).category, variant.gsm ? `${variant.gsm} GSM` : "Standard GSM"].filter(Boolean).join(" • ")}
                                     </div>
-                                    <div className={`mt-0.5 text-xs font-medium ${
-                                      (variant.stock || 0) > 10 ? 'text-emerald-600' : 
+                                    <div className={`mt-0.5 text-xs font-medium ${(variant.stock || 0) > 10 ? 'text-emerald-600' :
                                       (variant.stock || 0) > 0 ? 'text-amber-600' : 'text-red-600'
-                                    }`}>
+                                      }`}>
                                       {variant.stock || 0} in stock
                                     </div>
                                   </div>
@@ -438,7 +460,7 @@ export default function InventoryPage() {
                                   </button>
                                 </div>
                               </div>
-                          ))
+                            ))
                         )}
                       </div>
                     </div>
