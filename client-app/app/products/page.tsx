@@ -13,7 +13,6 @@ type Category = {
   parent_id: string | null;
 };
 
-// Helper type for our structured category tree
 type CategoryWithSubs = Category & {
   subcategories: Category[];
 };

@@ -8,7 +8,7 @@ import Button from "@/components/Button";
 import Input from "@/components/Input";
 import AdminShell, { AdminPanel } from "@/components/admin/AdminShell";
 import { deleteVariant, getCategories, getProducts, getVariants, upsertVariant } from "@/services/admin";
-import { CategoryRow, ProductRow, ProductVariantRow } from "@/types";
+import { ProductRow, ProductVariantRow } from "@/types";
 
 const AVAILABLE_GSMS = ["180", "210", "230", "240"];
 const AVAILABLE_SIZES = ["XS", "S", "M", "L", "XL", "XXL", "XXXL"];
@@ -279,7 +279,7 @@ export default function InventoryPage() {
                   </div>
 
                   {form.variants.map((v, index) => (
-                    <div key={index} className="grid grid-cols-1 sm:grid-cols-[1fr_1fr_1fr_1fr_auto] gap-3 items-end border border-black/10 p-4 rounded-xl bg-black/[0.02] relative transition-all">
+                    <div key={index} className="grid grid-cols-1 sm:grid-cols-[1fr_1fr_1fr_1fr_auto] gap-3 items-end border border-black/10 p-4 rounded-xl bg-black/2 relative transition-all">
 
                       {/* GSM Dropdown */}
                       <div className="space-y-1">
@@ -345,7 +345,7 @@ export default function InventoryPage() {
                     <Button
                       type="button"
                       onClick={addVariantRow}
-                      className="mt-4 gap-2 bg-black/5 text-black hover:bg-black/10 border-none shadow-none w-full border border-dashed border-black/20"
+                      className="mt-4 gap-2 bg-black/5 text-black hover:bg-black/10 border-none shadow-none w-full border border-black/20"
                     >
                       <Plus className="h-4 w-4" />
                       Add another variant
@@ -407,7 +407,7 @@ export default function InventoryPage() {
 
                   return (
                     <div key={product.id} className="overflow-hidden rounded-2xl border border-black/10 shadow-sm transition-all hover:border-black/20">
-                      <div className="flex items-center justify-between gap-3 border-b border-black/10 bg-black/[0.03] px-4 py-3">
+                      <div className="flex items-center justify-between gap-3 border-b border-black/10 bg-black/3 px-4 py-3">
                         <div>
                           <div className="font-semibold text-black">{product.name}</div>
                           <div className="text-xs text-black/60 mt-0.5">{productVariants.length} variants established</div>
@@ -424,7 +424,7 @@ export default function InventoryPage() {
                           productVariants
                             .sort((a, b) => String(a.gsm).localeCompare(String(b.gsm)) || a.size.localeCompare(b.size))
                             .map((variant) => (
-                              <div key={variant.id} className="flex items-center justify-between gap-3 px-4 py-3 text-sm group hover:bg-black/[0.02]">
+                              <div key={variant.id} className="flex items-center justify-between gap-3 px-4 py-3 text-sm group hover:bg-black/2">
                                 <div className="flex items-center gap-4">
                                   <div className="flex h-10 w-10 items-center justify-center rounded-lg border border-black/10 bg-black/5 font-bold text-black">
                                     {variant.size}

@@ -295,7 +295,7 @@ export default function Home() {
           <div className="w-full">
 
             {/* Replaced 75vh and min-h-[800px] with a strict max-height (500px to 600px max) */}
-            <div className="grid grid-cols-1 md:grid-cols-4 md:grid-rows-2 gap-0 w-full h-auto md:h-[500px] lg:h-[600px] border-t border-l border-(--gray-800)">
+            <div className="grid grid-cols-1 md:grid-cols-4 md:grid-rows-2 gap-0 w-full h-auto md:h-[500px] lg:h-600px border-t border-l border-(--gray-800)">
 
               {/* Product 1: Large square (Left half) */}
               <Reveal className="md:col-span-2 md:row-span-2 h-full w-full min-h-0 border-r border-b border-(--gray-800)">
@@ -474,8 +474,8 @@ export default function Home() {
             ].map((feat) => (
               <Reveal key={feat.num} className="border-b md:border-b-0 md:border-r border-(--gray-800) py-10 pr-0 md:pr-10 last:border-r-0 last:pl-0 md:first:pl-0 md:pl-10 flex flex-col gap-5">
                 <span className="font-sans text-[9px] tracking-[0.3em] uppercase text-(--orange)">{feat.num}</span>
-                <h3 className="font-serif text-2xl md:text-3xl text-[var(--beige)] leading-tight">{feat.title}</h3>
-                <p className="font-sans text-[11px] leading-[1.85] tracking-[0.04em] text-[var(--gray-200)]">{feat.body}</p>
+                <h3 className="font-serif text-2xl md:text-3xl text-(--beige) leading-tight">{feat.title}</h3>
+                <p className="font-sans text-[11px] leading-[1.85] tracking-[0.04em] text-(--gray-200)">{feat.body}</p>
               </Reveal>
             ))}
           </div>
@@ -485,24 +485,24 @@ export default function Home() {
       {/* ══════════════════════════════════════════════
           FULL-BLEED EDITORIAL BANNER
       ══════════════════════════════════════════════ */}
-      <section className="relative h-[90svh] w-full overflow-hidden border-t border-b border-[var(--gray-800)]">
+      <section className="relative h-[90svh] w-full overflow-hidden border-t border-b border-(--gray-800)">
         <img
           src="/images/mockup.png"
           alt="Editorial"
           className="absolute inset-0 h-full w-full object-cover"
         />
-        <div className="absolute inset-0 bg-gradient-to-br from-black/80 via-black/40 to-transparent" />
+        <div className="absolute inset-0 bg-linear-to-br from-black/80 via-black/40 to-transparent" />
         <div className="absolute inset-0" style={{ backgroundImage: NOISE_SVG, opacity: 0.15 }} />
 
         <div className="absolute inset-0 flex flex-col items-start justify-end p-6 md:p-16 pb-16 z-10">
           <Reveal>
-            <span className="font-sans text-[9px] tracking-[0.35em] uppercase text-[var(--orange)] border border-[var(--orange)]/30 px-3 py-1.5 mb-8 inline-block backdrop-blur-sm bg-[var(--orange)]/5">
+            <span className="font-sans text-[9px] tracking-[0.35em] uppercase text-(--orange) border border-(--orange)/30 px-3 py-1.5 mb-8 inline-block backdrop-blur-sm bg-(--orange)/5">
               Editorial — FW26
             </span>
           </Reveal>
           <Reveal className="delay-100">
             <h2
-              className="font-serif italic leading-[0.85] tracking-[-0.025em] text-[var(--beige)] mb-8"
+              className="font-serif italic leading-[0.85] tracking-[-0.025em] text-(--beige) mb-8"
               style={{ fontSize: "clamp(4rem,11vw,9.5rem)" }}
             >
               Redefine<br />
@@ -534,17 +534,17 @@ export default function Home() {
       </section>
 
       {/* ══════════════════════════════════════════════
-          LOOKBOOK HORIZONTAL SCROLL
-      ══════════════════════════════════════════════ */}
+            LOOKBOOK HORIZONTAL SCROLL
+        ══════════════════════════════════════════════ */}
       <section className="w-full py-24 md:py-40">
         <div className="flex items-end justify-between px-6 md:px-12 mb-12">
           <Reveal>
             <div>
-              <p className="font-sans text-[9px] tracking-[0.35em] uppercase text-[var(--orange)] mb-3 flex items-center gap-2">
-                <span className="w-6 h-px bg-[var(--orange)]" />
+              <p className="font-sans text-[9px] tracking-[0.35em] uppercase text-(--orange) mb-3 flex items-center gap-2">
+                <span className="w-6 h-px bg-(--orange)" />
                 Lookbook
               </p>
-              <h2 className="font-serif italic leading-[0.95] text-[var(--beige)]" style={{ fontSize: "clamp(3rem,5.5vw,5rem)" }}>
+              <h2 className="font-serif italic leading-[0.95] text-(--beige)" style={{ fontSize: "clamp(3rem,5.5vw,5rem)" }}>
                 The Lookbook
               </h2>
             </div>
@@ -561,8 +561,8 @@ export default function Home() {
                 <Lookbook key={product.id} product={product} />
               ))
             ) : (
-              <div className="w-full h-[50vh] flex items-center justify-center border-t border-[var(--gray-800)]">
-                <p className="font-sans text-[10px] tracking-[0.2em] uppercase text-[var(--gray-400)] animate-pulse">
+              <div className="w-full h-[50vh] flex items-center justify-center border-t border-(--gray-800)">
+                <p className="font-sans text-[10px] tracking-[0.2em] uppercase text-(--gray-400) animate-pulse">
                   Loading Lookbook…
                 </p>
               </div>
@@ -574,38 +574,38 @@ export default function Home() {
       {/* ══════════════════════════════════════════════
           NEWSLETTER — full-width black strip
       ══════════════════════════════════════════════ */}
-      <section className="w-full border-t border-[var(--gray-800)] bg-[var(--gray-900)]">
+      <section className="w-full border-t border-(--gray-800) bg-(--gray-900)">
         <div className="max-w-4xl mx-auto px-6 md:px-12 py-20 md:py-28 text-center">
           <Reveal>
-            <p className="font-sans text-[9px] tracking-[0.35em] uppercase text-[var(--orange)] mb-5 flex items-center justify-center gap-2">
-              <span className="w-6 h-px bg-[var(--orange)]" />
+            <p className="font-sans text-[9px] tracking-[0.35em] uppercase text-(--orange) mb-5 flex items-center justify-center gap-2">
+              <span className="w-6 h-px bg-(--orange)" />
               Stay Ahead
-              <span className="w-6 h-px bg-[var(--orange)]" />
+              <span className="w-6 h-px bg-(--orange)" />
             </p>
             <h2
-              className="font-serif leading-[0.92] tracking-[-0.02em] text-[var(--beige)] mb-6"
+              className="font-serif leading-[0.92] tracking-[-0.02em] text-(--beige) mb-6"
               style={{ fontSize: "clamp(3rem,6vw,5.5rem)" }}
             >
               Join the<br />
-              <em className="text-[var(--orange)]">Edit.</em>
+              <em className="text-(--orange)">Edit.</em>
             </h2>
-            <p className="font-sans text-[11px] leading-[1.8] tracking-[0.04em] text-[var(--gray-200)] max-w-md mx-auto mb-10">
+            <p className="font-sans text-[11px] leading-[1.8] tracking-[0.04em] text-(--gray-200) max-w-md mx-auto mb-10">
               New drops. Exclusive access. Zero noise. Be the first to know when the next collection lands.
             </p>
           </Reveal>
           <Reveal className="delay-150">
             <form
               onSubmit={(e) => e.preventDefault()}
-              className="flex items-stretch max-w-lg mx-auto border border-[var(--gray-600)] hover:border-[var(--orange)] transition-colors duration-400 group"
+              className="flex items-stretch max-w-lg mx-auto border border-(--gray-600) hover:border-(--orange) transition-colors duration-400 group"
             >
               <input
                 type="email"
                 placeholder="YOUR EMAIL ADDRESS"
-                className="flex-1 bg-transparent border-none outline-none font-sans text-[10px] uppercase tracking-[0.2em] text-[var(--beige)] placeholder-[var(--gray-600)] px-6 py-4"
+                className="flex-1 bg-transparent border-none outline-none font-sans text-[10px] uppercase tracking-[0.2em] text-(--beige) placeholder-(--gray-600) px-6 py-4"
               />
               <button
                 type="submit"
-                className="bg-[var(--orange)] text-[var(--black)] font-sans text-[9px] font-bold uppercase tracking-[0.2em] px-6 py-4 hover:bg-[var(--beige)] transition-colors duration-300 flex-shrink-0"
+                className="bg-(--orange) text-(--black) font-sans text-[9px] font-bold uppercase tracking-[0.2em] px-6 py-4 hover:bg-(--beige) transition-colors duration-300 flex-shrink-0"
               >
                 Join
               </button>
@@ -614,6 +614,6 @@ export default function Home() {
         </div>
       </section>
 
-    </main>
+    </main >
   );
 }
