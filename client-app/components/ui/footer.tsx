@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { Plus, Minus } from "lucide-react";
 import { SketchHighlight } from "@/components/ui/sketch-highlight";
 
@@ -47,6 +48,7 @@ const FooterSection = ({ title, links }: { title: string; links: string[] }) => 
 
 export const Footer = () => {
   const [isScrolling, setIsScrolling] = useState(false);
+  const pathname = usePathname();
 
   useEffect(() => {
     let scrollTimeout: NodeJS.Timeout;
@@ -66,6 +68,11 @@ export const Footer = () => {
       clearTimeout(scrollTimeout);
     };
   }, []);
+
+  // Hide the footer completely on authentication pages
+  if (pathname === "/auth" || pathname === "/reset-password") {
+    return null;
+  }
 
   return (
     <footer className="bg-(--black) pt-16 md:pt-20 border-t border-(--gray-800) overflow-hidden flex flex-col">

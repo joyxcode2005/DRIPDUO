@@ -166,12 +166,12 @@ export default function Home() {
         {/* Top bar */}
         <div className="absolute top-24 left-0 right-0 flex items-center justify-between px-6 md:px-12 z-10">
           <Reveal>
-            <span className="font-sans text-[9px] tracking-[0.35em] uppercase text-(--orange) border border-(--orange)/30 px-3 py-1.5 backdrop-blur-sm bg-(--orange)/5">
+            <span className="whitespace-nowrap font-sans text-[8px] md:text-[9px] tracking-[0.2em] md:tracking-[0.35em] uppercase text-(--orange) border border-(--orange)/30 px-2 py-1 md:px-3 md:py-1.5 backdrop-blur-sm bg-(--orange)/5">
               FW 2026 — New Collection
             </span>
           </Reveal>
           {/* Removed hidden md:block, added mobile scaling to fit screens better */}
-          <Reveal className="delay-200 max-md:scale-[0.7] max-md:origin-right">
+          <Reveal className="delay-200 max-md:scale-[0.65] max-md:origin-right">
             <RotatingBadge />
           </Reveal>
         </div>
