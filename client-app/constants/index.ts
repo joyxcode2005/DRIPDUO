@@ -76,10 +76,10 @@ export const FEATURED = [
 ];
 
 export const HOME_CATEGORIES = [
-  { name: "Oversized", img: "https://images.unsplash.com/photo-1583743814966-8936f5b7be1a?w=700&q=80" },
-  { name: "Gothic", img: "https://images.unsplash.com/photo-1509631179647-0177331693ae?w=700&q=80" },
-  { name: "Anime", img: "https://images.unsplash.com/photo-1529374255404-311a2a4f1fd9?w=700&q=80" },
-  { name: "Gym Wear", img: "https://images.unsplash.com/photo-1571945153237-4929e783af4a?w=700&q=80" },
+  { name: "Oversized", Image: "https://images.unsplash.com/photo-1583743814966-8936f5b7be1a?w=700&q=80" },
+  { name: "Gothic", Image: "https://images.unsplash.com/photo-1509631179647-0177331693ae?w=700&q=80" },
+  { name: "Anime", Image: "https://images.unsplash.com/photo-1529374255404-311a2a4f1fd9?w=700&q=80" },
+  { name: "Gym Wear", Image: "https://images.unsplash.com/photo-1571945153237-4929e783af4a?w=700&q=80" },
 ];
 
 export const LOOKBOOK = [

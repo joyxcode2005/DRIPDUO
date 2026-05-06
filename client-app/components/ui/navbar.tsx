@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useCart } from "@/lib/CartContext";
@@ -43,7 +43,7 @@ export const Navbar = () => {
     <>
       {/* ── MAIN NAVBAR ── */}
       <nav
-        className={`fixed top-0 left-0 w-full z-100 transition-all duration-500 ease-in-out ${scrolled ? "bg-[#050505]/95 backdrop-blur-md py-4 border-b border-white/5" : "bg-transparent p-5" 
+        className={`fixed top-0 left-0 w-full z-100 transition-all duration-500 ease-in-out ${scrolled ? "bg-[#050505]/95 backdrop-blur-md py-4 border-b border-white/5" : "bg-transparent p-5"
           }`}
         style={{ fontFamily: "'Helvetica Neue', Helvetica, Arial, sans-serif" }}
       >

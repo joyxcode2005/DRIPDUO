@@ -4,6 +4,7 @@ import React from "react";
 import Link from "next/link";
 import { X, Plus, Minus } from "lucide-react";
 import { useCart } from "@/lib/CartContext";
+import Image from "next/image";
 
 export default function CartDrawer() {
   const { cart, isCartOpen, closeCart, updateQuantity, removeFromCart, cartTotal } = useCart();
@@ -42,7 +43,7 @@ export default function CartDrawer() {
             cart.map((item) => (
               <div key={item.id} className="flex gap-6">
                 <div className="w-24 bg-(--gray-900) shrink-0" style={{ aspectRatio: "2/3" }}>
-                  <img src={item.image} alt={item.name} className="w-full h-full object-cover" />
+                  <Image height={100} width={100} src={item.image} alt={item.name} className="w-full h-full object-cover" />
                 </div>
                 <div className="flex-1 flex flex-col justify-between py-1">
                   <div>

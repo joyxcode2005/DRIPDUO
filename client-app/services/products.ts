@@ -91,8 +91,8 @@ export const getAllProducts = async () => {
 
         // --- IMAGE MAPPING ---
         const mappedImages = product.product_images || [];
-        const primaryImgObj = mappedImages.find((img: any) => img.is_primary) || mappedImages[0];
-        const primaryUrl = primaryImgObj ? primaryImgObj.url : "/images/placeholder.jpg";
+        const primaryImageObj = mappedImages.find((Image: any) => Image.is_primary) || mappedImages[0];
+        const primaryUrl = primaryImageObj ? primaryImageObj.url : "/images/placeholder.jpg";
 
         // --- VARIANT & STOCK MAPPING ---
         const variants = product.product_variants || [];
@@ -157,7 +157,7 @@ export const getProductById = async (id: string) => {
         ...data,
         categories: data.product_categories?.map((pc: any) => pc.categories) || [],
         images: data.product_images || [],
-        primary_image_url: (data.product_images || []).find((img: any) => img.is_primary)?.url || "/images/placeholder.jpg",
+        primary_image_url: (data.product_images || []).find((Image: any) => Image.is_primary)?.url || "/images/placeholder.jpg",
 
         // ✅ Return only the filtered, in-stock variants
         variants: availableVariants

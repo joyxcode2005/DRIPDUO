@@ -5,6 +5,7 @@ import Link from "next/link";
 import { ArrowLeft, Check } from "lucide-react";
 import { useCart } from "@/lib/CartContext";
 import { getProductById } from "@/services/products";
+import Image from "next/image";
 
 // Hardcoded presentation data for consistent ordering and descriptions
 const SIZES_ORDER = ["XS", "S", "M", "L", "XL", "XXL", "XXXL"];
@@ -131,7 +132,7 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
             <ArrowLeft size={14} strokeWidth={1} /> BACK TO ARCHIVE
           </Link>
           <div className="w-full bg-(--gray-900) border border-(--gray-800) aspect-3/4 overflow-hidden">
-            <img src={product.images[0].url} alt={product.name} className="w-full h-full object-cover" />
+            <Image height={100} width={100} src={product.images[0].url} alt={product.name} className="w-full h-full object-cover" />
           </div>
         </div>
 

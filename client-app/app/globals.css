@@ -72,7 +72,7 @@ body {
   color: var(--black);
 }
 
-img {
+Image {
   display: block;
   max-width: 100%;
 }
@@ -225,19 +225,19 @@ main, section, header, footer, nav {
 /* ─────────────────────────────────────────
    PRODUCT IMAGE HOVER
 ───────────────────────────────────────── */
-.product-img-wrap {
+.product-Image-wrap {
   overflow: hidden;
   position: relative;
   background: var(--gray-900);
 }
-.product-img-wrap img {
+.product-Image-wrap Image {
   width: 100%;
   height: 100%;
   object-fit: cover;
   transition: transform 1.2s var(--ease-out-expo);
   will-change: transform;
 }
-.product-img-wrap:hover img {
+.product-Image-wrap:hover Image {
   transform: scale(1.04);
 }
 

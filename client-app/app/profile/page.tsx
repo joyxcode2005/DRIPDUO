@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Package, MapPin, Heart, Settings, LogOut, ChevronRight, Plus, Edit2, Trash2, Eye, ArrowLeft } from "lucide-react";
 import { useAuth } from "@/lib/AuthContext";
+import Image from "next/image";
 
 type Tab = "orders" | "addresses" | "wishlist" | "settings";
 
@@ -49,11 +50,10 @@ const StatusBadge = ({ status }: { status: string }) => {
   const isDelivered = status === "delivered";
   const isProcessing = status === "processing";
   return (
-    <span className={`font-sans text-[9px] font-semibold tracking-[0.15em] uppercase px-3 py-1 border ${
-      isDelivered ? "bg-[var(--beige)] text-[var(--black)] border-[var(--beige)]" :
+    <span className={`font-sans text-[9px] font-semibold tracking-[0.15em] uppercase px-3 py-1 border ${isDelivered ? "bg-[var(--beige)] text-[var(--black)] border-[var(--beige)]" :
       isProcessing ? "bg-[var(--orange)] text-[var(--black)] border-[var(--orange)]" :
-      "bg-transparent text-[var(--beige)] border-[var(--beige)]"
-    }`}>
+        "bg-transparent text-[var(--beige)] border-[var(--beige)]"
+      }`}>
       {status}
     </span>
   );
@@ -97,10 +97,10 @@ export default function ProfilePage() {
   if (!user) return null;
 
   const tabs: { id: Tab; label: string; icon: React.ReactNode }[] = [
-    { id: "orders",    label: "Orders",    icon: <Package size={14} strokeWidth={1} /> },
+    { id: "orders", label: "Orders", icon: <Package size={14} strokeWidth={1} /> },
     { id: "addresses", label: "Addresses", icon: <MapPin size={14} strokeWidth={1} /> },
-    { id: "wishlist",  label: "Wishlist",  icon: <Heart size={14} strokeWidth={1} /> },
-    { id: "settings",  label: "Settings",  icon: <Settings size={14} strokeWidth={1} /> },
+    { id: "wishlist", label: "Wishlist", icon: <Heart size={14} strokeWidth={1} /> },
+    { id: "settings", label: "Settings", icon: <Settings size={14} strokeWidth={1} /> },
   ];
 
   return (
@@ -139,9 +139,8 @@ export default function ProfilePage() {
             <button
               key={id}
               onClick={() => setActiveTab(id)}
-              className={`flex items-center gap-3 font-sans text-[10px] uppercase tracking-[0.2em] pb-4 border-b-2 transition-colors ${
-                activeTab === id ? "border-[var(--orange)] text-[var(--orange)]" : "border-transparent text-[var(--gray-400)] hover:text-[var(--beige)]"
-              }`}
+              className={`flex items-center gap-3 font-sans text-[10px] uppercase tracking-[0.2em] pb-4 border-b-2 transition-colors ${activeTab === id ? "border-[var(--orange)] text-[var(--orange)]" : "border-transparent text-[var(--gray-400)] hover:text-[var(--beige)]"
+                }`}
             >
               {icon} {label}
             </button>
@@ -186,7 +185,7 @@ export default function ProfilePage() {
                         {order.items.map((item, i) => (
                           <div key={i} className="flex gap-6 items-center">
                             <div className="w-20 shrink-0 bg-[var(--gray-900)] aspect-[2/3] overflow-hidden">
-                              <img src={item.image} alt={item.name} className="w-full h-full object-cover" />
+                              <Image height={100} width={100} src={item.image} alt={item.name} className="w-full h-full object-cover" />
                             </div>
                             <div className="flex-1">
                               <p className="font-sans text-[11px] uppercase tracking-[0.15em] text-[var(--beige)] mb-2">{item.name}</p>
@@ -264,7 +263,7 @@ export default function ProfilePage() {
                 {wishlist.map((item) => (
                   <div key={item.id} className="group relative border-r border-b border-[var(--gray-800)] bg-[var(--gray-900)] overflow-hidden">
                     <div className="relative w-full aspect-[2/3]">
-                      <img src={item.image} alt={item.name} className="absolute inset-0 w-full h-full object-cover transition-transform duration-[1.5s] ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:scale-105" />
+                      <Image src={item.image} alt={item.name} className="absolute inset-0 w-full h-full object-cover transition-transform duration-[1.5s] ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:scale-105" />
                       <div className="absolute inset-x-0 bottom-0 h-32 bg-gradient-to-t from-black/80 to-transparent pointer-events-none" />
                       <button
                         onClick={() => setWishlist(w => w.filter(x => x.id !== item.id))}

@@ -420,7 +420,7 @@ export default function Home() {
               >
                 <Image
                   fill
-                  src={cat.img}
+                  src={cat.Image}
                   alt={cat.name}
                   objectFit="cover"
                   className="absolute inset-0 h-full w-full object-cover transition-transform duration-[2.5s] ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:scale-108"

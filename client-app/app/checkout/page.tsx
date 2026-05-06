@@ -4,15 +4,16 @@ import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { ArrowLeft, Lock, CheckCircle2, ShieldCheck, CreditCard } from "lucide-react";
 import { useCart } from "@/lib/CartContext";
+import Image from "next/image";
 
 export default function CheckoutPage() {
   const { cart, cartTotal } = useCart();
   const [activeStep, setActiveStep] = useState<"shipping" | "payment" | "success">("shipping");
   const [orderId, setOrderId] = useState<string>("D2-FW26-PENDING");
 
-  useEffect(() => {
-    setOrderId(`D2-FW26-${Math.floor(Math.random() * 90000) + 10000}`);
-  }, []);
+  // useEffect(() => {
+  //   setOrderId(`D2-FW26-${Math.floor(Math.random() * 90000) + 10000}`);
+  // }, []);
 
   const shippingCost = cartTotal > 200 ? 0 : 15;
   const taxes = cartTotal * 0.08;
@@ -182,7 +183,7 @@ export default function CheckoutPage() {
               <div className="space-y-6 mb-10 max-h-[45vh] overflow-y-auto no-scroll pr-2">
                 {cart.map((item) => (
                   <div key={`${item.id}-${item.size}`} className="flex gap-5">
-                    <img src={item.image} alt={item.name} className="w-20 h-24 object-cover border border-[var(--gray-800)]" />
+                    <Image height={100} width={100} src={item.image} alt={item.name} className="w-20 h-24 object-cover border border-[var(--gray-800)]" />
                     <div className="flex-1 flex flex-col justify-between py-1">
                       <div>
                         <h4 className="label text-[var(--beige)]" style={{ fontSize: "10px", lineHeight: 1.4, letterSpacing: "0.1em" }}>{item.name}</h4>

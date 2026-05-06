@@ -77,14 +77,14 @@ export const fetchCartItems = async (userId: string): Promise<CartRecord[]> => {
     return items.map((item) => {
         // Find the primary image, or default to the first one
         const images = item.products?.product_images || [];
-        const primaryImg = images.find((img) => img.is_primary) || images[0];
+        const primaryImage = images.find((Image) => Image.is_primary) || images[0];
 
         return {
             id: item.id,
             productId: item.products?.id || item.id,
             name: item.products?.name,
             price: Number(item.products?.final_price || item.products?.price || 0),
-            image: primaryImg?.url || "/images/placeholder.jpg",
+            image: primaryImage?.url || "/images/placeholder.jpg",
             size: item.product_variants?.size,
             gsm: item.product_variants?.gsm,
             quantity: Number(item.quantity),

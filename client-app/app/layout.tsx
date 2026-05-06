@@ -7,7 +7,6 @@ import { AuthProvider } from "@/lib/AuthContext";
 // Named imports (with curly braces)
 import { Navbar } from "@/components/ui/navbar";
 import { BottomNav } from "@/components/ui/bottom-nav";
-import { QuickViewModal } from "@/components/ui/quick-view-modal";
 import { Footer } from "@/components/ui/footer";
 
 // Default import (no curly braces for CartDrawer)
@@ -38,7 +37,6 @@ export default function RootLayout({
               <Footer />
               <BottomNav />
               <CartDrawer />
-              <QuickViewModal />
             </QuickViewProvider>
           </CartProvider>
         </AuthProvider>
