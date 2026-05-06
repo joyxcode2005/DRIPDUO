@@ -2,7 +2,9 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { Package, MapPin, Heart, Settings, LogOut, ChevronRight, Plus, Edit2, Trash2, Eye, ArrowLeft } from "lucide-react";
+import { useAuth } from "@/lib/AuthContext";
 
 type Tab = "orders" | "addresses" | "wishlist" | "settings";
 
@@ -46,12 +48,11 @@ const MOCK_WISHLIST = [
 const StatusBadge = ({ status }: { status: string }) => {
   const isDelivered = status === "delivered";
   const isProcessing = status === "processing";
-  
   return (
     <span className={`font-sans text-[9px] font-semibold tracking-[0.15em] uppercase px-3 py-1 border ${
-      isDelivered ? "bg-(--beige) text-(--black) border-(--beige)" : 
-      isProcessing ? "bg-(--orange) text-(--black) border-(--orange)" : 
-      "bg-transparent text-(--beige) border-(--beige)"
+      isDelivered ? "bg-[var(--beige)] text-[var(--black)] border-[var(--beige)]" :
+      isProcessing ? "bg-[var(--orange)] text-[var(--black)] border-[var(--orange)]" :
+      "bg-transparent text-[var(--beige)] border-[var(--beige)]"
     }`}>
       {status}
     </span>
@@ -59,9 +60,41 @@ const StatusBadge = ({ status }: { status: string }) => {
 };
 
 export default function ProfilePage() {
+  const { user, signOut, loading } = useAuth();
+  const router = useRouter();
   const [activeTab, setActiveTab] = useState<Tab>("orders");
   const [expandedOrder, setExpandedOrder] = useState<string | null>(null);
   const [wishlist, setWishlist] = useState(MOCK_WISHLIST);
+  const [signingOut, setSigningOut] = useState(false);
+
+  // Redirect if not logged in
+  React.useEffect(() => {
+    if (!loading && !user) {
+      router.push("/auth");
+    }
+  }, [user, loading, router]);
+
+  const handleSignOut = async () => {
+    setSigningOut(true);
+    await signOut();
+    router.push("/");
+  };
+
+  // Get display name from metadata or email
+  const displayName = user?.user_metadata?.full_name || user?.email?.split("@")[0] || "Member";
+  const memberSince = user?.created_at
+    ? new Date(user.created_at).toLocaleDateString("en-US", { month: "long", year: "numeric" })
+    : "2026";
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-[var(--black)] flex items-center justify-center">
+        <p className="font-sans text-[10px] uppercase tracking-[0.2em] text-[var(--gray-400)] animate-pulse">Loading…</p>
+      </div>
+    );
+  }
+
+  if (!user) return null;
 
   const tabs: { id: Tab; label: string; icon: React.ReactNode }[] = [
     { id: "orders",    label: "Orders",    icon: <Package size={14} strokeWidth={1} /> },
@@ -71,38 +104,43 @@ export default function ProfilePage() {
   ];
 
   return (
-    <div className="bg-(--black) min-h-screen text-(--beige) pt-24 font-sans">
+    <div className="bg-[var(--black)] min-h-screen text-[var(--beige)] pt-24 font-sans">
 
       {/* ── PAGE HEADER ── */}
-      <div className="px-6 md:px-12 pb-12 border-b border-(--gray-800)">
-        <Link href="/" className="inline-flex items-center gap-2 font-sans text-[10px] uppercase tracking-[0.2em] text-(--beige) hover:text-(--orange) transition-colors mb-12">
+      <div className="px-6 md:px-12 pb-12 border-b border-[var(--gray-800)]">
+        <Link href="/" className="inline-flex items-center gap-2 font-sans text-[10px] uppercase tracking-[0.2em] text-[var(--beige)] hover:text-[var(--orange)] transition-colors mb-12">
           <ArrowLeft size={14} strokeWidth={1} /> Back to store
         </Link>
 
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-8">
           <div>
-            <p className="font-sans text-[9px] uppercase tracking-[0.2em] text-(--orange) mb-4">
-              Member since 2026
+            <p className="font-sans text-[9px] uppercase tracking-[0.2em] text-[var(--orange)] mb-4">
+              Member since {memberSince}
             </p>
-            <h1 className="font-serif text-[clamp(3rem,8vw,6rem)] leading-[0.9] text-(--beige)">
-              My Account
+            <h1 className="font-serif text-[clamp(2.5rem,7vw,5.5rem)] leading-[0.9] text-[var(--beige)]">
+              {displayName}
             </h1>
+            <p className="font-sans text-[10px] tracking-[0.1em] text-[var(--gray-400)] mt-3">{user.email}</p>
           </div>
 
-          <button className="flex items-center gap-2 font-sans text-[10px] uppercase tracking-[0.2em] text-(--gray-400) hover:text-(--orange) transition-colors">
+          <button
+            onClick={handleSignOut}
+            disabled={signingOut}
+            className="flex items-center gap-2 font-sans text-[10px] uppercase tracking-[0.2em] text-[var(--gray-400)] hover:text-[var(--orange)] transition-colors disabled:opacity-50"
+          >
             <LogOut size={14} strokeWidth={1} />
-            Sign Out
+            {signingOut ? "Signing out…" : "Sign Out"}
           </button>
         </div>
 
         {/* TABS */}
-        <div className="flex overflow-x-auto no-scroll mt-16 gap-8 md:gap-16 border-b border-(--gray-900)">
+        <div className="flex overflow-x-auto no-scroll mt-16 gap-8 md:gap-16 border-b border-[var(--gray-900)]">
           {tabs.map(({ id, label, icon }) => (
             <button
               key={id}
               onClick={() => setActiveTab(id)}
               className={`flex items-center gap-3 font-sans text-[10px] uppercase tracking-[0.2em] pb-4 border-b-2 transition-colors ${
-                activeTab === id ? "border-(--orange) text-(--orange)" : "border-transparent text-(--gray-400) hover:text-(--beige)"
+                activeTab === id ? "border-[var(--orange)] text-[var(--orange)]" : "border-transparent text-[var(--gray-400)] hover:text-[var(--beige)]"
               }`}
             >
               {icon} {label}
@@ -117,57 +155,52 @@ export default function ProfilePage() {
         {/* ────── ORDERS ────── */}
         {activeTab === "orders" && (
           <div className="animate-in fade-in slide-in-from-bottom-4 duration-700">
-            <p className="font-sans text-[10px] uppercase tracking-[0.2em] text-(--orange) mb-8">
+            <p className="font-sans text-[10px] uppercase tracking-[0.2em] text-[var(--orange)] mb-8">
               {MOCK_ORDERS.length} Orders
             </p>
-
-            <div className="flex flex-col border-t border-(--gray-800)">
+            <div className="flex flex-col border-t border-[var(--gray-800)]">
               {MOCK_ORDERS.map((order) => (
-                <div key={order.id} className="border-b border-(--gray-800) bg-(--black)">
-                  {/* Order header */}
+                <div key={order.id} className="border-b border-[var(--gray-800)] bg-[var(--black)]">
                   <button
                     className="w-full flex items-center justify-between py-8 group transition-colors"
                     onClick={() => setExpandedOrder(expandedOrder === order.id ? null : order.id)}
                   >
                     <div className="flex items-center gap-8 md:gap-16 flex-wrap">
                       <div className="text-left">
-                        <p className="font-sans text-[11px] uppercase tracking-[0.15em] text-(--beige) group-hover:text-(--orange) mb-2 transition-colors">#{order.id}</p>
-                        <p className="font-sans text-[10px] uppercase tracking-[0.1em] text-(--gray-400)">{order.date}</p>
+                        <p className="font-sans text-[11px] uppercase tracking-[0.15em] text-[var(--beige)] group-hover:text-[var(--orange)] mb-2 transition-colors">#{order.id}</p>
+                        <p className="font-sans text-[10px] uppercase tracking-[0.1em] text-[var(--gray-400)]">{order.date}</p>
                       </div>
                       <StatusBadge status={order.status} />
                     </div>
                     <div className="flex items-center gap-6">
-                      <span className="font-sans text-[11px] tracking-[0.1em] text-(--beige)">$ {order.total}</span>
+                      <span className="font-sans text-[11px] tracking-[0.1em] text-[var(--beige)]">$ {order.total}</span>
                       <ChevronRight
                         size={16} strokeWidth={1}
-                        className={`text-(--gray-400) transition-transform duration-500 ${expandedOrder === order.id ? "rotate-90 text-(--orange)" : ""}`}
+                        className={`text-[var(--gray-400)] transition-transform duration-500 ${expandedOrder === order.id ? "rotate-90 text-[var(--orange)]" : ""}`}
                       />
                     </div>
                   </button>
-
-                  {/* Expanded items */}
                   <div className={`overflow-hidden transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] ${expandedOrder === order.id ? "max-h-[800px] opacity-100 mb-8" : "max-h-0 opacity-0"}`}>
-                    <div className="pt-8 border-t border-(--gray-900)">
+                    <div className="pt-8 border-t border-[var(--gray-900)]">
                       <div className="flex flex-col gap-6 mb-8">
                         {order.items.map((item, i) => (
                           <div key={i} className="flex gap-6 items-center">
-                            <div className="w-20 shrink-0 bg-(--gray-900) aspect-[2/3] overflow-hidden">
+                            <div className="w-20 shrink-0 bg-[var(--gray-900)] aspect-[2/3] overflow-hidden">
                               <img src={item.image} alt={item.name} className="w-full h-full object-cover" />
                             </div>
                             <div className="flex-1">
-                              <p className="font-sans text-[11px] uppercase tracking-[0.15em] text-(--beige) mb-2">{item.name}</p>
-                              <p className="font-sans text-[10px] uppercase tracking-[0.1em] text-(--gray-400)">Size: {item.size} &nbsp;·&nbsp; Qty: {item.qty}</p>
+                              <p className="font-sans text-[11px] uppercase tracking-[0.15em] text-[var(--beige)] mb-2">{item.name}</p>
+                              <p className="font-sans text-[10px] uppercase tracking-[0.1em] text-[var(--gray-400)]">Size: {item.size} &nbsp;·&nbsp; Qty: {item.qty}</p>
                             </div>
-                            <span className="font-sans text-[11px] tracking-[0.1em] text-(--orange)">$ {item.price}</span>
+                            <span className="font-sans text-[11px] tracking-[0.1em] text-[var(--orange)]">$ {item.price}</span>
                           </div>
                         ))}
                       </div>
-
                       <div className="flex gap-4">
-                        <button className="border border-(--beige) text-(--beige) font-sans text-[9px] uppercase tracking-[0.2em] px-8 py-3 hover:bg-(--beige) hover:text-(--black) transition-colors flex items-center gap-2">
+                        <button className="border border-[var(--beige)] text-[var(--beige)] font-sans text-[9px] uppercase tracking-[0.2em] px-8 py-3 hover:bg-[var(--beige)] hover:text-[var(--black)] transition-colors flex items-center gap-2">
                           <Eye size={12} strokeWidth={1} /> Track Order
                         </button>
-                        <button className="text-(--gray-400) font-sans text-[9px] uppercase tracking-[0.2em] px-4 hover:text-(--orange) transition-colors">
+                        <button className="text-[var(--gray-400)] font-sans text-[9px] uppercase tracking-[0.2em] px-4 hover:text-[var(--orange)] transition-colors">
                           Return / Exchange
                         </button>
                       </div>
@@ -183,49 +216,28 @@ export default function ProfilePage() {
         {activeTab === "addresses" && (
           <div className="animate-in fade-in slide-in-from-bottom-4 duration-700">
             <div className="flex items-center justify-between mb-8">
-              <p className="font-sans text-[10px] uppercase tracking-[0.2em] text-(--orange)">Saved Addresses</p>
-              <button className="flex items-center gap-2 font-sans text-[10px] uppercase tracking-[0.2em] text-(--beige) hover:text-(--orange) transition-colors">
+              <p className="font-sans text-[10px] uppercase tracking-[0.2em] text-[var(--orange)]">Saved Addresses</p>
+              <button className="flex items-center gap-2 font-sans text-[10px] uppercase tracking-[0.2em] text-[var(--beige)] hover:text-[var(--orange)] transition-colors">
                 <Plus size={14} strokeWidth={1} /> Add New
               </button>
             </div>
-
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {/* Default address */}
-              <div className="border border-(--beige) p-8 bg-(--gray-900)">
+              <div className="border border-[var(--beige)] p-8 bg-[var(--gray-900)]">
                 <div className="flex justify-between items-start mb-6">
-                  <span className="font-sans text-[10px] uppercase tracking-[0.2em] text-(--beige)">Home — Default</span>
+                  <span className="font-sans text-[10px] uppercase tracking-[0.2em] text-[var(--beige)]">Home — Default</span>
                   <div className="flex gap-4">
-                    <button className="text-(--beige) hover:text-(--orange) transition-colors"><Edit2 size={14} strokeWidth={1} /></button>
-                    <button className="text-(--gray-400) hover:text-(--orange) transition-colors"><Trash2 size={14} strokeWidth={1} /></button>
+                    <button className="text-[var(--beige)] hover:text-[var(--orange)] transition-colors"><Edit2 size={14} strokeWidth={1} /></button>
+                    <button className="text-[var(--gray-400)] hover:text-[var(--orange)] transition-colors"><Trash2 size={14} strokeWidth={1} /></button>
                   </div>
                 </div>
-                <p className="font-sans text-[11px] tracking-[0.05em] leading-loose text-(--gray-200)">
-                  Jane Doe<br />
+                <p className="font-sans text-[11px] tracking-[0.05em] leading-loose text-[var(--gray-200)]">
+                  {displayName}<br />
                   123 Park Street<br />
                   Kolkata, West Bengal<br />
                   700 016, India
                 </p>
               </div>
-
-              {/* Work address */}
-              <div className="border border-(--gray-800) p-8 bg-(--black)">
-                <div className="flex justify-between items-start mb-6">
-                  <span className="font-sans text-[10px] uppercase tracking-[0.2em] text-(--gray-400)">Office</span>
-                  <div className="flex gap-4">
-                    <button className="text-(--beige) hover:text-(--orange) transition-colors"><Edit2 size={14} strokeWidth={1} /></button>
-                    <button className="text-(--gray-400) hover:text-(--orange) transition-colors"><Trash2 size={14} strokeWidth={1} /></button>
-                  </div>
-                </div>
-                <p className="font-sans text-[11px] tracking-[0.05em] leading-loose text-(--gray-400)">
-                  Jane Doe<br />
-                  45 MG Road, 3rd Floor<br />
-                  Bengaluru, Karnataka<br />
-                  560 001, India
-                </p>
-              </div>
-
-              {/* Add new card */}
-              <button className="border border-dashed border-(--gray-600) p-8 flex flex-col items-center justify-center gap-4 min-h-[200px] text-(--gray-400) hover:text-(--orange) hover:border-(--orange) transition-colors group">
+              <button className="border border-dashed border-[var(--gray-600)] p-8 flex flex-col items-center justify-center gap-4 min-h-[200px] text-[var(--gray-400)] hover:text-[var(--orange)] hover:border-[var(--orange)] transition-colors group">
                 <Plus size={24} strokeWidth={1} className="group-hover:scale-110 transition-transform" />
                 <span className="font-sans text-[10px] uppercase tracking-[0.2em]">Add Address</span>
               </button>
@@ -236,44 +248,38 @@ export default function ProfilePage() {
         {/* ────── WISHLIST ────── */}
         {activeTab === "wishlist" && (
           <div className="animate-in fade-in slide-in-from-bottom-4 duration-700">
-            <p className="font-sans text-[10px] uppercase tracking-[0.2em] text-(--orange) mb-8">
+            <p className="font-sans text-[10px] uppercase tracking-[0.2em] text-[var(--orange)] mb-8">
               {wishlist.length} Saved Items
             </p>
-
             {wishlist.length === 0 ? (
-              <div className="text-center py-32 border border-(--gray-800)">
-                <Heart size={28} strokeWidth={1} className="mx-auto mb-6 text-(--gray-400)" />
-                <p className="font-sans text-[11px] uppercase tracking-[0.2em] text-(--gray-400) mb-8">Your wishlist is empty</p>
-                <Link href="/products" className="border-b border-(--beige) pb-1 font-sans text-[10px] uppercase tracking-[0.2em] text-(--beige) hover:text-(--orange) hover:border-(--orange) transition-colors">
+              <div className="text-center py-32 border border-[var(--gray-800)]">
+                <Heart size={28} strokeWidth={1} className="mx-auto mb-6 text-[var(--gray-400)]" />
+                <p className="font-sans text-[11px] uppercase tracking-[0.2em] text-[var(--gray-400)] mb-8">Your wishlist is empty</p>
+                <Link href="/products" className="border-b border-[var(--beige)] pb-1 font-sans text-[10px] uppercase tracking-[0.2em] text-[var(--beige)] hover:text-[var(--orange)] hover:border-[var(--orange)] transition-colors">
                   Browse Collection
                 </Link>
               </div>
             ) : (
-              <div className="grid grid-cols-2 md:grid-cols-4 w-full border-t border-l border-(--gray-800)">
-                {wishlist.map((item, i) => (
-                  <div key={item.id} className="group relative border-r border-b border-(--gray-800) bg-(--gray-900) overflow-hidden">
+              <div className="grid grid-cols-2 md:grid-cols-4 w-full border-t border-l border-[var(--gray-800)]">
+                {wishlist.map((item) => (
+                  <div key={item.id} className="group relative border-r border-b border-[var(--gray-800)] bg-[var(--gray-900)] overflow-hidden">
                     <div className="relative w-full aspect-[2/3]">
                       <img src={item.image} alt={item.name} className="absolute inset-0 w-full h-full object-cover transition-transform duration-[1.5s] ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:scale-105" />
                       <div className="absolute inset-x-0 bottom-0 h-32 bg-gradient-to-t from-black/80 to-transparent pointer-events-none" />
-                      
-                      {/* Delete Button */}
                       <button
                         onClick={() => setWishlist(w => w.filter(x => x.id !== item.id))}
-                        className="absolute top-4 right-4 bg-(--black) text-(--beige) p-2 hover:text-(--orange) transition-colors z-20"
+                        className="absolute top-4 right-4 bg-[var(--black)] text-[var(--beige)] p-2 hover:text-[var(--orange)] transition-colors z-20"
                       >
                         <Trash2 size={14} strokeWidth={1} />
                       </button>
-
                       <div className="absolute bottom-6 left-4 right-4 z-10 pointer-events-none">
-                        <p className="font-sans text-[10px] tracking-[0.15em] uppercase text-(--beige) mb-1">{item.name}</p>
+                        <p className="font-sans text-[10px] tracking-[0.15em] uppercase text-[var(--beige)] mb-1">{item.name}</p>
                         <div className="flex justify-between items-center">
-                          <p className="font-sans text-[9px] tracking-[0.15em] uppercase text-(--gray-400)">{item.category}</p>
-                          <p className="font-sans text-[10px] tracking-[0.15em] uppercase text-(--beige)">${item.price}</p>
+                          <p className="font-sans text-[9px] tracking-[0.15em] uppercase text-[var(--gray-400)]">{item.category}</p>
+                          <p className="font-sans text-[10px] tracking-[0.15em] uppercase text-[var(--beige)]">${item.price}</p>
                         </div>
                       </div>
-
-                      {/* Quick Add Slide-Up */}
-                      <button className="absolute bottom-0 left-0 right-0 bg-(--orange) text-(--black) py-4 font-sans text-[11px] font-bold uppercase tracking-[0.15em] transition-transform duration-300 translate-y-full group-hover:translate-y-0 z-20">
+                      <button className="absolute bottom-0 left-0 right-0 bg-[var(--orange)] text-[var(--black)] py-4 font-sans text-[11px] font-bold uppercase tracking-[0.15em] transition-transform duration-300 translate-y-full group-hover:translate-y-0 z-20">
                         Add to Bag
                       </button>
                     </div>
@@ -287,64 +293,60 @@ export default function ProfilePage() {
         {/* ────── SETTINGS ────── */}
         {activeTab === "settings" && (
           <div className="animate-in fade-in slide-in-from-bottom-4 duration-700 max-w-2xl">
-            <p className="font-sans text-[10px] uppercase tracking-[0.2em] text-(--orange) mb-12">
+            <p className="font-sans text-[10px] uppercase tracking-[0.2em] text-[var(--orange)] mb-12">
               Account Settings
             </p>
 
             {/* Personal Info */}
             <section className="mb-16">
-              <h2 className="font-serif text-3xl mb-8 text-(--beige)">Personal Information</h2>
+              <h2 className="font-serif text-3xl mb-8 text-[var(--beige)]">Personal Information</h2>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
                 <div>
-                  <label className="font-sans text-[9px] uppercase tracking-[0.2em] text-(--gray-400) mb-4 block">First Name</label>
-                  <input defaultValue="Jane" className="w-full bg-transparent border-b border-(--gray-600) py-3 font-sans text-[12px] tracking-[0.1em] text-(--beige) focus:outline-none focus:border-(--orange) transition-colors" />
+                  <label className="font-sans text-[9px] uppercase tracking-[0.2em] text-[var(--gray-400)] mb-4 block">Full Name</label>
+                  <input
+                    defaultValue={user?.user_metadata?.full_name || ""}
+                    className="w-full bg-transparent border-b border-[var(--gray-600)] py-3 font-sans text-[12px] tracking-[0.1em] text-[var(--beige)] focus:outline-none focus:border-[var(--orange)] transition-colors"
+                  />
                 </div>
                 <div>
-                  <label className="font-sans text-[9px] uppercase tracking-[0.2em] text-(--gray-400) mb-4 block">Last Name</label>
-                  <input defaultValue="Doe" className="w-full bg-transparent border-b border-(--gray-600) py-3 font-sans text-[12px] tracking-[0.1em] text-(--beige) focus:outline-none focus:border-(--orange) transition-colors" />
+                  <label className="font-sans text-[9px] uppercase tracking-[0.2em] text-[var(--gray-400)] mb-4 block">Email Address</label>
+                  <input
+                    defaultValue={user?.email || ""}
+                    disabled
+                    className="w-full bg-transparent border-b border-[var(--gray-800)] py-3 font-sans text-[12px] tracking-[0.1em] text-[var(--gray-400)] focus:outline-none cursor-not-allowed"
+                  />
                 </div>
-              </div>
-              <div className="mb-8">
-                <label className="font-sans text-[9px] uppercase tracking-[0.2em] text-(--gray-400) mb-4 block">Email Address</label>
-                <input type="email" defaultValue="jane.doe@example.com" className="w-full bg-transparent border-b border-(--gray-600) py-3 font-sans text-[12px] tracking-[0.1em] text-(--beige) focus:outline-none focus:border-(--orange) transition-colors" />
-              </div>
-              <div>
-                <label className="font-sans text-[9px] uppercase tracking-[0.2em] text-(--gray-400) mb-4 block">Phone</label>
-                <input type="tel" defaultValue="98765 43210" className="w-full bg-transparent border-b border-(--gray-600) py-3 font-sans text-[12px] tracking-[0.1em] text-(--beige) focus:outline-none focus:border-(--orange) transition-colors" />
               </div>
             </section>
 
             {/* Password */}
-            <section className="mb-16 pt-12 border-t border-(--gray-800)">
-              <h2 className="font-serif text-3xl mb-8 text-(--beige)">Password</h2>
-              <div className="mb-8">
-                <label className="font-sans text-[9px] uppercase tracking-[0.2em] text-(--gray-400) mb-4 block">Current Password</label>
-                <input type="password" placeholder="••••••••" className="w-full bg-transparent border-b border-(--gray-600) py-3 font-sans text-[12px] tracking-[0.1em] text-(--beige) focus:outline-none focus:border-(--orange) transition-colors" />
-              </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                <div>
-                  <label className="font-sans text-[9px] uppercase tracking-[0.2em] text-(--gray-400) mb-4 block">New Password</label>
-                  <input type="password" placeholder="••••••••" className="w-full bg-transparent border-b border-(--gray-600) py-3 font-sans text-[12px] tracking-[0.1em] text-(--beige) focus:outline-none focus:border-(--orange) transition-colors" />
-                </div>
-                <div>
-                  <label className="font-sans text-[9px] uppercase tracking-[0.2em] text-(--gray-400) mb-4 block">Confirm Password</label>
-                  <input type="password" placeholder="••••••••" className="w-full bg-transparent border-b border-(--gray-600) py-3 font-sans text-[12px] tracking-[0.1em] text-(--beige) focus:outline-none focus:border-(--orange) transition-colors" />
-                </div>
-              </div>
+            <section className="mb-16 pt-12 border-t border-[var(--gray-800)]">
+              <h2 className="font-serif text-3xl mb-8 text-[var(--beige)]">Password</h2>
+              <p className="font-sans text-[11px] leading-relaxed tracking-[0.05em] text-[var(--gray-400)] mb-6">
+                To change your password, use the forgot password flow from the sign-in page.
+              </p>
+              <Link
+                href="/auth"
+                className="inline-flex items-center gap-2 border-b border-[var(--orange)] text-[var(--orange)] pb-1 font-sans text-[10px] uppercase tracking-[0.15em] hover:text-[var(--beige)] hover:border-[var(--beige)] transition-colors"
+              >
+                Go to Sign In
+              </Link>
             </section>
 
-            {/* Actions */}
-            <div className="flex gap-6 pt-8">
-              <button className="bg-(--beige) text-(--black) font-sans text-[10px] font-bold uppercase tracking-[0.2em] px-10 py-5 hover:bg-(--orange) transition-colors">
-                Save Changes
+            {/* Danger Zone */}
+            <section className="pt-12 border-t border-[var(--gray-800)]">
+              <h2 className="font-serif text-3xl mb-8 text-[var(--beige)]">Sign Out</h2>
+              <button
+                onClick={handleSignOut}
+                disabled={signingOut}
+                className="flex items-center gap-3 border border-[var(--gray-600)] text-[var(--gray-200)] font-sans text-[10px] uppercase tracking-[0.2em] px-8 py-4 hover:border-[var(--orange)] hover:text-[var(--orange)] transition-colors disabled:opacity-50"
+              >
+                <LogOut size={14} strokeWidth={1} />
+                {signingOut ? "Signing out…" : "Sign Out of Account"}
               </button>
-              <button className="text-(--gray-400) font-sans text-[10px] uppercase tracking-[0.2em] hover:text-(--beige) transition-colors">
-                Cancel
-              </button>
-            </div>
+            </section>
           </div>
         )}
-
       </div>
     </div>
   );

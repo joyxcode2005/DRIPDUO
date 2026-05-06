@@ -2,13 +2,16 @@
 
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { useCart } from "@/lib/CartContext";
-import { Search, X, User, ShoppingBag, Menu } from "lucide-react";
+import { useAuth } from "@/lib/AuthContext";
+import { Search, X, User, ShoppingBag, Menu, LogIn } from "lucide-react";
 import { Nav_links } from "@/constants";
-
 
 export const Navbar = () => {
   const { cart, openCart } = useCart();
+  const { user } = useAuth();
+  const pathname = usePathname();
   const [scrolled, setScrolled] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
@@ -31,6 +34,11 @@ export const Navbar = () => {
 
   const cartCount = cart.reduce((s, i) => s + i.quantity, 0);
 
+  // Hide the navbar completely on authentication pages
+  if (pathname === "/auth" || pathname === "/reset-password") {
+    return null;
+  }
+
   return (
     <>
       {/* ── MAIN NAVBAR ── */}
@@ -39,7 +47,6 @@ export const Navbar = () => {
           }`}
         style={{ fontFamily: "'Helvetica Neue', Helvetica, Arial, sans-serif" }}
       >
-        {/* Added lg:px-20 and md:px-12 for wide side margins */}
         <div className="flex items-center justify-end px-6 md:px-12 lg:px-12 h-10">
 
           {/* LEFT SIDE: Hamburger (mobile) & Links (desktop) */}
@@ -57,10 +64,9 @@ export const Navbar = () => {
                 <Link
                   key={link.name}
                   href={link.href}
-                  className="relative text-(--beige) hover:text-(--orange) [text-shadow:0_1px_2px_rgba(0,0,0)] transition-colors uppercase tracking-[0.15em] text-[10px] font-medium group hover:text-shadow:0_2px_4px_rgba(255,0,0,1) hover:underline-offset-4"
+                  className="relative text-(--beige) hover:text-(--orange) [text-shadow:0_1px_2px_rgba(0,0,0)] transition-colors uppercase tracking-[0.15em] text-[10px] font-medium group hover:underline-offset-4"
                 >
                   {link.name}
-                  {/* Subtle hover underline effect */}
                   <span className="absolute -bottom-1.5 left-0 w-0 h-px bg-(--orange) transition-all duration-300 group-hover:w-full"></span>
                 </Link>
               ))}
@@ -82,9 +88,24 @@ export const Navbar = () => {
             <button onClick={() => setSearchOpen(true)} className="hover:text-(--orange) transition-transform hover:scale-110 duration-300">
               <Search size={20} strokeWidth={1.5} />
             </button>
-            <Link href="/profile" className="hover:text-(--orange) transition-transform hover:scale-110 duration-300 hidden md:block">
-              <User size={20} strokeWidth={1.5} />
+
+            {/* Auth-aware profile icon */}
+            <Link
+              href={user ? "/profile" : "/auth"}
+              className="hover:text-(--orange) transition-transform hover:scale-110 duration-300 hidden md:flex items-center gap-1.5 relative"
+              title={user ? "My Profile" : "Sign In"}
+            >
+              {user ? (
+                <User size={20} strokeWidth={1.5} />
+              ) : (
+                <LogIn size={20} strokeWidth={1.5} />
+              )}
+              {/* Dot indicator when logged in */}
+              {user && (
+                <span className="absolute -top-0.5 -right-0.5 w-2 h-2 bg-(--orange) rounded-full" />
+              )}
             </Link>
+
             <button onClick={openCart} className="hover:text-(--orange) transition-transform hover:scale-110 duration-300 relative">
               <ShoppingBag size={20} strokeWidth={1.5} />
               {cartCount > 0 && (
@@ -109,7 +130,6 @@ export const Navbar = () => {
           </button>
         </div>
 
-        {/* Animated content wrapper */}
         <div className={`flex-1 flex flex-col px-4 md:px-8 pt-16 transition-all duration-700 delay-100 ${searchOpen ? "translate-y-0 opacity-100" : "translate-y-10 opacity-0"}`}>
           <form
             onSubmit={(e) => {
@@ -165,7 +185,6 @@ export const Navbar = () => {
           </button>
         </div>
 
-        {/* Animated content wrapper */}
         <div className={`flex-1 px-6 pt-12 overflow-y-auto pb-24 transition-all duration-700 delay-100 ${menuOpen ? "translate-x-0 opacity-100" : "-translate-x-10 opacity-0"}`}>
           {Nav_links.map((link, index) => (
             <Link
@@ -180,8 +199,12 @@ export const Navbar = () => {
           ))}
 
           <div className="mt-12 space-y-4">
-            <Link href="/profile" onClick={() => setMenuOpen(false)} className="uppercase tracking-[0.15em] block text-[11px] text-(--gray-200) hover:text-(--orange) transition-colors">
-              My Account
+            <Link
+              href={user ? "/profile" : "/auth"}
+              onClick={() => setMenuOpen(false)}
+              className="uppercase tracking-[0.15em] block text-[11px] text-(--gray-200) hover:text-(--orange) transition-colors"
+            >
+              {user ? "My Account" : "Sign In / Register"}
             </Link>
             <Link href="/checkout" onClick={() => setMenuOpen(false)} className="uppercase tracking-[0.15em] block text-[11px] text-(--gray-200) hover:text-(--orange) transition-colors">
               Orders & Returns

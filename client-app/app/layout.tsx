@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 import { CartProvider } from "@/lib/CartContext";
 import { QuickViewProvider } from "@/lib/QuickViewContext";
+import { AuthProvider } from "@/lib/AuthContext";
 
 // Named imports (with curly braces)
 import { Navbar } from "@/components/ui/navbar";
@@ -29,16 +30,18 @@ export default function RootLayout({
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
       </head>
       <body className="min-h-screen overflow-x-hidden bg-(--black) text-(--beige) antialiased selection:bg-(--orange) selection:text-(--black)">
-        <CartProvider>
-          <QuickViewProvider>
-            <Navbar />
-            <div className="pb-16 md:pb-0">{children}</div>
-            <Footer />
-            <BottomNav />
-            <CartDrawer />
-            <QuickViewModal />
-          </QuickViewProvider>
-        </CartProvider>
+        <AuthProvider>
+          <CartProvider>
+            <QuickViewProvider>
+              <Navbar />
+              <div className="pb-16 md:pb-0">{children}</div>
+              <Footer />
+              <BottomNav />
+              <CartDrawer />
+              <QuickViewModal />
+            </QuickViewProvider>
+          </CartProvider>
+        </AuthProvider>
       </body>
     </html>
   );
