@@ -1,154 +1,115 @@
-"use server";
-
 import { getSupabaseClient } from "@/lib/supabase";
 
-export async function fetchUserCart(userId: string) {
-    const supabase = getSupabaseClient();
 
-    try {
-        // 1. Try to find the existing cart for this user
-        let { data: cartData, error: cartError } = await supabase
-            .from("cart")
-            .select("id")
-            .eq("user_id", userId)
-            .maybeSingle(); // maybeSingle returns null instead of throwing an error if 0 rows are found
+const supabase = getSupabaseClient();
 
-        if (cartError) throw cartError;
+type CartRow = {
+    id: string;
+};
 
-        let cartId = (cartData as { id: string } | null)?.id;
+type CartItemRow = {
+    id: string;
+    quantity: number;
+    products?: {
+        id: string;
+        name: string;
+        price: number | null;
+        final_price: number | null;
+        product_images?: Array<{
+            url: string;
+            is_primary: boolean;
+        }>;
+    } | null;
+    product_variants?: {
+        size: string | null;
+        gsm: string | null;
+    } | null;
+};
 
-        // 2. If no cart exists, create one
-        if (!cartId) {
-            const { data: newCart, error: insertError } = await supabase
-                .from("cart")
-                .insert([{ user_id: userId }])
-                .select("id")
-                .single();
+export type CartRecord = {
+    id: string;
+    productId: string;
+    name: string;
+    price: number;
+    image: string;
+    quantity: number;
+    size?: string;
+    gsm?: string;
+};
 
-            if (insertError) throw insertError;
-            cartId = newCart.id;
-        }
+// 1. Fetch Cart Items
+export const fetchCartItems = async (userId: string): Promise<CartRecord[]> => {
+    // First, get the user's cart
+    const { data: cartData, error: cartError } = await supabase
+        .from('cart')
+        .select('id')
+        .eq('user_id', userId)
+        .maybeSingle();
 
-        // 3. Fetch all items in the cart (Join with products table)
-        // Supabase automatically detects foreign keys and nests the joined data
-        const { data: itemsData, error: itemsError } = await supabase
-            .from("cart_items")
-            .select(`
-        product_id,
-        quantity,
-        products (
-          name,
-          price,
-          image
-        )
-      `)
-            .eq("cart_id", cartId);
+    const cart = cartData as CartRow | null;
 
-        if (itemsError) throw itemsError;
+    if (cartError && !cart) {
+        console.error("Error fetching cart:", cartError);
+        return [];
+    }
 
-        // 4. Flatten the Supabase nested response to match your Context's CartItem[] type
-        const formattedItems = itemsData.map((item: any) => ({
-            id: item.product_id,
-            quantity: item.quantity,
-            name: item.products.name,
-            price: item.products.price,
-            image: item.products.image,
-        }));
+    if (!cart) return [];
+
+    // Then, fetch the items with joined product and variant data
+    const { data: itemsData, error: itemsError } = await supabase
+        .from('cart_items')
+        .select(`
+      id,
+      quantity,
+      products ( id, name, price, final_price, product_images (url, is_primary) ),
+      product_variants ( id, size, gsm )
+    `)
+        .eq('cart_id', cart.id);
+
+    const items = (itemsData ?? []) as CartItemRow[];
+
+    if (itemsError) {
+        console.error("Error fetching cart items:", itemsError);
+        return [];
+    }
+
+    // Format the data so your CartDrawer can easily read it
+    return items.map((item) => {
+        // Find the primary image, or default to the first one
+        const images = item.products?.product_images || [];
+        const primaryImg = images.find((img) => img.is_primary) || images[0];
 
         return {
-            id: cartId,
-            items: formattedItems,
+            id: item.id,
+            productId: item.products?.id || item.id,
+            name: item.products?.name,
+            price: Number(item.products?.final_price || item.products?.price || 0),
+            image: primaryImg?.url || "/images/placeholder.jpg",
+            size: item.product_variants?.size,
+            gsm: item.product_variants?.gsm,
+            quantity: Number(item.quantity),
         };
-    } catch (error) {
-        console.error("Error fetching user cart:", error);
-        throw new Error("Failed to fetch cart");
-    }
-}
+    }) as CartRecord[];
+};
 
-/**
- * Adds an item to the cart. If it already exists, updates the quantity.
- */
-export async function addCartItemToDB(payload: { cart_id: string; product_id: string; quantity: number }) {
-    const supabase = getSupabaseClient();
-    const { cart_id, product_id, quantity } = payload;
+// 2. Update Quantity in DB
+export const updateDbQuantity = async (cartItemId: string | number, newQuantity: number) => {
+    if (newQuantity < 1) return; // Prevent zero or negative quantities
 
-    try {
-        // 1. Check if the item is already in the cart
-        const { data: existingItem } = await supabase
-            .from("cart_items")
-            .select("id, quantity")
-            .eq("cart_id", cart_id)
-            .eq("product_id", product_id)
-            .maybeSingle();
+    const { error } = await supabase
+        .from('cart_items')
+        .update({ quantity: newQuantity })
+        .eq('id', cartItemId);
 
-        if (existingItem) {
-            // 2a. If it exists, update the quantity
-            const { error } = await supabase
-                .from("cart_items")
-                .update({ quantity: existingItem.quantity + quantity })
-                .eq("cart_id", cart_id)
-                .eq("product_id", product_id);
+    if (error) console.error("Update error:", error);
+};
 
-            if (error) throw error;
-        } else {
-            // 2b. If it doesn't exist, insert a new row
-            const { error } = await supabase
-                .from("cart_items")
-                .insert({ cart_id, product_id, quantity });
+// 3. Remove Item from DB
+export const removeDbItem = async (cartItemId: string | number) => {
+    const { error } = await supabase
+        .from('cart_items')
+        .delete()
+        .eq('id', cartItemId);
 
-            if (error) throw error;
-        }
-
-        return { success: true };
-    } catch (error) {
-        console.error("Error adding item to DB:", error);
-        throw new Error("Failed to add item to cart");
-    }
-}
-
-/**
- * Removes a specific product entirely from a specific cart.
- */
-export async function removeCartItemFromDB(cart_id: string, product_id: string) {
-    const supabase = getSupabaseClient();
-
-    try {
-        const { error } = await supabase
-            .from("cart_items")
-            .delete()
-            .eq("cart_id", cart_id)
-            .eq("product_id", product_id);
-
-        if (error) throw error;
-        return { success: true };
-    } catch (error) {
-        console.error("Error removing item from DB:", error);
-        throw new Error("Failed to remove item from cart");
-    }
-}
-
-/**
- * Updates the exact quantity of a product in the cart.
- */
-export async function updateCartItemInDB(cart_id: string, product_id: string, quantity: number) {
-    const supabase = getSupabaseClient();
-
-    try {
-        // Safety check: if quantity is somehow less than 1, delete the row instead
-        if (quantity < 1) {
-            return await removeCartItemFromDB(cart_id, product_id);
-        }
-
-        const { error } = await supabase
-            .from("cart_items")
-            .update({ quantity })
-            .eq("cart_id", cart_id)
-            .eq("product_id", product_id);
-
-        if (error) throw error;
-        return { success: true };
-    } catch (error) {
-        console.error("Error updating item quantity in DB:", error);
-        throw new Error("Failed to update item quantity");
-    }
-}
+    if (error) console.error("Delete error:", error);
+};

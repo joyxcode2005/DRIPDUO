@@ -41,6 +41,7 @@ export const QuickViewModal = () => {
     }
     addToCart({
       id: selectedProduct.id,
+      productId: selectedProduct.id,
       name: selectedProduct.name,
       price: selectedProduct.price,
       image: selectedProduct.image,

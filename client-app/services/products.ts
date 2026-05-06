@@ -63,9 +63,14 @@ export const getAllProducts = async () => {
                 id,
                 url,
                 is_primary
+            ),
+            product_variants (
+                id,
+                size,
+                gsm,
+                stock
             )
         `);
-
 
     console.log("Raw products data from Supabase:", JSON.stringify(data, null, 2));
 
@@ -80,9 +85,7 @@ export const getAllProducts = async () => {
         // --- BULLETPROOF CATEGORY MAPPING ---
         const rawCategories = product.product_categories || [];
         const mappedCategories = rawCategories.map((pc: any) => {
-            // If Supabase returned { categories: { id: "...", name: "..." } }
             if (pc.categories) return pc.categories;
-            // If Supabase somehow returned it flat already { id: "...", name: "..." }
             return pc;
         }).filter(Boolean);
 
@@ -91,11 +94,20 @@ export const getAllProducts = async () => {
         const primaryImgObj = mappedImages.find((img: any) => img.is_primary) || mappedImages[0];
         const primaryUrl = primaryImgObj ? primaryImgObj.url : "/images/placeholder.jpg";
 
+        // --- VARIANT & STOCK MAPPING ---
+        const variants = product.product_variants || [];
+
+        // Calculate the combined stock across all sizes and GSMs
+        const totalStock = variants.reduce((sum: number, variant: any) => sum + (variant.stock || 0), 0);
+
         return {
             ...product,
             categories: mappedCategories,
             images: mappedImages,
-            primary_image_url: primaryUrl
+            primary_image_url: primaryUrl,
+            variants: variants,           // Keep the raw array for size/gsm selection menus
+            total_stock: totalStock,      // Useful for "Out of Stock" badges
+            is_in_stock: totalStock > 0   // Quick boolean for conditional rendering
         };
     });
 
@@ -120,6 +132,12 @@ export const getProductById = async (id: string) => {
                 id,
                 url,
                 is_primary
+            ),
+            product_variants (
+                id,
+                size,
+                gsm,
+                stock
             )
         `)
         .eq("id", id)
@@ -130,11 +148,19 @@ export const getProductById = async (id: string) => {
         return null;
     }
 
+    // ✅ Filter the variants array so it ONLY includes items with stock greater than 0
+    const availableVariants = (data.product_variants || []).filter(
+        (variant: any) => variant.stock > 0
+    );
+
     return {
         ...data,
         categories: data.product_categories?.map((pc: any) => pc.categories) || [],
         images: data.product_images || [],
-        primary_image_url: (data.product_images || []).find((img: any) => img.is_primary)?.url || "/images/placeholder.jpg"
+        primary_image_url: (data.product_images || []).find((img: any) => img.is_primary)?.url || "/images/placeholder.jpg",
+
+        // ✅ Return only the filtered, in-stock variants
+        variants: availableVariants
     };
 };
 

@@ -2,7 +2,6 @@
 
 import Link from "next/link";
 import { useState } from "react";
-import { useCart } from "@/lib/CartContext";
 import Image from "next/image";
 
 export interface SupabaseCategory {
@@ -28,6 +27,7 @@ export interface Product {
   discount: number;
   final_price: number;
   stock: number;
+  total_stock: number;
   is_active: boolean;
   created_at: string;
   updated_at: string;
@@ -36,7 +36,6 @@ export interface Product {
 }
 
 export default function ProductCard({ product }: { product: Product }) {
-  const { addToCart } = useCart();
   const [isHovered, setIsHovered] = useState(false);
 
   const imageUrl = product.product_images?.[0]?.url || "";
@@ -51,27 +50,13 @@ export default function ProductCard({ product }: { product: Product }) {
 
   const savings = product.price - product.final_price;
 
-
   // Show appropriate stock status based on inventory levels
   const stockStatus =
-    product.stock === 0
+    product.total_stock === 0
       ? { label: "Out of Stock", color: "text-red-400" }
-      : product.stock <= 5
-        ? { label: `Only ${product.stock} left`, color: "text-amber-400" }
+      : product.total_stock <= 5
+        ? { label: `Only ${product.total_stock} left`, color: "text-amber-400" }
         : { label: "In Stock", color: "text-green-400" };
-
-  const handleQuickAdd = (e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    addToCart({
-      id: product.id,
-      name: product.name,
-      price: product.final_price,
-      image: imageUrl,
-      size: "M",
-      quantity: 1,
-    });
-  };
 
   return (
     <Link
@@ -130,7 +115,7 @@ export default function ProductCard({ product }: { product: Product }) {
         {/* ── Stock Status Indicator ── */}
         <div
           className={`absolute z-10 flex items-center gap-1.5 font-sans text-[8px] tracking-[0.12em] uppercase transition-all duration-300 ${stockStatus.color}`}
-          style={{ bottom: isHovered ? "8.5rem" : "5.5rem", left: "0.75rem" }}
+          style={{ bottom: "4.5rem", left: "0.75rem" }}
         >
           <span className="w-1.5 h-1.5 rounded-full bg-current" />
           {stockStatus.label}
@@ -139,7 +124,7 @@ export default function ProductCard({ product }: { product: Product }) {
         {/* ── Product Info Overlay ── */}
         <div
           className="absolute left-3 right-3 z-10 flex justify-between items-end transition-all duration-300"
-          style={{ bottom: isHovered ? "4rem" : "0.875rem" }}
+          style={{ bottom: "0.875rem" }}
         >
           <div className="max-w-[68%]">
             <p className="font-sans text-[10px] tracking-[0.14em] uppercase text-(--beige) leading-relaxed line-clamp-2 font-medium">
@@ -176,25 +161,6 @@ export default function ProductCard({ product }: { product: Product }) {
             )}
           </div>
         </div>
-
-        {/* ── Quick Add CTA ── */}
-        <button
-          onClick={handleQuickAdd}
-          className="absolute bottom-0 left-0 right-0 bg-(--orange) text-(--black) font-bold text-center py-3.5 font-sans text-[10px] tracking-[0.18em] uppercase z-20 disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2 transition-transform duration-300 ease-in-out"
-          style={{ transform: isHovered ? "translateY(0)" : "translateY(100%)" }}
-          disabled={product.stock === 0}
-        >
-          {product.stock === 0 ? (
-            "Out of Stock"
-          ) : (
-            <>
-              Quick Add — M
-              <span className="font-normal opacity-60 text-[8px] tracking-widest">
-                · Change size →
-              </span>
-            </>
-          )}
-        </button>
       </div>
 
       {/* ── Footer Strip ── */}
