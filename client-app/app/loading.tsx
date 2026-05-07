@@ -97,7 +97,7 @@ export default function Loading() {
           <motion.div
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 1.2, duration: 0.8, ease: PREMIUM_EASE }}
+            transition={{ delay: 1.2, duration: 0.8, ease: PREMIUM_EASE as any }}
             className="absolute top-0 z-10"
           >
             {/* 456px exact shift ensures flawless seamless loop (6 items * 76px spacing) */}
@@ -138,7 +138,7 @@ export default function Loading() {
                 animate={{ opacity: 1, y: 0, rotateX: 0, filter: "blur(0px)", scale: 1 }}
                 transition={{
                   duration: 0.8,
-                  ease: PREMIUM_EASE,
+                  ease: PREMIUM_EASE as any,
                   delay: 1.6 + i * 0.06, // Triggers perfectly after the rack fades in
                 }}
                 className="inline-block font-serif text-[#ECE7D1]"
@@ -158,7 +158,7 @@ export default function Loading() {
             <motion.p
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 2.2, duration: 1, ease: PREMIUM_EASE }}
+              transition={{ delay: 2.2, duration: 1, ease: PREMIUM_EASE as any }}
               className="text-[#EE3C24] font-medium tracking-[0.4em] uppercase text-[9px]"
               style={{ fontFamily: "'Helvetica Neue', Helvetica, Arial, sans-serif" }}
             >
@@ -182,7 +182,7 @@ export default function Loading() {
             animate={{ left: "0%", right: "0%" }}
             transition={{
               duration: 2.5,
-              ease: PREMIUM_EASE,
+              ease: PREMIUM_EASE as any,
               delay: 2,
             }}
           />
