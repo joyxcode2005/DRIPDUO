@@ -22,6 +22,8 @@ export interface ProductRow {
     price: number;
     stock: number;
     is_active: boolean;
+    final_price: number;
+    updated_at: string;
     product_type_id?: string;
 }
 

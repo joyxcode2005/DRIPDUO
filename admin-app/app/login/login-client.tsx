@@ -4,9 +4,9 @@ import { useState } from "react"
 
 import { ArrowRight, Eye, EyeOff, Lock, Mail, ShieldCheck, Sparkles } from "lucide-react"
 import { motion } from "motion/react"
+import Input from "@/components/Input"
+import Button from "@/components/Button"
 
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
 
 const containerVariants = {
   hidden: { opacity: 0 },

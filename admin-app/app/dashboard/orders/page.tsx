@@ -6,7 +6,8 @@ import { toast } from "react-toastify";
 
 import AdminShell, { AdminPanel } from "@/components/admin/AdminShell";
 import { formatCurrency, formatDateTime } from "@/utils/admin";
-import { getOrderItems, getOrders, OrderItemRow, OrderRow } from "@/services/admin";
+import { getOrderItems, getOrders, } from "@/services/admin";
+import { OrderItemRow, OrderRow } from "@/types";
 
 export default function OrdersPage() {
   const [orders, setOrders] = useState<OrderRow[]>([]);
