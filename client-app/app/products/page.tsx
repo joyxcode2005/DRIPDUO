@@ -268,7 +268,8 @@ export default function ProductsPage() {
             </button>
           </div>
         ) : (
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-4 md:gap-x-6 gap-y-12 md:gap-y-16">
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+            {/* The gap classes and comment were removed here so it parses perfectly */}
             {filteredAndSortedProducts.map((product) => (
               <ProductCard key={product.id} product={product} />
             ))}

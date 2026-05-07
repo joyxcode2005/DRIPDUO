@@ -39,7 +39,7 @@ export default function Loading() {
 
   return (
     <div
-      className="fixed inset-0 z-[9999] flex flex-col items-center justify-center overflow-hidden"
+      className="fixed inset-0 z-9999 flex flex-col items-center justify-center overflow-hidden"
       style={{ background: "#050505" }} // Slightly off-black is considered more premium than #000
     >
       {/* Background Editorial Watermark */}
@@ -70,11 +70,11 @@ export default function Loading() {
         <div className="relative overflow-hidden flex justify-center" style={{ width: 280, height: 100 }}>
           
           {/* Edge Fade Masks for seamless loop inside #050505 */}
-          <div className="absolute inset-y-0 left-0 z-20 w-[60px]" style={{ background: "linear-gradient(to right, #050505 0%, transparent 100%)", pointerEvents: "none" }} />
-          <div className="absolute inset-y-0 right-0 z-20 w-[60px]" style={{ background: "linear-gradient(to left, #050505 0%, transparent 100%)", pointerEvents: "none" }} />
+          <div className="absolute inset-y-0 left-0 z-20 w-15" style={{ background: "linear-gradient(to right, #050505 0%, transparent 100%)", pointerEvents: "none" }} />
+          <div className="absolute inset-y-0 right-0 z-20 w-15" style={{ background: "linear-gradient(to left, #050505 0%, transparent 100%)", pointerEvents: "none" }} />
 
           {/* The Drop & Expanding Rod Animation */}
-          <div className="absolute top-[21px] left-0 right-0 flex justify-center items-center z-0">
+          <div className="absolute top-5.25 left-0 right-0 flex justify-center items-center z-0">
             <motion.div
               initial={{ width: "8px", height: "8px", y: -40, opacity: 0, borderRadius: "50%", background: "#EE3C24" }}
               animate={{ 
