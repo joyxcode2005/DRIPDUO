@@ -133,11 +133,20 @@ export default function Home() {
         className="relative h-screen w-full overflow-hidden"
       >
         {/* Background image */}
-        <Image
+        {/* <Image
           src="/images/drip.png"
           alt="FW26 Collection"
           fill
           priority
+          className={`absolute inset-0 h-full w-full object-cover object-[center_25%] transition-transform duration-[2.5s] ease-[cubic-bezier(0.16,1,0.3,1)] will-change-transform ${heroReady ? "scale-100" : "scale-[1.1]"}`}
+        /> */}
+
+        <video
+          src="https://ik.imagekit.io/dripduo2026/hero_video2.mp4"
+          autoPlay
+          loop
+          muted
+          playsInline
           className={`absolute inset-0 h-full w-full object-cover object-[center_25%] transition-transform duration-[2.5s] ease-[cubic-bezier(0.16,1,0.3,1)] will-change-transform ${heroReady ? "scale-100" : "scale-[1.1]"}`}
         />
 
