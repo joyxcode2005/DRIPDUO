@@ -26,10 +26,7 @@ export default function LoginPage() {
     setError(null);
 
     const { error } = await supabase.auth.signInWithOtp({
-      email,
-      options: {
-        emailRedirectTo: `${location.origin}/auth/callback`,
-      },
+      email: email.trim(),
     });
 
     setLoading(false);
@@ -47,11 +44,13 @@ export default function LoginPage() {
     setLoading(true);
     setError(null);
 
-    const { error } = await supabase.auth.verifyOtp({
+    const { data, error } = await supabase.auth.verifyOtp({
       email,
       token: otp,
       type: "email",
     });
+
+    console.log("OTP Verification Result:", { data, error });
 
     setLoading(false);
 
@@ -60,7 +59,11 @@ export default function LoginPage() {
       return;
     }
 
-    router.push("/profile");
+    // FIX 1: Tell Next.js to refresh its server-side state
+    router.refresh();
+
+    // FIX 2: Use a hard redirect to guarantee the middleware sees the new cookie
+    window.location.href = "/profile";
   };
 
   const handleOAuthLogin = async (provider: "google" | "facebook") => {

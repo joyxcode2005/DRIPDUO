@@ -1,6 +1,6 @@
-import { createClient } from "@supabase/supabase-js";
+import { createBrowserClient } from "@supabase/ssr";
 
-let cachedClient: ReturnType<typeof createClient> | null = null;
+let cachedClient: ReturnType<typeof createBrowserClient> | null = null;
 
 export function getSupabaseClient() {
   if (cachedClient) {
@@ -14,7 +14,7 @@ export function getSupabaseClient() {
     throw new Error("Missing Supabase environment variables.");
   }
 
-  cachedClient = createClient(supabaseUrl, supabaseAnonKey);
+  cachedClient = createBrowserClient(supabaseUrl, supabaseAnonKey);
 
   return cachedClient;
 }
