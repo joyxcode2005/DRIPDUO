@@ -97,8 +97,7 @@ export const updateDbQuantity = async (cartItemId: string | number, newQuantity:
 
     const { error } = await supabase
         .from('cart_items')
-        // @ts-expect-error - Bypass Supabase's strict 'never' type inference during build
-        .update({ quantity: newQuantity })
+        .update({ quantity: newQuantity } as never)
         .eq('id', cartItemId);
 
     if (error) console.error("Update error:", error);
