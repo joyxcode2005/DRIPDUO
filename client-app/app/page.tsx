@@ -120,7 +120,7 @@ export default function Home() {
   if (!splashGone) return <Loading />;
 
   return (
-    <main className="w-full overflow-x-clip bg-(--black) text-(--beige)">
+    <main className="w-full overflow-x-clip bg-[var(--black)] text-[var(--beige)]">
 
       {/* ══════════════════════════════════════════════
           HERO — full bleed with magnetic cursor glow
@@ -130,16 +130,8 @@ export default function Home() {
         onMouseMove={handleMouseMove}
         onMouseEnter={() => setHeroHover(true)}
         onMouseLeave={() => setHeroHover(false)}
-        className="relative h-screen w-full overflow-hidden"
+        className="relative h-[96vh] w-full overflow-hidden"
       >
-        {/* Background image */}
-        {/* <Image
-          src="/images/drip.png"
-          alt="FW26 Collection"
-          fill
-          priority
-          className={`absolute inset-0 h-full w-full object-cover object-[center_25%] transition-transform duration-[2.5s] ease-[cubic-bezier(0.16,1,0.3,1)] will-change-transform ${heroReady ? "scale-100" : "scale-[1.1]"}`}
-        /> */}
 
         <video
           src="https://ik.imagekit.io/dripduo2026/hero_video2.mp4"
@@ -147,12 +139,12 @@ export default function Home() {
           loop
           muted
           playsInline
-          className={`absolute inset-0 h-full w-full object-cover object-[center_25%] transition-transform duration-[2.5s] ease-[cubic-bezier(0.16,1,0.3,1)] will-change-transform ${heroReady ? "scale-100" : "scale-[1.1]"}`}
+          className={`absolute inset-0 h-full w-full object-cover object-[center_25%] transition-transform duration-[2.5s] ease-[cubic-bezier(0.16,1,0.3,1)] will-change-transform ${heroReady ? "scale-120" : "scale-[1.1]"}`}
         />
 
         {/* Gradient layers */}
         <div className="absolute inset-0 bg-linear-to-t from-black via-black/30 to-transparent" />
-        <div className="absolute inset-0 bg-linear-to-r from-black/60 via-transparent to-transparent" />
+        <div className="absolute inset-0 bg-linear-to-r from-black/70 via-transparent to-transparent" />
 
         {/* Noise grain overlay */}
         <div className="absolute inset-0 opacity-30 mix-blend-overlay pointer-events-none" style={{ backgroundImage: NOISE_SVG }} />
@@ -175,7 +167,7 @@ export default function Home() {
         {/* Top bar */}
         <div className="absolute top-24 left-0 right-0 flex items-center justify-between px-6 md:px-12 z-10">
           <Reveal>
-            <span className="whitespace-nowrap font-sans text-[8px] md:text-[9px] tracking-[0.2em] md:tracking-[0.35em] uppercase text-(--orange) border border-(--orange)/30 px-2 py-1 md:px-3 md:py-1.5 backdrop-blur-sm bg-(--orange)/5">
+            <span className="whitespace-nowrap font-sans text-[8px] md:text-[9px] tracking-[0.2em] md:tracking-[0.35em] uppercase text-[var(--orange)] border border-[var(--orange)]/30 px-2 py-1 md:px-3 md:py-1.5 backdrop-blur-sm bg-[var(--orange)]/5">
               FW 2026 — New Collection
             </span>
           </Reveal>
@@ -188,8 +180,8 @@ export default function Home() {
         {/* Hero text */}
         <div className="absolute inset-x-0 bottom-0 flex flex-col items-start justify-end px-6 md:px-12 pb-20 md:pb-24 z-10">
           <Reveal>
-            <p className="font-sans text-[10px] tracking-[0.4em] uppercase text-(--gray-200) mb-6 flex items-center gap-3">
-              <span className="w-8 h-px bg-(--orange)" />
+            <p className="font-sans text-[10px] tracking-[0.4em] uppercase text-[var(--gray-200)] mb-6 flex items-center gap-3">
+              <span className="w-8 h-px bg-[var(--orange)]" />
               Engineered for those who demand excellence
             </p>
           </Reveal>
@@ -521,7 +513,7 @@ export default function Home() {
           </Reveal>
           <Reveal className="delay-100">
             <h2
-              className="font-serif italic leading-[0.85] tracking-[-0.025em] text-(--beige) mb-8"
+              className="font-serif italic leading-[0.85] tracking-tight text-(--beige) mb-8"
               style={{ fontSize: "clamp(4rem,11vw,9.5rem)" }}
             >
               Redefine<br />

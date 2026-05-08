@@ -4,13 +4,11 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useCart } from "@/lib/CartContext";
-import { useAuth } from "@/lib/AuthContext";
-import { Search, X, User, ShoppingBag, Menu, LogIn } from "lucide-react";
+import { Search, X, User, ShoppingBag, Menu } from "lucide-react";
 import { Nav_links } from "@/constants";
 
 export const Navbar = () => {
   const { cart, openCart } = useCart();
-  const { user } = useAuth();
   const pathname = usePathname();
   const [scrolled, setScrolled] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
@@ -53,7 +51,7 @@ export const Navbar = () => {
           <div className="flex items-center gap-2 flex-1">
             <button
               onClick={() => setMenuOpen(true)}
-              className="lg:hidden p-2 -ml-2 text-(--beige) hover:text-(--orange) transition-colors"
+              className="lg:hidden p-2 -ml-2 text-[var(--beige)] hover:text-[var(--orange)] transition-colors"
               aria-label="Menu"
             >
               <Menu size={22} strokeWidth={1.5} />
@@ -64,10 +62,10 @@ export const Navbar = () => {
                 <Link
                   key={link.name}
                   href={link.href}
-                  className="relative text-(--beige) hover:text-(--orange) [text-shadow:0_1px_2px_rgba(0,0,0)] transition-colors uppercase tracking-[0.15em] text-[10px] font-medium group hover:underline-offset-4"
+                  className="relative text-[var(--beige)] hover:text-[var(--orange)] [text-shadow:0_1px_2px_rgba(0,0,0)] transition-colors uppercase tracking-[0.15em] text-[10px] font-medium group hover:underline-offset-4"
                 >
                   {link.name}
-                  <span className="absolute -bottom-1.5 left-0 w-0 h-px bg-(--orange) transition-all duration-300 group-hover:w-full"></span>
+                  <span className="absolute -bottom-1.5 left-0 w-0 h-px bg-[var(--orange)] transition-all duration-300 group-hover:w-full"></span>
                 </Link>
               ))}
             </div>
@@ -76,7 +74,7 @@ export const Navbar = () => {
           {/* CENTER: Absolute Logo */}
           <Link
             href="/"
-            className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 text-(--beige) hover:text-(--orange) transition-colors z-10"
+            className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 text-[var(--beige)] hover:text-[var(--orange)] transition-colors z-10"
           >
             <span style={{ fontSize: "22px", fontWeight: "900", letterSpacing: "0.2em", textTransform: "uppercase" }}>
               DRIPDUO
@@ -84,32 +82,24 @@ export const Navbar = () => {
           </Link>
 
           {/* RIGHT SIDE: Icons */}
-          <div className="flex items-center gap-5 flex-1 justify-end text-(--beige)">
-            <button onClick={() => setSearchOpen(true)} className="hover:text-(--orange) transition-transform hover:scale-110 duration-300">
+          <div className="flex items-center gap-5 flex-1 justify-end text-[var(--beige)]">
+            <button onClick={() => setSearchOpen(true)} className="hover:text-[var(--orange)] transition-transform hover:scale-110 duration-300">
               <Search size={20} strokeWidth={1.5} />
             </button>
 
-            {/* Auth-aware profile icon */}
+            {/* Profile Icon - Relies on middleware for protection */}
             <Link
-              href={user ? "/profile" : "/auth"}
-              className="hover:text-(--orange) transition-transform hover:scale-110 duration-300 hidden md:flex items-center gap-1.5 relative"
-              title={user ? "My Profile" : "Sign In"}
+              href="/profile"
+              className="hover:text-[var(--orange)] transition-transform hover:scale-110 duration-300 hidden md:flex items-center gap-1.5 relative"
+              title="My Profile"
             >
-              {user ? (
-                <User size={20} strokeWidth={1.5} />
-              ) : (
-                <LogIn size={20} strokeWidth={1.5} />
-              )}
-              {/* Dot indicator when logged in */}
-              {user && (
-                <span className="absolute -top-0.5 -right-0.5 w-2 h-2 bg-(--orange) rounded-full" />
-              )}
+              <User size={20} strokeWidth={1.5} />
             </Link>
 
-            <button onClick={openCart} className="hover:text-(--orange) transition-transform hover:scale-110 duration-300 relative">
+            <button onClick={openCart} className="hover:text-[var(--orange)] transition-transform hover:scale-110 duration-300 relative">
               <ShoppingBag size={20} strokeWidth={1.5} />
               {cartCount > 0 && (
-                <span className="absolute -bottom-1.5 -right-2 w-4 h-4 bg-(--orange) text-[#050505] rounded-full flex items-center justify-center font-bold text-[9px] shadow-sm">
+                <span className="absolute -bottom-1.5 -right-2 w-4 h-4 bg-[var(--orange)] text-[#050505] rounded-full flex items-center justify-center font-bold text-[9px] shadow-sm">
                   {cartCount}
                 </span>
               )}
@@ -123,9 +113,9 @@ export const Navbar = () => {
         className={`fixed inset-0 bg-[#050505]/98 backdrop-blur-xl z-200 flex flex-col transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] ${searchOpen ? "opacity-100 visible" : "opacity-0 invisible pointer-events-none"
           }`}
       >
-        <div className="flex items-center justify-between h-20 px-4 md:px-8 border-b border-white/10 text-(--beige)">
+        <div className="flex items-center justify-between h-20 px-4 md:px-8 border-b border-white/10 text-[var(--beige)]">
           <span className="uppercase tracking-[0.2em] text-[10px] font-medium">Search Archive</span>
-          <button onClick={() => setSearchOpen(false)} className="p-2 -mr-2 hover:text-(--orange) hover:rotate-90 transition-all duration-300">
+          <button onClick={() => setSearchOpen(false)} className="p-2 -mr-2 hover:text-[var(--orange)] hover:rotate-90 transition-all duration-300">
             <X size={24} strokeWidth={1.5} />
           </button>
         </div>
@@ -147,13 +137,13 @@ export const Navbar = () => {
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="What are you looking for?"
-              className="w-full text-3xl md:text-5xl bg-transparent border-0 border-b border-(--gray-800) text-(--beige) outline-none pb-4 focus:border-(--orange) placeholder:text-(--gray-600) transition-colors"
+              className="w-full text-3xl md:text-5xl bg-transparent border-0 border-b border-[var(--gray-800)] text-[var(--beige)] outline-none pb-4 focus:border-[var(--orange)] placeholder:text-[var(--gray-600)] transition-colors"
               style={{ fontFamily: "'EB Garamond', Georgia, serif", fontWeight: 400 }}
             />
           </form>
 
           <div className="mt-16">
-            <p className="uppercase tracking-[0.2em] text-(--orange) mb-6 text-[10px] font-medium">Trending Queries</p>
+            <p className="uppercase tracking-[0.2em] text-[var(--orange)] mb-6 text-[10px] font-medium">Trending Queries</p>
             <div className="flex flex-wrap gap-3">
               {["Oversized Tee", "Gothic", "Anime Collection", "Heavyweight", "FW26"].map((t) => (
                 <button
@@ -163,7 +153,7 @@ export const Navbar = () => {
                     window.location.href = `/products?search=${encodeURIComponent(t)}`;
                     setSearchOpen(false);
                   }}
-                  className="border border-white/20 text-(--beige) px-5 py-2.5 uppercase tracking-widest text-[10px] hover:border-(--orange) hover:bg-(--orange) hover:text-[#050505] transition-all duration-300"
+                  className="border border-white/20 text-[var(--beige)] px-5 py-2.5 uppercase tracking-widest text-[10px] hover:border-[var(--orange)] hover:bg-[var(--orange)] hover:text-[#050505] transition-all duration-300"
                 >
                   {t}
                 </button>
@@ -178,9 +168,9 @@ export const Navbar = () => {
         className={`fixed inset-0 bg-[#050505] z-200 flex flex-col lg:hidden transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] ${menuOpen ? "opacity-100 visible" : "opacity-0 invisible pointer-events-none"
           }`}
       >
-        <div className="flex items-center justify-between h-20 px-4 border-b border-white/10 text-(--beige)">
+        <div className="flex items-center justify-between h-20 px-4 border-b border-white/10 text-[var(--beige)]">
           <span className="uppercase tracking-[0.2em] text-[10px] font-medium">Menu</span>
-          <button onClick={() => setMenuOpen(false)} className="p-2 -mr-2 hover:text-(--orange) hover:rotate-90 transition-all duration-300">
+          <button onClick={() => setMenuOpen(false)} className="p-2 -mr-2 hover:text-[var(--orange)] hover:rotate-90 transition-all duration-300">
             <X size={24} strokeWidth={1.5} />
           </button>
         </div>
@@ -191,7 +181,7 @@ export const Navbar = () => {
               key={link.name}
               href={link.href}
               onClick={() => setMenuOpen(false)}
-              className="block py-4 border-b border-white/5 text-(--beige) hover:text-(--orange) hover:pl-4 transition-all duration-300"
+              className="block py-4 border-b border-white/5 text-[var(--beige)] hover:text-[var(--orange)] hover:pl-4 transition-all duration-300"
               style={{ fontFamily: "'EB Garamond', Georgia, serif", fontSize: "32px", transitionDelay: `${index * 50}ms` }}
             >
               {link.name}
@@ -200,16 +190,16 @@ export const Navbar = () => {
 
           <div className="mt-12 space-y-4">
             <Link
-              href={user ? "/profile" : "/auth"}
+              href="/profile"
               onClick={() => setMenuOpen(false)}
-              className="uppercase tracking-[0.15em] block text-[11px] text-(--gray-200) hover:text-(--orange) transition-colors"
+              className="uppercase tracking-[0.15em] block text-[11px] text-[var(--gray-200)] hover:text-[var(--orange)] transition-colors"
             >
-              {user ? "My Account" : "Sign In / Register"}
+              My Account
             </Link>
-            <Link href="/checkout" onClick={() => setMenuOpen(false)} className="uppercase tracking-[0.15em] block text-[11px] text-(--gray-200) hover:text-(--orange) transition-colors">
+            <Link href="/checkout" onClick={() => setMenuOpen(false)} className="uppercase tracking-[0.15em] block text-[11px] text-[var(--gray-200)] hover:text-[var(--orange)] transition-colors">
               Orders & Returns
             </Link>
-            <button onClick={() => { setMenuOpen(false); setSearchOpen(true); }} className="uppercase tracking-[0.15em] block text-[11px] text-(--gray-200) hover:text-(--orange) transition-colors">
+            <button onClick={() => { setMenuOpen(false); setSearchOpen(true); }} className="uppercase tracking-[0.15em] block text-[11px] text-[var(--gray-200)] hover:text-[var(--orange)] transition-colors">
               Search Archive
             </button>
           </div>
