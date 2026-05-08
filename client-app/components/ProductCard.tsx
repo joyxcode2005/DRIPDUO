@@ -164,11 +164,13 @@ export default function ProductCard({ product }: { product: Product }) {
       </div>
 
       {/* ── Footer Strip ── */}
-      <div className="flex items-center justify-between px-3 py-2.5 border-t border-(--gray-800)">
+      {/* <div className="flex items-center justify-between px-3 py-2.5 border-t border-(--gray-800)">
         <p className="font-sans text-[8px] tracking-[0.14em] uppercase text-(--gray-400)">
           {productTypeName || categoryName}
         </p>
-      </div>
+      </div> 
+      */}
+      
     </Link>
   );
 }
