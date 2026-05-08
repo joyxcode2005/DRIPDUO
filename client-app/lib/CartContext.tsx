@@ -59,7 +59,7 @@ export const CartProvider = ({ children }: { children: React.ReactNode }) => {
     initializeCart();
 
     // Listen for login/logout events to merge or clear carts
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event: string, session: { user: { id: string }; } | null) => {
       if (event === "SIGNED_IN" && session?.user) {
         setUserId(session.user.id);
         await handleGuestToUserMerge(session.user.id);
