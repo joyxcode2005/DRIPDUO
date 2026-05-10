@@ -31,6 +31,8 @@ export default function LoginPage() {
 
     setLoading(false);
 
+    console.log("OTP Request Result:", { email, error });
+
     if (error) {
       setError(error.message);
       return;
