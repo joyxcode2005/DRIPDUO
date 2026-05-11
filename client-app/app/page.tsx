@@ -3,7 +3,6 @@
 import React, { useEffect, useState, useRef } from "react";
 import Link from "next/link";
 import { ArrowRight, ArrowDown } from "lucide-react";
-import Loading from "./loading";
 import { HOME_CATEGORIES } from "@/constants";
 import RotatingBadge from "@/components/RotatingBadge";
 import { SketchHighlight } from "@/components/SktechHighlight";
@@ -59,7 +58,6 @@ function Stat({ value, suffix, label, trigger }: { value: number; suffix: string
 }
 
 export default function Home() {
-  const [splashGone, setSplashGone] = useState(false);
   const [heroReady, setHeroReady] = useState(false);
   const [featuredProducts, setFeaturedProducts] = useState<FeaturedProduct[]>([]);
   const [lookbookProducts, setLookbookProducts] = useState<FeaturedProduct[]>([]);
@@ -70,8 +68,8 @@ export default function Home() {
   const heroRef = useRef<HTMLElement>(null);
 
   useEffect(() => {
-    const t1 = setTimeout(() => setSplashGone(true), 3500);
-    const t2 = setTimeout(() => setHeroReady(true), 3700);
+    // Start hero animation slightly after the splash screen finishes
+    const t2 = setTimeout(() => setHeroReady(true), 100);
 
     const fetchFeaturedProducts = async () => {
       try {
@@ -94,7 +92,6 @@ export default function Home() {
     fetchLookbookProducts();
 
     return () => {
-      clearTimeout(t1);
       clearTimeout(t2);
     };
   }, []);
@@ -117,10 +114,8 @@ export default function Home() {
     setCursorPos({ x: e.clientX - rect.left, y: e.clientY - rect.top });
   };
 
-  if (!splashGone) return <Loading />;
-
   return (
-    <main className="w-full overflow-x-clip bg-[var(--black)] text-[var(--beige)]">
+    <main className="w-full overflow-x-clip bg-(--black) text-(--beige)">
 
       {/* ══════════════════════════════════════════════
           HERO — full bleed with magnetic cursor glow
@@ -134,12 +129,15 @@ export default function Home() {
       >
 
         <video
-          src="https://ik.imagekit.io/dripduo2026/hero_video2.mp4"
+          // 1. Added ?tr=q-100 to force ImageKit to serve 100% maximum quality
+          src="https://ik.imagekit.io/dripduo2026/hero_video2.mp4?tr=q-100"
           autoPlay
           loop
           muted
           playsInline
-          className={`absolute inset-0 h-full w-full object-cover object-[center_25%] transition-transform duration-[2.5s] ease-[cubic-bezier(0.16,1,0.3,1)] will-change-transform ${heroReady ? "scale-120" : "scale-[1.1]"}`}
+          // 2. Changed scale-120 to scale-100 so it settles at its native, crisp resolution
+          // 3. Changed the starting scale to 105 for a subtle, premium settle-in effect
+          className={`absolute inset-0 h-full w-full object-cover object-[center_25%] transition-transform duration-[3s] ease-[cubic-bezier(0.16,1,0.3,1)] will-change-transform ${heroReady ? "scale-100" : "scale-105"}`}
         />
 
         {/* Gradient layers */}
@@ -171,7 +169,6 @@ export default function Home() {
               FW 2026 — New Collection
             </span>
           </Reveal>
-          {/* Removed hidden md:block, added mobile scaling to fit screens better */}
           <Reveal className="delay-200 max-md:scale-[0.65] max-md:origin-right">
             <RotatingBadge />
           </Reveal>
@@ -180,8 +177,8 @@ export default function Home() {
         {/* Hero text */}
         <div className="absolute inset-x-0 bottom-0 flex flex-col items-start justify-end px-6 md:px-12 pb-20 md:pb-24 z-10">
           <Reveal>
-            <p className="font-sans text-[10px] tracking-[0.4em] uppercase text-[var(--gray-200)] mb-6 flex items-center gap-3">
-              <span className="w-8 h-px bg-[var(--orange)]" />
+            <p className="font-sans text-[10px] tracking-[0.4em] uppercase text-(--gray-200) mb-6 flex items-center gap-3">
+              <span className="w-8 h-px bg-(--orange)" />
               Engineered for those who demand excellence
             </p>
           </Reveal>
@@ -202,7 +199,7 @@ export default function Home() {
                 className="font-serif italic leading-[0.82] tracking-[-0.03em] text-(--beige) drop-shadow-2xl"
                 style={{ fontSize: "clamp(5rem,16vw,13rem)" }}
               >
-                <SketchHighlight type="underline" delay={1200} color="var(--orange)">
+                <SketchHighlight type="circle" delay={1200} color="var(--orange)">
                   Collection
                 </SketchHighlight>
               </h1>
@@ -297,31 +294,20 @@ export default function Home() {
         {/* Gapless grid */}
         {featuredProducts.length >= 4 ? (
           <div className="w-full">
-            {/* 
-              Mobile layout (abstract): 2 columns.
-              Item 1: Spans 2 cols (Full width, tall)
-              Item 2: Spans 1 col (Half width, short)
-              Item 3: Spans 1 col (Half width, short)
-              Item 4: Spans 2 cols (Full width, medium)
-            */}
             <div className="grid grid-cols-2 md:grid-cols-4 md:grid-rows-2 gap-0 w-full h-auto md:h-125 lg:h-150 border-t border-l border-(--gray-800)">
 
-              {/* Product 1: Top full width (Mobile) / Large square left (Desktop) */}
               <Reveal className="col-span-2 md:col-span-2 md:row-span-2 h-[50vh] md:h-full w-full min-h-0 border-r border-b border-(--gray-800)">
                 <HomeProductCard product={featuredProducts[0]} />
               </Reveal>
 
-              {/* Product 2: Middle left half (Mobile) / Top middle (Desktop) */}
               <Reveal className="col-span-1 h-[30vh] md:h-full w-full delay-100 min-h-0 border-r border-b border-(--gray-800)">
                 <HomeProductCard product={featuredProducts[1]} />
               </Reveal>
 
-              {/* Product 3: Middle right half (Mobile) / Top right (Desktop) */}
               <Reveal className="col-span-1 h-[30vh] md:h-full w-full delay-150 min-h-0 border-r border-b border-(--gray-800)">
                 <HomeProductCard product={featuredProducts[2]} />
               </Reveal>
 
-              {/* Product 4: Bottom full width (Mobile) / Bottom wide (Desktop) */}
               <Reveal className="col-span-2 h-[40vh] md:h-full w-full delay-200 min-h-0 border-r border-b border-(--gray-800)">
                 <HomeProductCard product={featuredProducts[3]} />
               </Reveal>
@@ -341,7 +327,6 @@ export default function Home() {
           EDITORIAL SPLIT — two column brand statement
       ══════════════════════════════════════════════ */}
       <section className="w-full border-t border-(--gray-800) mt-20 md:mt-32 grid grid-cols-1 md:grid-cols-2">
-        {/* Left: Bold type */}
         <Reveal className="flex flex-col justify-between px-6 md:px-12 py-16 md:py-24 border-r border-(--gray-800)">
           <p className="font-sans text-[9px] tracking-[0.35em] uppercase text-(--orange) flex items-center gap-2 mb-12">
             <span className="w-6 h-px bg-(--orange)" />
@@ -370,7 +355,6 @@ export default function Home() {
           </Link>
         </Reveal>
 
-        {/* Right: Large image with overlay tag */}
         <Reveal className="delay-150 relative h-[60vw] md:h-auto overflow-hidden bg-(--gray-900)">
           <Image
             src="/images/mockup.png"
@@ -426,11 +410,9 @@ export default function Home() {
                   objectFit="cover"
                   className="absolute inset-0 h-full w-full object-cover transition-transform duration-[2.5s] ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:scale-108"
                 />
-                {/* Darkening layers */}
                 <div className="absolute inset-0 bg-black/50 transition-opacity duration-500 group-hover:opacity-20" />
                 <div className="absolute inset-0 bg-linear-to-t from-black/80 via-black/20 to-transparent" />
 
-                {/* Bottom label */}
                 <div className="absolute inset-x-0 bottom-0 px-5 pb-6 flex items-end justify-between">
                   <p className="font-sans text-[10px] tracking-[0.25em] uppercase text-(--beige) transition-colors duration-200 group-hover:text-(--orange)">
                     {cat.name}
@@ -442,7 +424,6 @@ export default function Home() {
                   />
                 </div>
 
-                {/* Index number */}
                 <div className="absolute top-4 left-4 font-sans text-[9px] tracking-[0.2em] text-(--gray-600) group-hover:text-(--orange) transition-colors duration-300">
                   0{i + 1}
                 </div>
