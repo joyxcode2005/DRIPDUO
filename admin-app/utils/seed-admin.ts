@@ -10,7 +10,7 @@ dotenv.config({
 
 // Init Supabase with service role key
 // SECURITY FIX: NEXT_PUBLIC_ removed from the service role key!
-const supabaseUrl = process.env.PUBLIC_SUPABASE_URL;
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const supabaseServiceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
 console.log('🔍 Supabase URL:', supabaseUrl);
@@ -31,10 +31,10 @@ const supabase = createClient(supabaseUrl, supabaseServiceRoleKey, {
 
 // Define the function to seed the admin user
 async function seedAdmin() {
-    const adminEmail = "ayushkirtania@gmail.com"; // Add your email here
-    const adminPassword = "ayush.admin@2004"; // Add your password here
-    const fullname = "Ayush Kirtania"; 
-    const phone = "9836763794";
+    const adminEmail = "coder.joy2005@gmail.com"; // Add your email here
+    const adminPassword = "joy.admin@2005"; // Add your password here
+    const fullname = "Joy Sengupta"; // Add your full name here
+    const phone = "8777699459"; // Add your phone number here
 
     console.log(`Attempting to seed the admin user with email: ${adminEmail}`);
 
