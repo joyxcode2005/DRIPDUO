@@ -8,8 +8,8 @@ import Image from "next/image";
 const GRID_SIZE = 5; // 5x5 Grid = 25 paper slices
 
 // Premium broadcast-quality easing curves
-const paperTumbleEase = [0.22, 1, 0.36, 1];
-const textRevealEase = [0.65, 0, 0.35, 1];
+const paperTumbleEase: [number, number, number, number] = [0.22, 1, 0.36, 1];
+const textRevealEase: [number, number, number, number] = [0.65, 0, 0.35, 1];
 
 // A deterministic pseudo-random number generator to prevent Next.js hydration crashes
 const pseudoRandom = (seed: number) => {
@@ -54,9 +54,11 @@ export default function CinematicLoader() {
     handleResize();
     window.addEventListener("resize", handleResize);
 
-    // Timing Sequence
-    const exitTimer = setTimeout(() => setIsVisible(false), 5500);
-    const doneTimer = setTimeout(() => setIsDone(true), 7000);
+    // ⚡ FASTER TIMING SEQUENCE ⚡
+    // Reduced from 5500ms to 3500ms
+    const exitTimer = setTimeout(() => setIsVisible(false), 3500);
+    // Reduced from 7000ms to 4500ms
+    const doneTimer = setTimeout(() => setIsDone(true), 4500);
 
     return () => {
       window.removeEventListener("resize", handleResize);
@@ -84,10 +86,10 @@ export default function CinematicLoader() {
         <motion.div
           key="loader-overlay"
           initial={{ opacity: 1 }}
+          // ⚡ Exit animation duration sped up to 0.8s
           exit={{ opacity: 0, scale: 1.1, filter: "blur(15px)" }}
-          transition={{ duration: 1.2, ease: textRevealEase }}
-          className="fixed inset-0 z-[9999] flex flex-col items-center justify-center bg-[#050505] overflow-hidden"
-          // Perspective gives the flying papers true 3D depth
+          transition={{ duration: 0.8, ease: textRevealEase }}
+          className="fixed inset-0 z-9999 flex flex-col items-center justify-center bg-[#050505] overflow-hidden"
           style={{ perspective: 1500 }} 
         >
           
@@ -99,7 +101,6 @@ export default function CinematicLoader() {
               height: screenConfig.logoSize,
               gridTemplateColumns: `repeat(${GRID_SIZE}, ${CELL_SIZE}px)`,
               gridTemplateRows: `repeat(${GRID_SIZE}, ${CELL_SIZE}px)`,
-              // This double drop-shadow gives the assembled logo massive, solid 3D elevation
               filter: "drop-shadow(0px 30px 40px rgba(0, 0, 0, 0.9)) drop-shadow(0px 10px 20px rgba(238, 60, 36, 0.25))",
               transformStyle: "preserve-3d"
             }}
@@ -109,19 +110,17 @@ export default function CinematicLoader() {
               const rand2 = pseudoRandom(index * 20);
               const rand3 = pseudoRandom(index * 30);
 
-              // 3D Scatter Physics 
               const xOffset = Number(((rand1 - 0.5) * screenConfig.scatter).toFixed(2)); 
               const yOffset = Number(((rand2 - 0.5) * screenConfig.scatter).toFixed(2));
               const zOffset = Number((-screenConfig.depth - (rand3 * screenConfig.depth)).toFixed(2)); 
 
-              // Extreme tumbling rotations
               const rotX = Number(((rand1 - 0.5) * 720).toFixed(2)); 
               const rotY = Number(((rand2 - 0.5) * 720).toFixed(2));
               const rotZ = Number(((rand3 - 0.5) * 360).toFixed(2));
 
-              const delay = Number((0.1 + (rand1 * 0.4)).toFixed(2));
+              // ⚡ Faster entry delay for individual pieces
+              const delay = Number((0.05 + (rand1 * 0.3)).toFixed(2));
 
-              // Determine exact border radius for the 4 outermost corners
               let borderRadius = "0px";
               if (r === 0 && c === 0) borderRadius = `${screenConfig.radius}px 0 0 0`; 
               if (r === 0 && c === GRID_SIZE - 1) borderRadius = `0 ${screenConfig.radius}px 0 0`; 
@@ -140,7 +139,6 @@ export default function CinematicLoader() {
                     rotateY: rotY,
                     rotateZ: rotZ,
                     scale: 0.8,
-                    // Strong 3D shadows and rim light while flying in space
                     boxShadow: "0px 20px 40px rgba(0,0,0,0.9), inset 0 0 2px rgba(255,255,255,0.3)"
                   }}
                   animate={{
@@ -151,13 +149,11 @@ export default function CinematicLoader() {
                     rotateX: 0,
                     rotateY: 0,
                     rotateZ: 0,
-                    // scale 1.015 forces the pieces to overlap by a fraction of a pixel, destroying all visible gaps
                     scale: 1.015,
-                    // Shadow dissolves to 0 as it locks into the grid, fusing it into one solid block
                     boxShadow: "0px 0px 0px rgba(0,0,0,0), inset 0 0 0px rgba(255,255,255,0)"
                   }}
                   transition={{
-                    duration: 3.2, 
+                    duration: 2.0, // ⚡ Sped up from 3.2s
                     delay: delay,
                     ease: paperTumbleEase,
                   }}
@@ -170,9 +166,8 @@ export default function CinematicLoader() {
                     backgroundColor: "#1a1a1a", 
                   }}
                 >
-                  {/* The actual sliced image */}
                   <Image
-                    src="/images/loader.png"
+                    src="/images/transLoader.png"
                     alt="Logo paper slice"
                     width={screenConfig.logoSize}
                     height={screenConfig.logoSize}
@@ -185,7 +180,6 @@ export default function CinematicLoader() {
                       height: screenConfig.logoSize,
                       objectFit: "cover",
                       WebkitBackfaceVisibility: "hidden", 
-                      // Adding a tiny scale here ensures the image texture bleeds past the slice edges
                       transform: "scale(1.02)",
                     }}
                   />
@@ -198,7 +192,8 @@ export default function CinematicLoader() {
           <motion.div
             initial={{ opacity: 0, y: 30, filter: "blur(10px)", scale: 0.95 }}
             animate={{ opacity: 1, y: 0, filter: "blur(0px)", scale: 1 }}
-            transition={{ delay: 2.8, duration: 1.8, ease: paperTumbleEase }}
+            // ⚡ Sped up from delay 2.8s, duration 1.8s
+            transition={{ delay: 1.5, duration: 1.2, ease: paperTumbleEase }}
             className="absolute bottom-16 md:bottom-24 flex flex-col items-center gap-2 md:gap-3"
           >
             <span
@@ -217,14 +212,16 @@ export default function CinematicLoader() {
             <motion.div
               initial={{ width: 0 }}
               animate={{ width: "clamp(80px, 20vw, 120px)" }} 
-              transition={{ delay: 3.3, duration: 1.4, ease: textRevealEase }}
+              // ⚡ Sped up from delay 3.3s, duration 1.4s
+              transition={{ delay: 1.8, duration: 1.0, ease: textRevealEase }}
               style={{ height: 1, background: "#EE3C24" }}
             />
             
             <motion.span
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              transition={{ delay: 3.8, duration: 1.2 }}
+              // ⚡ Sped up from delay 3.8s, duration 1.2s
+              transition={{ delay: 2.1, duration: 0.8 }}
               style={{
                 fontFamily: "'EB Garamond',Georgia,serif",
                 fontSize: "clamp(10px, 2.5vw, 13px)", 
