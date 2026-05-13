@@ -1,5 +1,7 @@
 @import url('https://fonts.googleapis.com/css2?family=EB+Garamond:ital,opsz,wght@0,6..144,400;0,6..144,500;1,6..144,400;1,6..144,500&family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&display=swap');
 
+@import url('https://fonts.googleapis.com/css2?family=Saira:ital,wght@0,100..900;1,100..900&display=swap');
+
 @import "tailwindcss";
 
 /* ─────────────────────────────────────────
@@ -21,6 +23,7 @@
 
   --font-sans: 'Helvetica Neue', Helvetica, 'Arial Nova', Arial, sans-serif;
   --font-serif: 'EB Garamond', 'Cormorant Garamond', Georgia, serif;
+  --font-saira: 'Saira', 'Helvetica Neue', Helvetica, 'Arial Nova', Arial, sans-serif;
 
   --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
   --ease-in-out-quart: cubic-bezier(0.76, 0, 0.24, 1);
@@ -123,7 +126,7 @@ main, section, header, footer, nav {
 }
 
 .label {
-  font-family: var(--font-sans);
+  font-family: var(--font-saira);
   font-size: 10px;
   font-weight: 500;
   letter-spacing: 0.18em;
@@ -133,7 +136,7 @@ main, section, header, footer, nav {
 }
 
 .label-sm {
-  font-family: var(--font-sans);
+  font-family: var(--font-saira);
   font-size: 9px;
   font-weight: 500;
   letter-spacing: 0.16em;
@@ -141,7 +144,7 @@ main, section, header, footer, nav {
 }
 
 .body-copy {
-  font-family: var(--font-sans);
+  font-family: var(--font-saira);
   font-size: 11.5px;
   font-weight: 400;
   letter-spacing: 0.05em;
@@ -298,6 +301,7 @@ main, section, header, footer, nav {
   pointer-events: none;
   transition: opacity 0.35s ease, visibility 0.35s ease;
 }
+
 .search-overlay.open {
   opacity: 1;
   visibility: visible;
@@ -324,7 +328,7 @@ main, section, header, footer, nav {
 }
 
 .mobile-menu-link {
-  font-family: var(--font-serif);
+  font-family: var(--font-saira);
   font-size: clamp(2rem, 8vw, 3.5rem);
   font-weight: 400;
   display: block;
@@ -359,6 +363,7 @@ main, section, header, footer, nav {
   pointer-events: none;
   transition: opacity 0.4s ease, visibility 0.4s ease;
 }
+
 .cart-backdrop.open {
   opacity: 1;
   visibility: visible;
@@ -381,6 +386,7 @@ main, section, header, footer, nav {
   transition: transform 0.6s var(--ease-out-expo);
   box-shadow: -20px 0 80px rgba(238, 60, 36, 0.08);
 }
+
 .cart-drawer.open {
   transform: translateX(0);
 }
@@ -399,6 +405,7 @@ main, section, header, footer, nav {
   pointer-events: none;
   transition: opacity 0.4s ease;
 }
+
 .qv-backdrop.open { opacity: 1; visibility: visible; pointer-events: auto; }
 
 .qv-panel {
@@ -420,6 +427,7 @@ main, section, header, footer, nav {
   display: flex;
   box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.8);
 }
+
 .qv-panel.open {
   opacity: 1;
   visibility: visible;
@@ -442,6 +450,16 @@ main, section, header, footer, nav {
     border-top: 1px solid var(--gray-600);
   }
   .qv-panel.open { transform: translateY(0); }
+}
+
+
+.font-saira {
+  font-family: "Saira", sans-serif;
+  font-optical-sizing: auto;
+  font-weight: 100;
+  font-style: normal;
+  font-variation-settings:
+    "wdth" 100;
 }
 
 /* ─────────────────────────────────────────
