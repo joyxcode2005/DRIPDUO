@@ -5,13 +5,12 @@ import { motion, AnimatePresence } from "framer-motion";
 import Image from "next/image";
 
 // --- CONFIGURATION ---
-const GRID_SIZE = 5; // 5x5 Grid = 25 paper slices
+const GRID_SIZE = 5; 
 
-// Premium broadcast-quality easing curves
+// Premium broadcast-quality easing curves (Typecast to prevent TS errors)
 const paperTumbleEase: [number, number, number, number] = [0.22, 1, 0.36, 1];
 const textRevealEase: [number, number, number, number] = [0.65, 0, 0.35, 1];
 
-// A deterministic pseudo-random number generator to prevent Next.js hydration crashes
 const pseudoRandom = (seed: number) => {
   const x = Math.sin(seed++) * 10000;
   return x - Math.floor(x);
@@ -21,7 +20,6 @@ export default function CinematicLoader() {
   const [isVisible, setIsVisible] = useState(true);
   const [isDone, setIsDone] = useState(false);
 
-  // Responsive Configuration State
   const [screenConfig, setScreenConfig] = useState({
     logoSize: 250,   
     scatter: 600,    
@@ -30,34 +28,19 @@ export default function CinematicLoader() {
   });
 
   useEffect(() => {
-    // Dynamically adjust sizes based on device screen width
     const handleResize = () => {
       if (window.innerWidth < 768) {
-        // MOBILE CONFIGURATION 
-        setScreenConfig({
-          logoSize: 125,  
-          scatter: 200,   
-          depth: 400,     
-          radius: 14,     
-        });
+        setScreenConfig({ logoSize: 125, scatter: 200, depth: 400, radius: 14 });
       } else {
-        // DESKTOP CONFIGURATION
-        setScreenConfig({
-          logoSize: 250,  
-          scatter: 600,   
-          depth: 800,     
-          radius: 28,     
-        });
+        setScreenConfig({ logoSize: 250, scatter: 600, depth: 800, radius: 28 });
       }
     };
 
     handleResize();
     window.addEventListener("resize", handleResize);
 
-    // ⚡ FASTER TIMING SEQUENCE ⚡
-    // Reduced from 5500ms to 3500ms
+    // Faster Timings
     const exitTimer = setTimeout(() => setIsVisible(false), 3500);
-    // Reduced from 7000ms to 4500ms
     const doneTimer = setTimeout(() => setIsDone(true), 4500);
 
     return () => {
@@ -69,7 +52,6 @@ export default function CinematicLoader() {
 
   const CELL_SIZE = screenConfig.logoSize / GRID_SIZE;
 
-  // Generate the 25 grid slices
   const cells = [];
   let index = 0;
   for (let r = 0; r < GRID_SIZE; r++) {
@@ -86,14 +68,12 @@ export default function CinematicLoader() {
         <motion.div
           key="loader-overlay"
           initial={{ opacity: 1 }}
-          // ⚡ Exit animation duration sped up to 0.8s
           exit={{ opacity: 0, scale: 1.1, filter: "blur(15px)" }}
           transition={{ duration: 0.8, ease: textRevealEase }}
           className="fixed inset-0 z-9999 flex flex-col items-center justify-center bg-[#050505] overflow-hidden"
           style={{ perspective: 1500 }} 
         >
           
-          {/* --- 3D TUMBLING PAPER PUZZLE --- */}
           <div
             className="relative grid"
             style={{
@@ -101,8 +81,9 @@ export default function CinematicLoader() {
               height: screenConfig.logoSize,
               gridTemplateColumns: `repeat(${GRID_SIZE}, ${CELL_SIZE}px)`,
               gridTemplateRows: `repeat(${GRID_SIZE}, ${CELL_SIZE}px)`,
-              filter: "drop-shadow(0px 30px 40px rgba(0, 0, 0, 0.9)) drop-shadow(0px 10px 20px rgba(238, 60, 36, 0.25))",
-              transformStyle: "preserve-3d"
+              // ⚡ OPTIMIZATION: Removed deadly CSS Drop-shadows from moving 3D grid
+              transformStyle: "preserve-3d",
+              willChange: "transform"
             }}
           >
             {cells.map(({ r, c, index }) => {
@@ -118,7 +99,6 @@ export default function CinematicLoader() {
               const rotY = Number(((rand2 - 0.5) * 720).toFixed(2));
               const rotZ = Number(((rand3 - 0.5) * 360).toFixed(2));
 
-              // ⚡ Faster entry delay for individual pieces
               const delay = Number((0.05 + (rand1 * 0.3)).toFixed(2));
 
               let borderRadius = "0px";
@@ -139,6 +119,7 @@ export default function CinematicLoader() {
                     rotateY: rotY,
                     rotateZ: rotZ,
                     scale: 0.8,
+                    // Fast, hardware-friendly box shadow instead of heavy drop shadow
                     boxShadow: "0px 20px 40px rgba(0,0,0,0.9), inset 0 0 2px rgba(255,255,255,0.3)"
                   }}
                   animate={{
@@ -153,7 +134,7 @@ export default function CinematicLoader() {
                     boxShadow: "0px 0px 0px rgba(0,0,0,0), inset 0 0 0px rgba(255,255,255,0)"
                   }}
                   transition={{
-                    duration: 2.0, // ⚡ Sped up from 3.2s
+                    duration: 2.0, 
                     delay: delay,
                     ease: paperTumbleEase,
                   }}
@@ -188,11 +169,9 @@ export default function CinematicLoader() {
             })}
           </div>
 
-          {/* --- BRAND TYPOGRAPHY --- */}
           <motion.div
             initial={{ opacity: 0, y: 30, filter: "blur(10px)", scale: 0.95 }}
             animate={{ opacity: 1, y: 0, filter: "blur(0px)", scale: 1 }}
-            // ⚡ Sped up from delay 2.8s, duration 1.8s
             transition={{ delay: 1.5, duration: 1.2, ease: paperTumbleEase }}
             className="absolute bottom-16 md:bottom-24 flex flex-col items-center gap-2 md:gap-3"
           >
@@ -212,7 +191,6 @@ export default function CinematicLoader() {
             <motion.div
               initial={{ width: 0 }}
               animate={{ width: "clamp(80px, 20vw, 120px)" }} 
-              // ⚡ Sped up from delay 3.3s, duration 1.4s
               transition={{ delay: 1.8, duration: 1.0, ease: textRevealEase }}
               style={{ height: 1, background: "#EE3C24" }}
             />
@@ -220,7 +198,6 @@ export default function CinematicLoader() {
             <motion.span
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              // ⚡ Sped up from delay 3.8s, duration 1.2s
               transition={{ delay: 2.1, duration: 0.8 }}
               style={{
                 fontFamily: "'EB Garamond',Georgia,serif",
