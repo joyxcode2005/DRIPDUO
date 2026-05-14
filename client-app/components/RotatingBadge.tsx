@@ -1,5 +1,5 @@
 export default function RotatingBadge({ mobile = false }: { mobile?: boolean }) {
-    const sizeClass = mobile ? "h-[92px] w-[92px]" : "h-[140px] w-[140px]";
+    const sizeClass = mobile ? "h-[55px] w-[55px]" : "h-[140px] w-[140px]";
     const textLength = mobile ? "204" : "219";
     const textSize = mobile ? 9 : 10.5;
     const pathId = mobile ? "badgePathMobile" : "badgePathDesktop";

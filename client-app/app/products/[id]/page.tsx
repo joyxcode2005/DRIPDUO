@@ -57,7 +57,6 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
     }
   }, [selectedGSM, product, selectedSize]);
 
-  // ✅ MADE THIS ASYNC TO MATCH THE NEW CART CONTEXT
   const handleAddToCart = async () => {
     if (!selectedSize) {
       setSizeError(true);
@@ -78,22 +77,25 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
 
     try {
       // ✅ AWAIT THE ADD TO CART FUNCTION
-      // ✅ REMOVED 'id' SINCE THE CONTEXT AUTO-GENERATES IT FROM VARIANT ID
-      // await addToCart({
-      //   productId: product!.id,
-      //   variantId: selectedVariant.id,
-      //   name: product!.name,
-      //   price: product!.final_price || product!.price,
-      //   image: product!.images?.[0]?.url || "",
-      //   size: selectedSize,
-      //   gsm: selectedGSM,
-      //   quantity: 1,
-      // });
+      // ✅ Included 'stock' because your CartContext uses it to validate maximum quantities
+      await addToCart({
+        productId: product!.id,
+        variantId: selectedVariant.id,
+        name: product!.name,
+        price: product!.final_price || product!.price,
+        image: product!.images?.[0]?.url || "",
+        size: selectedSize,
+        gsm: selectedGSM,
+        quantity: 1,
+        stock: selectedVariant.stock,
+      });
 
+      // Show success feedback
       setAdded(true);
       setTimeout(() => {
         setAdded(false);
       }, 2000);
+
     } catch (error) {
       console.error("Error adding item to cart:", error);
     }

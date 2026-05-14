@@ -189,7 +189,7 @@ export default function CheckoutPage() {
                         <h4 className="label text-[var(--beige)]" style={{ fontSize: "10px", lineHeight: 1.4, letterSpacing: "0.1em" }}>{item.name}</h4>
                         <span className="label text-[var(--gray-400)] block mt-2" style={{ fontSize: "9px" }}>Size: {item.size} <br/> Qty: {item.quantity}</span>
                       </div>
-                      <span className="label text-[var(--orange)]" style={{ fontSize: "11px" }}>${(item.price * item.quantity).toFixed(2)}</span>
+                      <span className="label text-[var(--orange)]" style={{ fontSize: "11px" }}>₹{(item.price * item.quantity).toFixed(2)}</span>
                     </div>
                   </div>
                 ))}
@@ -198,7 +198,7 @@ export default function CheckoutPage() {
               <div className="space-y-5 border-t border-[var(--gray-800)] pt-8 label text-[var(--gray-200)]" style={{ fontSize: "10px", letterSpacing: "0.15em" }}>
                 <div className="flex justify-between">
                   <span>SUBTOTAL</span>
-                  <span className="text-[var(--beige)]">${cartTotal.toFixed(2)}</span>
+                  <span className="text-[var(--beige)]">₹{cartTotal.toFixed(2)}</span>
                 </div>
                 <div className="flex justify-between">
                   <span>SHIPPING</span>
@@ -206,13 +206,13 @@ export default function CheckoutPage() {
                 </div>
                 <div className="flex justify-between">
                   <span>TAXES (ESTIMATED)</span>
-                  <span className="text-[var(--beige)]">${taxes.toFixed(2)}</span>
+                  <span className="text-[var(--beige)]">₹{taxes.toFixed(2)}</span>
                 </div>
               </div>
 
               <div className="flex justify-between items-center border-t border-[var(--gray-800)] mt-8 pt-8">
                 <span className="label text-[var(--beige)]" style={{ fontSize: "12px", letterSpacing: "0.2em" }}>TOTAL</span>
-                <span className="font-serif text-3xl text-[var(--orange)]">${finalTotal.toFixed(2)}</span>
+                <span className="font-serif text-3xl text-[var(--orange)]">₹{finalTotal.toFixed(2)}</span>
               </div>
             </div>
           </aside>

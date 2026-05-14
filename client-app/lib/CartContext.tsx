@@ -1,11 +1,9 @@
 "use client";
 
-import React, { createContext, useContext, useMemo, useState, useEffect, useCallback } from "react";
-import { getSupabaseClient } from "./supabase";
-// Assuming you have a standard Supabase browser client setup
+import React, { createContext, useContext, useMemo, useState, useEffect } from "react";
 
 export type CartItem = {
-  id: string; // Used for local React mapping (format: variantId or db-uuid)
+  id: string; // Used for local React mapping (format: variantId)
   productId: string;
   variantId: string;
   name: string;
@@ -31,96 +29,54 @@ interface CartContextType {
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
 
+// Generic storage key instead of 'guest_cart'
+const CART_STORAGE_KEY = "shopping_cart";
+
 export const CartProvider = ({ children }: { children: React.ReactNode }) => {
-  const supabase = getSupabaseClient();
   const [cart, setCart] = useState<CartItem[]>([]);
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [isInitialized, setIsInitialized] = useState(false);
-  const [userId, setUserId] = useState<string | null>(null);
 
-  // --- 1. AUTHENTICATION & INITIALIZATION ---
+  // --- 1. INITIALIZATION (Read from Local Storage on mount) ---
   useEffect(() => {
-    const initializeCart = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      const user = session?.user?.id || null;
-      setUserId(user);
-
-      if (user) {
-        // Logged In: Fetch from Supabase
-        await fetchSupabaseCart(user);
-      } else {
-        // Guest: Fetch from Local Storage
-        const localCart = localStorage.getItem("guest_cart");
-        if (localCart) setCart(JSON.parse(localCart));
+    const localCart = localStorage.getItem(CART_STORAGE_KEY);
+    if (localCart) {
+      try {
+        setCart(JSON.parse(localCart));
+      } catch (error) {
+        console.error("Failed to parse cart from local storage", error);
       }
-      setIsInitialized(true);
-    };
-
-    initializeCart();
-
-    // Listen for login/logout events to merge or clear carts
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event: string, session: { user: { id: string }; } | null) => {
-      if (event === "SIGNED_IN" && session?.user) {
-        setUserId(session.user.id);
-        await handleGuestToUserMerge(session.user.id);
-      } else if (event === "SIGNED_OUT") {
-        setUserId(null);
-        setCart([]); // Clear cart on logout
-        localStorage.removeItem("guest_cart");
-      }
-    });
-
-    return () => subscription.unsubscribe();
-  }, [supabase]);
-
-  // --- 2. LOCAL STORAGE SYNC (GUESTS ONLY) ---
-  useEffect(() => {
-    if (isInitialized && !userId) {
-      localStorage.setItem("guest_cart", JSON.stringify(cart));
     }
-  }, [cart, isInitialized, userId]);
+    setIsInitialized(true);
+  }, []);
 
-  // --- 3. DATABASE HELPER FUNCTIONS ---
-  const fetchSupabaseCart = async (uid: string) => {
-    // You would write a join query here to get cart_items + product details
-    // Example: select('*, products(*), product_variants(*)')
-    // For now, we assume you map the DB result back to the CartItem[] type
-  };
+  // --- 2. LOCAL STORAGE SYNC (Always write to local storage when cart changes) ---
+  useEffect(() => {
+    if (isInitialized) {
+      localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(cart));
+    }
+  }, [cart, isInitialized]);
 
-  const handleGuestToUserMerge = async (uid: string) => {
-    const localCartStr = localStorage.getItem("guest_cart");
-    if (!localCartStr) return fetchSupabaseCart(uid); // Nothing to merge
-
-    const localCart: CartItem[] = JSON.parse(localCartStr);
-
-    // Logic here: 
-    // 1. Get or create `cart` row for `user_id`
-    // 2. Loop through `localCart` and insert/upsert into `cart_items`
-    // 3. Clear local storage
-
-    localStorage.removeItem("guest_cart");
-    await fetchSupabaseCart(uid); // Fetch the freshly merged cart
-  };
-
-  // --- 4. CORE ACTIONS (OPTIMISTIC UI) ---
+  // --- 3. CORE ACTIONS ---
 
   const addToCart = async (product: Omit<CartItem, "id">) => {
-    const incomingItem = { ...product, id: product.variantId }; // Use variantId as primary local key
+    const incomingItem = { ...product, id: product.variantId };
 
-    // OPTIMISTIC UPDATE: Update UI instantly
     setCart((prev) => {
       const existing = prev.find((item) => item.variantId === incomingItem.variantId);
+
       if (existing) {
         const newQuantity = existing.quantity + incomingItem.quantity;
 
+        // Prevent ordering more than is in stock
         if (newQuantity > existing.stock) {
           alert(`You cannot add more than ${existing.stock} of this item.`);
-          return prev; // Cancel the state update
+          return prev;
         }
-        
+
         return prev.map((item) =>
           item.variantId === incomingItem.variantId
-            ? { ...item, quantity: item.quantity + incomingItem.quantity }
+            ? { ...item, quantity: newQuantity }
             : item
         );
       }
@@ -128,30 +84,10 @@ export const CartProvider = ({ children }: { children: React.ReactNode }) => {
     });
 
     setIsCartOpen(true);
-
-    // BACKGROUND SYNC: If user is logged in, push to Supabase
-    if (userId) {
-      try {
-        // 1. Get user's cart ID
-        // 2. Upsert into public.cart_items (match by cart_id and variant_id)
-      } catch (error) {
-        console.error("Failed to sync add to cart with DB", error);
-        // In a perfect app, you'd roll back the React state here if the DB fails
-      }
-    }
   };
 
   const removeFromCart = async (variantId: string) => {
-    // OPTIMISTIC UPDATE
     setCart((prev) => prev.filter((item) => item.variantId !== variantId));
-
-    if (userId) {
-      try {
-        // Delete from public.cart_items where variant_id = variantId
-      } catch (error) {
-        console.error("Failed to delete from DB", error);
-      }
-    }
   };
 
   const updateQuantity = async (variantId: string, quantity: number) => {
@@ -163,18 +99,9 @@ export const CartProvider = ({ children }: { children: React.ReactNode }) => {
       return;
     }
 
-    // OPTIMISTIC UPDATE
     setCart((prev) =>
       prev.map((item) => (item.variantId === variantId ? { ...item, quantity } : item))
     );
-
-    if (userId) {
-      try {
-        // Update public.cart_items set quantity = quantity where variant_id = variantId
-      } catch (error) {
-        console.error("Failed to update quantity in DB", error);
-      }
-    }
   };
 
   const cartTotal = useMemo(
