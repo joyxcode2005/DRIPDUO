@@ -1,7 +1,7 @@
 // app/api/payment/create-order/route.ts
 import { NextResponse } from "next/server";
 import Razorpay from "razorpay";
-import { createClient } from "@supabase/supabase-js"; // <-- CHANGE 1
+import { createClient } from "@supabase/supabase-js";
 
 const razorpay = new Razorpay({
     key_id: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID!,
@@ -13,7 +13,9 @@ export async function POST(req: Request) {
         const body = await req.json();
         const { amount, cartItems, shippingDetails } = body;
 
-        // --- CHANGE 2: Create an Admin Client to bypass RLS ---
+        console.log("Received Order Creation Request:", { amount, cartItems, shippingDetails });
+
+        // --- Create an Admin Client to bypass RLS ---
         const supabaseAdmin = createClient(
             process.env.NEXT_PUBLIC_SUPABASE_URL!,
             process.env.SUPABASE_SERVICE_ROLE_KEY!
@@ -68,7 +70,7 @@ export async function POST(req: Request) {
         if (cartItems && cartItems.length > 0) {
             const itemsToInsert = cartItems.map((item: any) => ({
                 order_id: localOrderId,
-                product_id: item.id,
+                product_id: item.productId, // <-- FIX: Changed item.id to item.productId
                 name: item.name,
                 price: item.price,
                 quantity: item.quantity,
