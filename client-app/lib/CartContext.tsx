@@ -24,6 +24,7 @@ interface CartContextType {
   addToCart: (item: Omit<CartItem, "id">) => Promise<void>;
   removeFromCart: (variantId: string) => Promise<void>;
   updateQuantity: (variantId: string, quantity: number) => Promise<void>;
+  clearCart: () => void;
   cartTotal: number;
 }
 
@@ -58,6 +59,10 @@ export const CartProvider = ({ children }: { children: React.ReactNode }) => {
   }, [cart, isInitialized]);
 
   // --- 3. CORE ACTIONS ---
+  const clearCart = () => {
+    setCart([]);
+  };
+
 
   const addToCart = async (product: Omit<CartItem, "id">) => {
     const incomingItem = { ...product, id: product.variantId };
@@ -119,6 +124,7 @@ export const CartProvider = ({ children }: { children: React.ReactNode }) => {
       addToCart,
       removeFromCart,
       updateQuantity,
+      clearCart,
       cartTotal
     }}>
       {children}

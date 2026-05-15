@@ -7,7 +7,7 @@ import { ArrowLeft, Lock, CheckCircle2, ShieldCheck } from "lucide-react";
 import { useCart } from "@/lib/CartContext";
 import Image from "next/image";
 
-// Add Razorpay type to the global window object
+
 declare global {
   interface Window {
     Razorpay: any;
@@ -15,7 +15,7 @@ declare global {
 }
 
 export default function CheckoutPage() {
-  const { cart, cartTotal } = useCart();
+  const { cart, cartTotal, clearCart } = useCart();
   const [activeStep, setActiveStep] = useState<"shipping" | "payment" | "success">("shipping");
   const [orderId, setOrderId] = useState<string>("");
   const [isProcessing, setIsProcessing] = useState(false);
@@ -26,6 +26,8 @@ export default function CheckoutPage() {
     lastName: "",
     addressLine1: "",
     city: "",
+    email: "",
+    phone: "",
     postalCode: "",
   });
 
@@ -65,21 +67,20 @@ export default function CheckoutPage() {
         key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID,
         amount: data.amount,
         currency: "INR",
-        name: "Archive Collection",
-        description: "Premium Clothing Acquisition",
+        name: "DRIPDUO",
+        description: "Complete your purchase securely",
         order_id: data.orderId,
         handler: async function (response: any) {
-          // Verify payment on success and pass the local database ID
           response.localOrderId = data.localOrderId;
           await verifyPayment(response);
         },
         prefill: {
           name: `${shippingDetails.firstName} ${shippingDetails.lastName}`.trim(),
-          email: "customer@example.com",
-          contact: "9999999999",
+          email: data.shippingDetails?.email || "",
+          contact: data.shippingDetails?.phone || "",
         },
         theme: {
-          color: "#E85D04", // Your var(--orange) brand color
+          color: "#E85D04",
         },
       };
 
@@ -118,6 +119,7 @@ export default function CheckoutPage() {
       if (data.success) {
         setOrderId(paymentResponse.razorpay_order_id);
         setActiveStep("success");
+        clearCart();
       } else {
         alert("Payment verification failed. Please contact support.");
       }
@@ -132,12 +134,12 @@ export default function CheckoutPage() {
   // --- EMPTY CART STATE ---
   if (cart.length === 0 && activeStep !== "success") {
     return (
-      <div className="min-h-screen bg-[var(--black)] text-[var(--beige)] flex flex-col items-center justify-center pt-20 font-sans">
-        <h1 className="font-serif text-4xl font-light mb-6 text-[var(--beige)]">Archive Empty</h1>
-        <p className="label text-[var(--gray-400)] mb-10" style={{ fontSize: "10px", letterSpacing: "0.15em" }}>
+      <div className="min-h-screen bg-(--black) text-(--beige) flex flex-col items-center justify-center pt-20 font-sans">
+        <h1 className="font-serif text-4xl font-light mb-6 text-(--beige)">Archive Empty</h1>
+        <p className="label text-(--gray-400) mb-10" style={{ fontSize: "10px", letterSpacing: "0.15em" }}>
           Add pieces to your archive to checkout.
         </p>
-        <Link href="/products" className="label border-b border-[var(--orange)] text-[var(--orange)] pb-1 hover:text-[var(--beige)] hover:border-[var(--beige)] transition-colors" style={{ fontSize: "11px", letterSpacing: "0.15em" }}>
+        <Link href="/products" className="label border-b border-(--orange) text-(--orange) pb-1 hover:text-(--beige) hover:border-(--beige) transition-colors" style={{ fontSize: "11px", letterSpacing: "0.15em" }}>
           Return to Collection
         </Link>
       </div>
@@ -147,17 +149,17 @@ export default function CheckoutPage() {
   // --- SUCCESS STATE ---
   if (activeStep === "success") {
     return (
-      <div className="min-h-screen bg-[var(--black)] text-[var(--beige)] flex flex-col items-center justify-center pt-20 px-6 text-center font-sans">
-        <div className="w-20 h-20 rounded-full border border-[var(--orange)] flex items-center justify-center mb-8 bg-[var(--orange)]/10">
-          <CheckCircle2 className="w-10 h-10 text-[var(--orange)]" />
+      <div className="min-h-screen bg-(--black) text-(--beige) flex flex-col items-center justify-center pt-20 px-6 text-center font-sans">
+        <div className="w-20 h-20 rounded-full border border-(--orange) flex items-center justify-center mb-8 bg-(--orange)/10">
+          <CheckCircle2 className="w-10 h-10 text-(--orange)" />
         </div>
-        <h1 className="font-serif text-4xl md:text-5xl font-light mb-6 text-[var(--beige)]">Order Confirmed</h1>
-        <p className="label text-[var(--gray-200)] max-w-md leading-relaxed mb-10" style={{ fontSize: "11px", textTransform: "none", letterSpacing: "0.08em" }}>
+        <h1 className="font-serif text-4xl md:text-5xl font-light mb-6 text-(--beige)">Order Confirmed</h1>
+        <p className="label text-(--gray-200) max-w-md leading-relaxed mb-10" style={{ fontSize: "11px", textTransform: "none", letterSpacing: "0.08em" }}>
           Thank you for your acquisition. Your archive pieces are being prepared with absolute precision. Order confirmation has been sent to your email.
         </p>
-        <div className="p-8 bg-[var(--gray-900)] border border-[var(--gray-800)] inline-block text-center mb-12">
-          <span className="label text-[var(--orange)] block mb-3" style={{ fontSize: "10px", letterSpacing: "0.15em" }}>ORDER REFERENCE</span>
-          <span className="font-serif text-2xl text-[var(--beige)]">{orderId}</span>
+        <div className="p-8 bg-(--gray-900) border border-(--gray-800) inline-block text-center mb-12">
+          <span className="label text-(--orange) block mb-3" style={{ fontSize: "10px", letterSpacing: "0.15em" }}>ORDER REFERENCE</span>
+          <span className="font-serif text-2xl text-(--beige)">{orderId}</span>
         </div>
         <Link href="/products" className="btn-primary" style={{ fontSize: "11px", padding: "18px 40px" }}>
           Continue Exploring
@@ -171,15 +173,15 @@ export default function CheckoutPage() {
     <>
       <Script src="https://checkout.razorpay.com/v1/checkout.js" strategy="lazyOnload" />
 
-      <div className="min-h-screen bg-[var(--black)] text-[var(--beige)] pt-24 pb-24 font-sans">
+      <div className="min-h-screen bg-(--black) text-(--beige) pt-24 pb-24 font-sans">
         <div className="max-w-7xl mx-auto px-6 md:px-12">
 
           {/* HEADER */}
-          <div className="flex items-center justify-between border-b border-[var(--gray-800)] pb-8 mb-12">
-            <Link href="/products" className="label flex items-center gap-3 text-[var(--gray-400)] hover:text-[var(--orange)] transition-colors" style={{ fontSize: "10px", letterSpacing: "0.15em" }}>
+          <div className="flex items-center justify-between border-b border-(--gray-800) pb-8 mb-12">
+            <Link href="/products" className="label flex items-center gap-3 text-(--gray-400) hover:text-(--orange) transition-colors" style={{ fontSize: "10px", letterSpacing: "0.15em" }}>
               <ArrowLeft size={14} strokeWidth={1.5} /> BACK
             </Link>
-            <div className="flex items-center gap-2 text-[var(--orange)] label" style={{ fontSize: "10px", letterSpacing: "0.15em" }}>
+            <div className="flex items-center gap-2 text-(--orange) label" style={{ fontSize: "10px", letterSpacing: "0.15em" }}>
               <Lock size={14} strokeWidth={1.5} />
               <span>SECURE CHECKOUT</span>
             </div>
@@ -193,14 +195,14 @@ export default function CheckoutPage() {
               {/* Step 1: Shipping */}
               <section className={`transition-opacity duration-500 ${activeStep === "payment" ? "opacity-40 pointer-events-none" : "opacity-100"}`}>
                 <div className="flex items-center justify-between mb-10">
-                  <h2 className="font-serif text-3xl font-light text-[var(--beige)]">1. Shipping Destination</h2>
-                  {activeStep === "payment" && <CheckCircle2 className="w-6 h-6 text-[var(--orange)]" />}
+                  <h2 className="font-serif text-3xl font-light text-(--beige)">1. Shipping Destination</h2>
+                  {activeStep === "payment" && <CheckCircle2 className="w-6 h-6 text-(--orange)" />}
                 </div>
 
                 <form className="space-y-6" onSubmit={(e) => { e.preventDefault(); setActiveStep("payment"); }}>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div className="flex flex-col gap-3">
-                      <label className="label text-[var(--gray-400)]" style={{ fontSize: "10px" }}>First Name</label>
+                      <label className="label text-(--gray-400)" style={{ fontSize: "10px" }}>First Name</label>
                       <input
                         type="text"
                         name="firstName"
@@ -211,7 +213,7 @@ export default function CheckoutPage() {
                       />
                     </div>
                     <div className="flex flex-col gap-3">
-                      <label className="label text-[var(--gray-400)]" style={{ fontSize: "10px" }}>Last Name</label>
+                      <label className="label text-(--gray-400)" style={{ fontSize: "10px" }}>Last Name</label>
                       <input
                         type="text"
                         name="lastName"
