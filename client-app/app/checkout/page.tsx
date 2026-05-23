@@ -226,7 +226,7 @@ export default function CheckoutPage() {
                   </div>
 
                   <div className="flex flex-col gap-3">
-                    <label className="label text-[var(--gray-400)]" style={{ fontSize: "10px" }}>Address Line 1</label>
+                    <label className="label text-(--gray-400)" style={{ fontSize: "10px" }}>Address Line 1</label>
                     <input
                       type="text"
                       name="addressLine1"
@@ -239,7 +239,7 @@ export default function CheckoutPage() {
 
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                     <div className="flex flex-col gap-3 md:col-span-2">
-                      <label className="label text-[var(--gray-400)]" style={{ fontSize: "10px" }}>City</label>
+                      <label className="label text-(--gray-400)" style={{ fontSize: "10px" }}>City</label>
                       <input
                         type="text"
                         name="city"
@@ -250,7 +250,7 @@ export default function CheckoutPage() {
                       />
                     </div>
                     <div className="flex flex-col gap-3">
-                      <label className="label text-[var(--gray-400)]" style={{ fontSize: "10px" }}>Postal Code</label>
+                      <label className="label text-(--gray-400)" style={{ fontSize: "10px" }}>Postal Code</label>
                       <input
                         type="text"
                         name="postalCode"
@@ -277,11 +277,11 @@ export default function CheckoutPage() {
               {/* Step 2: Payment */}
               <section className={`transition-all duration-700 ${activeStep === "shipping" ? "opacity-20 pointer-events-none translate-y-4" : "opacity-100 translate-y-0"}`}>
                 <div className="flex items-center justify-between mb-10">
-                  <h2 className="font-serif text-3xl font-light text-[var(--beige)]">2. Secure Payment</h2>
+                  <h2 className="font-serif text-3xl font-light text-(--beige)">2. Secure Payment</h2>
                 </div>
 
-                <div className="bg-[var(--gray-900)] border border-[var(--orange)] p-8 mb-10">
-                  <p className="text-[var(--gray-200)] label mb-4" style={{ fontSize: "11px", letterSpacing: "0.1em" }}>
+                <div className="bg-(--gray-900) border border-(--orange) p-8 mb-10">
+                  <p className="text-(--gray-200) label mb-4" style={{ fontSize: "11px", letterSpacing: "0.1em" }}>
                     You will be securely redirected to Razorpay to complete your purchase using UPI, Cards, or Netbanking.
                   </p>
                 </div>
@@ -291,7 +291,7 @@ export default function CheckoutPage() {
                     <button
                       type="button"
                       onClick={() => setActiveStep("shipping")}
-                      className="btn-secondary flex-shrink-0"
+                      className="btn-secondary shrink-0"
                       style={{ padding: "20px 32px" }}
                       disabled={isProcessing}
                     >
@@ -313,9 +313,9 @@ export default function CheckoutPage() {
             </div>
 
             {/* SIDEBAR: ORDER SUMMARY */}
-            <aside className="w-full lg:w-[400px] flex-shrink-0">
-              <div className="bg-[var(--gray-900)] border border-[var(--gray-800)] p-8 sticky top-28">
-                <h3 className="label text-[var(--beige)] mb-8 border-b border-[var(--gray-800)] pb-5" style={{ fontSize: "11px", letterSpacing: "0.15em" }}>
+            <aside className="w-full lg:w-100 shrink-0">
+              <div className="bg-(--gray-900) border border-(--gray-800) p-8 sticky top-28">
+                <h3 className="label text-(--beige) mb-8 border-b border-(--gray-800) pb-5" style={{ fontSize: "11px", letterSpacing: "0.15em" }}>
                   ORDER SUMMARY
                 </h3>
 
@@ -329,37 +329,37 @@ export default function CheckoutPage() {
                         src={item.image}
                         alt={item.name}
                         sizes="(max-width: 768px) 100vw, 50vw"
-                        className="w-20 h-24 object-cover border border-[var(--gray-800)]"
+                        className="w-20 h-24 object-cover border border-(--gray-800)"
                       />
                       <div className="flex-1 flex flex-col justify-between py-1">
                         <div>
-                          <h4 className="label text-[var(--beige)]" style={{ fontSize: "10px", lineHeight: 1.4, letterSpacing: "0.1em" }}>{item.name}</h4>
-                          <span className="label text-[var(--gray-400)] block mt-2" style={{ fontSize: "9px" }}>Size: {item.size} <br /> Qty: {item.quantity}</span>
+                          <h4 className="label text-(--beige)" style={{ fontSize: "10px", lineHeight: 1.4, letterSpacing: "0.1em" }}>{item.name}</h4>
+                          <span className="label text-(--gray-400) block mt-2" style={{ fontSize: "9px" }}>Size: {item.size} <br /> Qty: {item.quantity}</span>
                         </div>
-                        <span className="label text-[var(--orange)]" style={{ fontSize: "11px" }}>₹{(item.price * item.quantity).toFixed(2)}</span>
+                        <span className="label text-(--orange)" style={{ fontSize: "11px" }}>₹{(item.price * item.quantity).toFixed(2)}</span>
                       </div>
                     </div>
                   ))}
                 </div>
 
-                <div className="space-y-5 border-t border-[var(--gray-800)] pt-8 label text-[var(--gray-200)]" style={{ fontSize: "10px", letterSpacing: "0.15em" }}>
+                <div className="space-y-5 border-t border-(--gray-800) pt-8 label text-(--gray-200)" style={{ fontSize: "10px", letterSpacing: "0.15em" }}>
                   <div className="flex justify-between">
                     <span>SUBTOTAL</span>
-                    <span className="text-[var(--beige)]">₹{cartTotal.toFixed(2)}</span>
+                    <span className="text-(--beige)">₹{cartTotal.toFixed(2)}</span>
                   </div>
                   <div className="flex justify-between">
                     <span>SHIPPING</span>
-                    <span className="text-[var(--beige)]">{shippingCost === 0 ? "COMPLIMENTARY" : `₹${shippingCost.toFixed(2)}`}</span>
+                    <span className="text-(--beige)">{shippingCost === 0 ? "COMPLIMENTARY" : `₹${shippingCost.toFixed(2)}`}</span>
                   </div>
                   <div className="flex justify-between">
                     <span>TAXES (ESTIMATED)</span>
-                    <span className="text-[var(--beige)]">₹{taxes.toFixed(2)}</span>
+                    <span className="text-(--beige)">₹{taxes.toFixed(2)}</span>
                   </div>
                 </div>
 
-                <div className="flex justify-between items-center border-t border-[var(--gray-800)] mt-8 pt-8">
-                  <span className="label text-[var(--beige)]" style={{ fontSize: "12px", letterSpacing: "0.2em" }}>TOTAL</span>
-                  <span className="font-serif text-3xl text-[var(--orange)]">₹{finalTotal.toFixed(2)}</span>
+                <div className="flex justify-between items-center border-t border-(--gray-800) mt-8 pt-8">
+                  <span className="label text-(--beige)" style={{ fontSize: "12px", letterSpacing: "0.2em" }}>TOTAL</span>
+                  <span className="font-serif text-3xl text-(--orange)">₹{finalTotal.toFixed(2)}</span>
                 </div>
               </div>
             </aside>

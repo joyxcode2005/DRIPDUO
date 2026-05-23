@@ -202,7 +202,7 @@ export default function ClothButton({
         camera={{ position: [0, 0, cameraZ], fov: 42 }}
         gl={{ antialias: true, alpha: true }}
         style={{ overflow: "visible" }} 
-        // ⚡ OPTIMIZATION: Limits pixel rendering on mobile to prevent crashes
+        //  OPTIMIZATION: Limits pixel rendering on mobile to prevent crashes
         dpr={isMobile ? [1, 1.5] : [1, 2]}
       >
         <ambientLight intensity={0.4} />
@@ -216,7 +216,7 @@ export default function ClothButton({
           <DraggableCoinLogo logoSrc={logoSrc} isMobile={isMobile} triggerSpin={triggerSpin} />
         </React.Suspense>
 
-        {/* ⚡ OPTIMIZATION: Baked shadow calculates once instead of 60 times a second */}
+        {/*  OPTIMIZATION: Baked shadow calculates once instead of 60 times a second */}
         <ContactShadows
           position={[0, shadowY, 0]}
           opacity={0.8}
