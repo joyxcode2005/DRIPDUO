@@ -12,18 +12,18 @@ interface ClothButtonProps {
   onClick?: () => void;
 }
 
-function DraggableCoinLogo({ 
-  logoSrc, 
-  isMobile, 
-  triggerSpin 
-}: { 
-  logoSrc: string; 
+function DraggableCoinLogo({
+  logoSrc,
+  isMobile,
+  triggerSpin
+}: {
+  logoSrc: string;
   isMobile: boolean;
   triggerSpin?: boolean;
 }) {
   // Use cloned texture to avoid ESLint immutability errors
   const baseTexture = useTexture(logoSrc);
-  
+
   const texture = useMemo(() => {
     const tex = baseTexture.clone();
     tex.colorSpace = THREE.SRGBColorSpace;
@@ -59,7 +59,7 @@ function DraggableCoinLogo({
       } else {
         // 2. Normalize rotation to prevent it from violently unwinding backward
         groupRef.current.rotation.y = groupRef.current.rotation.y % (Math.PI * 2);
-        
+
         // Calculate shortest path to front-facing (0)
         if (groupRef.current.rotation.y > Math.PI) groupRef.current.rotation.y -= Math.PI * 2;
         else if (groupRef.current.rotation.y < -Math.PI) groupRef.current.rotation.y += Math.PI * 2;
@@ -67,21 +67,21 @@ function DraggableCoinLogo({
         // 3. Normal resting Lerp
         groupRef.current.rotation.y = THREE.MathUtils.lerp(groupRef.current.rotation.y, 0, 0.08);
         groupRef.current.rotation.x = THREE.MathUtils.lerp(groupRef.current.rotation.x, 0, 0.08);
-        
+
         if (Math.abs(groupRef.current.rotation.y) < 0.001) groupRef.current.rotation.y = 0;
         if (Math.abs(groupRef.current.rotation.x) < 0.001) groupRef.current.rotation.x = 0;
       }
     }
   });
 
-  const coinRadius = isMobile ? 2.2 : 3.1; 
-  const coinThickness = isMobile ? 0.25 : 0.4; 
-  const rimThickness = isMobile ? 0.1 : 0.16; 
+  const coinRadius = isMobile ? 2.2 : 3.1;
+  const coinThickness = isMobile ? 0.25 : 0.4;
+  const rimThickness = isMobile ? 0.1 : 0.16;
   const faceOffset = coinThickness / 2 + 0.005;
 
   return (
-    <group 
-      ref={groupRef} 
+    <group
+      ref={groupRef}
       onPointerDown={(e) => {
         (e.target as Element).setPointerCapture(e.pointerId);
         isDragging.current = true;
@@ -116,14 +116,14 @@ function DraggableCoinLogo({
 
       <mesh position={[0, 0, faceOffset]}>
         <circleGeometry args={[coinRadius - 0.02, 64]} />
-        <meshPhysicalMaterial 
-          map={texture} 
-          transparent={true} 
-          alphaTest={0.5} 
-          color="#ffffff" 
-          metalness={0.1} 
-          roughness={0.2} 
-          clearcoat={1.0} 
+        <meshPhysicalMaterial
+          map={texture}
+          transparent={true}
+          alphaTest={0.5}
+          color="#ffffff"
+          metalness={0.1}
+          roughness={0.2}
+          clearcoat={1.0}
           clearcoatRoughness={0.1}
           envMapIntensity={1.2}
           side={THREE.FrontSide}
@@ -132,14 +132,14 @@ function DraggableCoinLogo({
 
       <mesh position={[0, 0, -faceOffset]} rotation={[0, Math.PI, 0]}>
         <circleGeometry args={[coinRadius - 0.02, 64]} />
-        <meshPhysicalMaterial 
-          map={texture} 
-          transparent={true} 
-          alphaTest={0.5} 
-          color="#ffffff" 
-          metalness={0.1} 
-          roughness={0.2} 
-          clearcoat={1.0} 
+        <meshPhysicalMaterial
+          map={texture}
+          transparent={true}
+          alphaTest={0.5}
+          color="#ffffff"
+          metalness={0.1}
+          roughness={0.2}
+          clearcoat={1.0}
           clearcoatRoughness={0.1}
           envMapIntensity={1.2}
           side={THREE.FrontSide}
@@ -150,12 +150,12 @@ function DraggableCoinLogo({
 }
 
 export default function ClothButton({
-  size = 220, 
+  size = 220,
   logoSrc = "/images/transLoader.png",
   className = "",
   onClick,
 }: ClothButtonProps) {
-  
+
   const [isMobile, setIsMobile] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
   const [triggerSpin, setTriggerSpin] = useState(false);
@@ -185,15 +185,15 @@ export default function ClothButton({
   }, []);
 
   const activeSize = isMobile ? size * 0.55 : size;
-  const containerWidth = activeSize * 1.5;   
+  const containerWidth = activeSize * 1.5;
   const containerHeight = activeSize;
   const cameraZ = isMobile ? 7.5 : 9.0;
   const shadowY = isMobile ? -2.6 : -3.8;
 
   return (
-    <div 
+    <div
       ref={containerRef}
-      className={`relative flex items-center justify-center shrink-0 ${className}`} 
+      className={`relative flex items-center justify-center shrink-0 ${className}`}
       style={{ width: containerWidth, height: containerHeight, touchAction: "none" }}
       onClick={onClick}
     >
@@ -201,7 +201,7 @@ export default function ClothButton({
         shadows
         camera={{ position: [0, 0, cameraZ], fov: 42 }}
         gl={{ antialias: true, alpha: true }}
-        style={{ overflow: "visible" }} 
+        style={{ overflow: "visible" }}
         //  OPTIMIZATION: Limits pixel rendering on mobile to prevent crashes
         dpr={isMobile ? [1, 1.5] : [1, 2]}
       >
@@ -209,10 +209,9 @@ export default function ClothButton({
         <directionalLight position={[2, 6, 4]} intensity={3.5} castShadow />
         <spotLight position={[-4, 4, 6]} intensity={2.0} angle={0.4} penumbra={1} />
         <pointLight position={[0, -2, 4]} intensity={1.5} color="#ece7d1" />
-        
-        <Environment preset="studio" />
 
         <React.Suspense fallback={null}>
+          <Environment preset="studio" />
           <DraggableCoinLogo logoSrc={logoSrc} isMobile={isMobile} triggerSpin={triggerSpin} />
         </React.Suspense>
 
@@ -224,7 +223,7 @@ export default function ClothButton({
           blur={2.0}
           far={6}
           color="#000000"
-          frames={4} 
+          frames={4}
           resolution={isMobile ? 256 : 512}
         />
       </Canvas>
