@@ -72,7 +72,6 @@ export const getAllProducts = async () => {
             )
         `);
 
-    console.log("Raw products data from Supabase:", JSON.stringify(data, null, 2));
 
     // 🛑 ALWAYS check the error object if data is null!
     if (error) {

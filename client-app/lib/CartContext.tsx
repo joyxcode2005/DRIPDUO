@@ -3,7 +3,7 @@
 import React, { createContext, useContext, useMemo, useState, useEffect } from "react";
 
 export type CartItem = {
-  id: string; // Used for local React mapping (format: variantId)
+  id: string;
   productId: string;
   variantId: string;
   name: string;
