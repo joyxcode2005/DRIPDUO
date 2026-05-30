@@ -93,7 +93,7 @@ export const Footer = () => {
                   </SketchHighlight>
                 </span>
               </Link>
-              <p className="font-sans text-[11px] leading-relaxed tracking-[0.05em] text-(--gray-400) max-w-70">
+              <p className="font-sans text-[11px] leading-relaxed tracking-wider text-(--gray-400) max-w-70">
                 Unapologetic style. Uncompromising quality. Engineered for those who demand excellence in every thread.
               </p>
             </div>

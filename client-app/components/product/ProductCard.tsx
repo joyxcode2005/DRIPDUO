@@ -34,8 +34,11 @@ export interface Product {
 }
 
 export default function ProductCard({ product }: { product: Product }) {
+    // Real logic for "Sold Out" based on your interface
     const isSoldOut = product.total_stock <= 0;
 
+    // Safely extract the image. 
+    // Adjust 'image_url' to whatever the exact property name is in your SupabaseProductImage interface.
     const imageUrl = product.product_images?.[0]?.url || "/placeholder-shirt.png";
 
     return (
