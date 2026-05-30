@@ -13,7 +13,7 @@ import { cn } from "@/lib/utils";
 const transition = { type: "spring", mass: 0.5, damping: 11.5, stiffness: 100 };
 
 export const Menu = ({ setActive, children }: { setActive: (item: string | null) => void; children: React.ReactNode; }) => (
-  <nav onMouseLeave={() => setActive(null)} className="flex justify-center space-x-8 px-8 py-2">{children}</nav>
+  <nav onMouseLeave={() => setActive(null)} className="flex items-center justify-center space-x-8 px-8 py-2">{children}</nav>
 );
 
 export const MenuItem = ({ setActive, active, item, children }: { setActive: (item: string) => void; active: string | null; item: string; children?: React.ReactNode; }) => (
@@ -22,8 +22,13 @@ export const MenuItem = ({ setActive, active, item, children }: { setActive: (it
     {active !== null && (
       <motion.div initial={{ opacity: 0, scale: 0.85, y: 10 }} animate={{ opacity: 1, scale: 1, y: 0 }} transition={transition}>
         {active === item && children && (
-          <div className="absolute top-[calc(100%_+_1.5rem)] left-1/2 transform -translate-x-1/2 pt-4">
-            <motion.div transition={transition} layoutId="active" className="bg-[#0D0D0B]/95 backdrop-blur-xl rounded-2xl overflow-hidden border border-white/10 shadow-2xl">
+          <div className="absolute top-full left-1/2 transform -translate-x-1/2 pt-6">
+            {/* ── REFINED GLASSMORPHISM & INVISIBLE HOVER BRIDGE ── */}
+            <motion.div 
+              transition={transition} 
+              layoutId="active" 
+              className="bg-[#050505]/80 backdrop-blur-2xl rounded-2xl overflow-hidden border border-white/5 shadow-[0_30px_60px_-15px_rgba(0,0,0,0.8)]"
+            >
               <motion.div layout className="w-max h-full p-6">{children}</motion.div>
             </motion.div>
           </div>
@@ -34,17 +39,19 @@ export const MenuItem = ({ setActive, active, item, children }: { setActive: (it
 );
 
 export const HoveredLink = ({ children, ...rest }: any) => (
-  <Link {...rest} className="font-sans text-sm tracking-wide text-[#ECE7D1]/70 hover:text-[#EE3C24] transition-colors block">{children}</Link>
+  <Link {...rest} className="font-sans text-[12px] tracking-[0.15em] uppercase text-[#ECE7D1]/60 hover:text-[#EE3C24] transition-colors block py-1.5">
+    {children}
+  </Link>
 );
 
 export const ProductItem = ({ title, description, href, src }: { title: string; description: string; href: string; src: string; }) => (
-  <Link href={href} className="flex space-x-4 group">
-    <div className="relative w-[100px] h-[70px] rounded-md overflow-hidden shrink-0 bg-[#111]">
-      <Image src={src} fill alt={title} className="object-cover group-hover:scale-105 transition-transform duration-500" />
+  <Link href={href} className="flex space-x-5 group p-2 -m-2 rounded-xl hover:bg-white/[0.03] transition-all duration-300">
+    <div className="relative w-[72px] h-[96px] rounded-sm overflow-hidden shrink-0 bg-[#111] border border-white/5">
+      <Image src={src} fill alt={title} className="object-cover group-hover:scale-110 transition-transform duration-700 ease-out" />
     </div>
-    <div>
-      <h4 className="font-serif text-lg text-[#ECE7D1] mb-1 group-hover:text-[#EE3C24] transition-colors">{title}</h4>
-      <p className="font-sans text-[11px] text-[#ECE7D1]/50 tracking-wide max-w-[180px]">{description}</p>
+    <div className="flex flex-col justify-center">
+      <h4 className="font-serif text-base text-[#ECE7D1] mb-1.5 group-hover:text-[#EE3C24] transition-colors">{title}</h4>
+      <p className="font-sans text-[11px] text-[#ECE7D1]/50 tracking-wider leading-relaxed max-w-[180px]">{description}</p>
     </div>
   </Link>
 );
@@ -85,14 +92,12 @@ export const Navbar = () => {
     <>
       <div className="fixed top-0 left-0 right-0 z-[150] flex flex-col pointer-events-none">
         
-        
-
         {/* ── HEADER CONTAINER ── */}
         <header className={cn("w-full transition-all duration-500 ease-out pointer-events-auto flex justify-center", scrolled ? "pt-2 md:pt-4" : "pt-4 md:pt-8")}>
-          <div className={cn("flex items-center justify-between transition-all duration-500 w-full",
+          <div className={cn("flex items-center justify-between transition-all duration-500",
               scrolled || !isBannerVisible
-                ? "bg-[#050505]/85 backdrop-blur-xl border-b border-white/5 md:border md:border-white/10 md:rounded-full md:w-auto md:min-w-[800px] px-6 md:px-8 py-3 shadow-2xl"
-                : "px-6 md:px-12 py-3 bg-transparent border-transparent"
+                ? "bg-[#050505]/85 backdrop-blur-xl border border-white/10 rounded-full w-[95%] md:w-auto md:min-w-[800px] px-5 md:px-8 py-3 shadow-2xl"
+                : "w-full px-6 md:px-12 py-3 bg-transparent border-transparent"
             )}
           >
             
@@ -114,8 +119,8 @@ export const Navbar = () => {
             {/* DESKTOP MENU: Center */}
             <div className="hidden md:flex absolute left-1/2 transform -translate-x-1/2">
               <Menu setActive={setActive}>
-                <Link href="/" onMouseEnter={() => setActive("Home")} className="mt-0.5">
-                  <span className="font-sans text-[11px] font-bold uppercase tracking-[0.2em] text-[#ECE7D1] hover:text-[#EE3C24] px-4 cursor-pointer">Home</span>
+                <Link href="/" onMouseEnter={() => setActive("Home")} className="relative">
+                  <p className="cursor-pointer font-sans text-[11px] font-bold uppercase tracking-[0.2em] text-[#ECE7D1] hover:text-[#EE3C24] transition-colors">Home</p>
                 </Link>
                 <MenuItem setActive={setActive} active={active} item="Shop">
                   <div className="grid grid-cols-2 gap-8 p-2 w-[550px]">
@@ -126,7 +131,7 @@ export const Navbar = () => {
                   </div>
                 </MenuItem>
                 <MenuItem setActive={setActive} active={active} item="Studio">
-                  <div className="flex flex-col space-y-4 p-2 w-[200px]">
+                  <div className="flex flex-col space-y-2 p-2 w-[200px]">
                     <HoveredLink href="/about">Our Story</HoveredLink>
                     <HoveredLink href="/behind-the-scenes">Behind the Scenes</HoveredLink>
                   </div>
