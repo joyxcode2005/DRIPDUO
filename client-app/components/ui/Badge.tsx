@@ -13,7 +13,7 @@ export function Badge({ children, active, variant = "outline", className = "", .
     outline: active 
       ? "border border-white text-white" 
       : "border border-zinc-800 text-zinc-400 hover:border-zinc-500 hover:text-zinc-200",
-    soldOut: "border border-red-700 text-red-700 font-semibold bg-red-100/20" // New variant for Sold Out
+    soldOut: "text-white font-semibold bg-red-500" // New variant for Sold Out
   };
 
   return (
