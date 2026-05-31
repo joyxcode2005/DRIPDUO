@@ -1,12 +1,12 @@
 "use client";
 
-import { Product } from "@/components/ProductCard";
 import { useState, useMemo, useEffect } from "react";
 import { getAllCategories, getAllProducts, getAllProductTypes } from "@/services/products";
 
 // Components
 
 import ProductCard from "@/components/product/ProductCard";
+import { Product } from "@/components/product/ProductCard";
 import FilterSidebar from "@/components/filters/FilterSidebar";
 import FilterToolbar from "@/components/filters/FilterToolbar";
 import Link from "next/link";
@@ -71,8 +71,6 @@ export default function ProductsPage() {
             }
         };
 
-
-
         fetchProducts();
         fetchCategories();
         fetchProductTypes();
@@ -122,7 +120,6 @@ export default function ProductsPage() {
         return result;
     }, [products, activeCategory, activeType, categoryTree]);
 
-
     return (
         <div className="min-h-screen bg-[#0a0a0a] text-white font-sans pt-16 selection:bg-zinc-800 relative">
 
@@ -135,7 +132,7 @@ export default function ProductsPage() {
             />
 
             {/* 2. Main Product Grid */}
-            <main className="p-6 md:p-8 max-w-400 mx-auto">
+            <main className="p-4 md:p-8 max-w-350 mx-auto">
                 {filteredAndSortedProducts.length === 0 ? (
                     <div className="text-center py-32 flex flex-col items-center">
                         <p className="text-zinc-500 text-xs tracking-widest uppercase mb-4">No items found</p>
@@ -147,7 +144,8 @@ export default function ProductsPage() {
                         </button>
                     </div>
                 ) : (
-                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4">
+                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-6">
+                        {/* Changed grid layout to 2 columns on mobile and adjusted gap sizing */}
                         {filteredAndSortedProducts.map((product) => (
                             <Link key={product.id} href={`/products/${product.id}`}>
                                 <ProductCard key={product.id} product={product} />

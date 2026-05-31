@@ -76,7 +76,7 @@ export const Navbar = () => {
                 <MenuItem setActive={setActive} active={active} item="Studio">
                   <div className="flex flex-col space-y-2 p-2 w-[200px]">
                     <HoveredLink href="/about">Our Story</HoveredLink>
-                    <HoveredLink href="/behind-the-scenes">Behind the Scenes</HoveredLink>
+                    <HoveredLink href="/bts">Behind the Scenes</HoveredLink>
                   </div>
                 </MenuItem>
               </Menu>

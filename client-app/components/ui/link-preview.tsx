@@ -31,7 +31,11 @@ export const LinkPreview = ({
   const [isMounted, setIsMounted] = useState(false);
 
   useEffect(() => {
-    setIsMounted(true);
+    const rafId = window.requestAnimationFrame(() => {
+      setIsMounted(true);
+    });
+
+    return () => window.cancelAnimationFrame(rafId);
   }, []);
 
   const springConfig = { stiffness: 100, damping: 15 };
@@ -72,7 +76,7 @@ export const LinkPreview = ({
             animate={{ opacity: 1, y: 0, scale: 1, transition: { type: "spring", stiffness: 260, damping: 20 } }}
             exit={{ opacity: 0, y: 20, scale: 0.8 }}
             style={{ x: translateX }}
-            className="hidden md:block absolute bottom-full left-1/2 -translate-x-1/2 mb-4 z-[100] pointer-events-none"
+            className="hidden md:block absolute bottom-full left-1/2 -translate-x-1/2 mb-4 z-100 pointer-events-none"
           >
             <div className="p-1.5 bg-[#050505]/85 backdrop-blur-2xl border border-white/10 shadow-[0_30px_60px_-15px_rgba(0,0,0,0.8)] rounded-2xl overflow-hidden">
               <div 
