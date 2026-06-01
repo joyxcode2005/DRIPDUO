@@ -1,14 +1,16 @@
 "use client";
 
-import React from 'react';
+import React, { useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { Bookmark, Plus } from 'lucide-react';
+import { Bookmark, Plus, Check } from 'lucide-react';
 import Reveal from './Reveal';
+import { useCart } from "@/lib/CartContext";
 
 interface LookbookProps {
     id: string;
     name: string;
+    price?: number; 
     product_images: {
         url: string;
         is_primary: boolean;
@@ -16,10 +18,49 @@ interface LookbookProps {
 }
 
 export default function Lookbook({ product }: { product: LookbookProps }) {
+    const { addToCart } = useCart();
+    
+    // Local states for interactivity
+    const [isWishlisted, setIsWishlisted] = useState(false);
+    const [isAdded, setIsAdded] = useState(false);
+
     if (!product.product_images?.length) return null;
     
     // Fallback to the first image if no primary is explicitly set
     const primaryImg = product.product_images.find(img => img.is_primary) || product.product_images[0];
+
+    // Wishlist Handler
+    const handleWishlist = (e: React.MouseEvent) => {
+        e.preventDefault(); // Prevents the link navigation
+        e.stopPropagation(); // Stops event from bubbling to parent elements
+        setIsWishlisted(!isWishlisted);
+        
+        // Note: You can trigger your global Wishlist Context/API call here later
+    };
+
+    // Quick Add Handler
+    const handleQuickAdd = async (e: React.MouseEvent) => {
+        e.preventDefault();
+        e.stopPropagation();
+        
+        try {
+            await addToCart({
+                productId: product.id,
+                variantId: `${product.id}-default`,
+                name: product.name,
+                price: product.price || 0, // Fallback if price isn't passed
+                image: primaryImg.url,
+                size: "M", // Default quick-add size
+                gsm: "240",
+                quantity: 1,
+                stock: 10,
+            });
+            setIsAdded(true);
+            setTimeout(() => setIsAdded(false), 2000);
+        } catch (error) {
+            console.error("Error adding to cart:", error);
+        }
+    };
 
     return (
         <Reveal className="shrink-0 h-full block" threshold={0.12}>
@@ -46,9 +87,12 @@ export default function Lookbook({ product }: { product: LookbookProps }) {
                         <span className="font-sans text-[9px] uppercase tracking-[0.2em] text-[#ECE7D1] bg-black/60 px-3 py-1 rounded-sm backdrop-blur-md border border-white/10">
                             FW26 Look
                         </span>
-                        <div className="text-zinc-400 hover:text-white transition-colors ml-auto">
-                            <Bookmark size={18} strokeWidth={1.5} />
-                        </div>
+                        <button 
+                            onClick={handleWishlist}
+                            className={`transition-colors ml-auto z-30 ${isWishlisted ? 'text-[#EE3C24]' : 'text-zinc-400 hover:text-white'}`}
+                        >
+                            <Bookmark size={18} strokeWidth={1.5} fill={isWishlisted ? "#EE3C24" : "none"} />
+                        </button>
                     </div>
 
                     {/* ── Gradient Overlay ── */}
@@ -68,9 +112,16 @@ export default function Lookbook({ product }: { product: LookbookProps }) {
                                     <span className="font-sans text-[9px] uppercase tracking-[0.25em] text-[#EE3C24]">Explore Look</span>
                                     <div className="w-6 h-px bg-[#ECE7D1]/20" />
                                 </div>
-                                <div className="p-2 border border-zinc-600 rounded-full text-zinc-400 bg-[#0a0a0a] group-hover:text-white group-hover:border-white transition-all">
-                                    <Plus size={16} strokeWidth={2} />
-                                </div>
+                                <button 
+                                    onClick={handleQuickAdd}
+                                    className={`p-2 border rounded-full transition-all z-30 ${
+                                        isAdded 
+                                            ? "text-[#050505] bg-[#ECE7D1] border-[#ECE7D1]" 
+                                            : "border-zinc-600 text-zinc-400 bg-[#0a0a0a] hover:text-white hover:border-white"
+                                    }`}
+                                >
+                                    {isAdded ? <Check size={16} strokeWidth={2} /> : <Plus size={16} strokeWidth={2} />}
+                                </button>
                             </div>
                         </div>
                     </div>

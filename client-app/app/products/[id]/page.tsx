@@ -9,18 +9,42 @@ import { getProductById, getAllProducts } from "@/services/products";
 import { motion, AnimatePresence } from "framer-motion";
 import { Badge } from "@/components/ui/Badge";
 
+// --- TYPE DEFINITIONS ---
+interface Category {
+  name: string;
+}
+
+interface ProductImage {
+  url: string;
+}
+
+interface Variant {
+  id: string;
+  size: string;
+  gsm: string | number;
+  stock: number;
+}
+
+interface Product {
+  id: string;
+  name: string;
+  description?: string;
+  price: number;
+  final_price?: number;
+  discount?: number;
+  categories?: Category[];
+  variants?: Variant[];
+  images?: ProductImage[];
+  product_images?: ProductImage[];
+  total_stock?: number;
+}
+// ------------------------
+
 const SIZES_ORDER = ["XS", "S", "M", "L", "XL", "XXL", "XXXL"];
 const GSM_DETAILS: Record<string, { label: string; desc: string }> = {
   "220": { label: "220 GSM", desc: "Lightweight & Breathable" },
   "240": { label: "240 GSM", desc: "Heavyweight Structure" },
 };
-
-interface Variant {
-  id: string;
-  size: string;
-  gsm: string;
-  stock: number;
-}
 
 const MOCK_REVIEWS = [
   { id: 1, name: "Arjun M.", verified: true, rating: 5, text: "The fabric feels exactly as described. Worth the price, beautifully weighted.", date: "2 weeks ago" },
@@ -47,7 +71,7 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
   const { id } = use(params);
   const { addToCart } = useCart();
 
-  const [product, setProduct] = useState<any | null>(null);
+  const [product, setProduct] = useState<Product | null>(null);
   const [selectedSize, setSelectedSize] = useState<string | null>(null);
   const [selectedGSM, setSelectedGSM] = useState<string>("");
   const [sizeError, setSizeError] = useState(false);
@@ -55,25 +79,36 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
   const [activeImageIndex, setActiveImageIndex] = useState(0);
   const [activeView, setActiveView] = useState<"FRONT" | "BACK" | "FABRIC" | "DETAIL">("FRONT");
   const [openFaq, setOpenFaq] = useState<number | null>(null);
-  const [relatedProducts, setRelatedProducts] = useState<any[]>([]);
+  const [relatedProducts, setRelatedProducts] = useState<Product[]>([]);
+  
+  // States for Related Products interactivity
+  const [wishlist, setWishlist] = useState<string[]>([]);
+  const [quickAddStatus, setQuickAddStatus] = useState<Record<string, boolean>>({});
 
   useEffect(() => {
     const fetchProduct = async () => {
-      const fetched = await getProductById(id);
+      const fetched: Product = await getProductById(id);
       setProduct(fetched);
-      if (fetched?.variants?.length > 0) setSelectedGSM(fetched.variants[0].gsm);
+      if (fetched?.variants && fetched.variants.length > 0) {
+        setSelectedGSM(String(fetched.variants[0].gsm));
+      }
 
       // Fetch related products
       try {
         const related = await getAllProducts();
-        // Safely extract the array whether it returns { data: [...] } or just [...]
-        const relatedData = related?.data || related || [];
+        
+        // Safely extract the array by narrowing the type
+        const relatedResponse = related as { data?: Product[] } | Product[];
+        const relatedData = Array.isArray(relatedResponse) 
+          ? relatedResponse 
+          : relatedResponse?.data || [];
+
         if (Array.isArray(relatedData)) {
-            // Filter out the current product from related list and grab up to 4
-            setRelatedProducts(relatedData.filter((p: any) => p.id !== id).slice(0, 4));
+          // Filter out the current product from related list and grab up to 4
+          setRelatedProducts(relatedData.filter((p: Product) => p.id !== id).slice(0, 4));
         }
       } catch (err) {
-          console.error("Error fetching related products:", err);
+        console.error("Error fetching related products:", err);
       }
     };
     fetchProduct();
@@ -82,13 +117,18 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
   const handleAddToCart = async () => {
     if (!selectedSize) { setSizeError(true); return; }
     setSizeError(false);
+    
+    if (!product || !product.variants) return;
+
     const selectedVariant = product.variants.find(
       (v: Variant) => v.size === selectedSize && String(v.gsm) === selectedGSM
     );
+    
     if (!selectedVariant || selectedVariant.stock <= 0) {
       alert("Sorry, this specific size and fabric weight is out of stock.");
       return;
     }
+    
     try {
       await addToCart({
         productId: product.id,
@@ -105,6 +145,43 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
       setTimeout(() => setAdded(false), 2000);
     } catch (error) {
       console.error("Error adding item to cart:", error);
+    }
+  };
+
+  // Handlers for Related Products interactivity
+  const toggleWishlist = (e: React.MouseEvent, productId: string) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setWishlist(prev => 
+        prev.includes(productId) ? prev.filter(item => item !== productId) : [...prev, productId]
+    );
+  };
+
+  const handleQuickAdd = async (e: React.MouseEvent, relatedProduct: Product) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    const defaultVariant = relatedProduct.variants?.[0];
+    
+    try {
+        await addToCart({
+            productId: relatedProduct.id,
+            variantId: defaultVariant?.id || `${relatedProduct.id}-default`,
+            name: relatedProduct.name,
+            price: relatedProduct.final_price || relatedProduct.price,
+            image: relatedProduct.product_images?.[0]?.url || "/placeholder-shirt.png",
+            size: defaultVariant?.size || "M",
+            gsm: String(defaultVariant?.gsm || "240"),
+            quantity: 1,
+            stock: defaultVariant?.stock || 10,
+        });
+        
+        setQuickAddStatus(prev => ({ ...prev, [relatedProduct.id]: true }));
+        setTimeout(() => {
+            setQuickAddStatus(prev => ({ ...prev, [relatedProduct.id]: false }));
+        }, 2000);
+    } catch (error) {
+        console.error("Error adding related product to cart:", error);
     }
   };
 
@@ -132,11 +209,9 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
 
   return (
     <div className="min-h-screen bg-[#050505] text-[#ECE7D1] font-sans">
-
       {/* ── SECTION 01: HERO PRODUCT VIEWER ── */}
       <section className="pt-20 border-b border-[#1A1A17]">
         <div className="max-w-350 mx-auto px-6 md:px-10">
-
           {/* Top breadcrumb bar */}
           <div className="flex items-center justify-between py-4 border-b border-[#1A1A17] mb-0">
             <Link href="/products" className="flex items-center gap-2 font-sans text-[10px] uppercase tracking-[0.2em] text-[#6B6A5E] hover:text-[#EE3C24] transition-colors">
@@ -152,10 +227,8 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-[auto_1fr_420px] gap-0">
-
             {/* Left: Thumbnail Rail */}
             <div className="hidden lg:flex flex-col gap-3 py-10 pr-6 w-22.5">
-              {/* View Labels */}
               {(["FRONT", "BACK", "FABRIC", "DETAIL"] as const).map((view) => (
                 <button
                   key={view}
@@ -170,7 +243,7 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
                 </button>
               ))}
               {/* Image thumbnails */}
-              {images.slice(0, 4).map((img: any, i: number) => (
+              {images.slice(0, 4).map((img: ProductImage, i: number) => (
                 <button
                   key={i}
                   onClick={() => setActiveImageIndex(i)}
@@ -246,7 +319,7 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
 
               {/* Mobile dot nav */}
               <div className="flex justify-center gap-2 py-4 lg:hidden border-t border-[#1A1A17]">
-                {images.map((_: any, i: number) => (
+                {images.map((_: ProductImage, i: number) => (
                   <button key={i} onClick={() => setActiveImageIndex(i)} className={`w-1 h-1 rounded-full transition-all ${i === activeImageIndex ? "bg-[#ECE7D1] w-4" : "bg-[#403F38]"}`} />
                 ))}
               </div>
@@ -269,7 +342,6 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
 
             {/* Right: Product Info Panel */}
             <div className="lg:pl-10 py-10 flex flex-col">
-
               {/* Rating row */}
               <div className="flex items-center gap-3 mb-6">
                 <div className="flex gap-0.5">
@@ -293,12 +365,12 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
 
               {/* Price */}
               <div className="flex items-center gap-4 mb-6 pb-6 border-b border-[#1A1A17]">
-                {product.discount > 0 ? (
+                {(product.discount ?? 0) > 0 ? (
                   <>
                     <span className="font-sans text-[11px] tracking-widest text-[#555450] line-through">₹{product.price}</span>
                     <span className="font-serif text-2xl text-[#ECE7D1]">₹{product.final_price}</span>
                     <span className="font-sans text-[9px] uppercase tracking-[0.15em] text-[#EE3C24] border border-[#EE3C24]/40 px-2 py-0.5">
-                      SAVE ₹{(product.price - product.final_price).toFixed(0)}
+                      SAVE ₹{(product.price - (product.final_price ?? product.price)).toFixed(0)}
                     </span>
                   </>
                 ) : (
@@ -512,7 +584,6 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
           </div>
 
           <div className="grid grid-cols-2 md:grid-cols-4 gap-0 border-t border-l border-[#1A1A17]">
-            {/* Large front */}
             <div className="col-span-1 row-span-2 border-r border-b border-[#1A1A17] relative aspect-3/4 bg-[#0D0D0B]">
               {images[0]?.url ? (
                 <Image src={images[0].url} alt="Front view" fill className="object-cover" />
@@ -592,23 +663,25 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
             {relatedProducts.length > 0 ? (
                 relatedProducts.map((relatedProduct) => {
-                    const isSoldOut = relatedProduct.total_stock <= 0;
+                    const isSoldOut = (relatedProduct.total_stock ?? 0) <= 0;
                     const imageUrl = relatedProduct.product_images?.[0]?.url || "/placeholder-shirt.png";
+                    const isWishlisted = wishlist.includes(relatedProduct.id);
+                    const isAdded = quickAddStatus[relatedProduct.id];
 
                     return (
                         <Link href={`/products/${relatedProduct.id}`} key={relatedProduct.id}>
                             <div className="group flex flex-col border border-zinc-800 rounded-xl overflow-hidden bg-[#0a0a0a] hover:border-zinc-600 transition-colors">
-                                {/* Image Area */}
                                 <div className="relative aspect-square flex items-center justify-center bg-[#0f0f0f] border-b border-zinc-800">
-                                    {/* Top Badges & Icons */}
                                     <div className="absolute top-4 left-4 w-full flex justify-between pr-8 z-10 text-red-700">
                                         {isSoldOut && <Badge variant="soldOut">Sold Out</Badge>}
-                                        <div className="text-zinc-500 hover:text-white transition-colors ml-auto">
-                                            <Bookmark size={20} strokeWidth={1.5} />
-                                        </div>
+                                        <button 
+                                            onClick={(e) => toggleWishlist(e, relatedProduct.id)}
+                                            className={`transition-colors ml-auto ${isWishlisted ? 'text-[#EE3C24]' : 'text-zinc-500 hover:text-white'}`}
+                                        >
+                                            <Bookmark size={20} strokeWidth={1.5} fill={isWishlisted ? "#EE3C24" : "none"} />
+                                        </button>
                                     </div>
 
-                                    {/* Product Image */}
                                     <div className="relative w-full h-full flex items-center justify-center opacity-80 group-hover:opacity-100 transition-opacity">
                                         <Image
                                             src={imageUrl}
@@ -621,20 +694,19 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
                                         </span>
                                     </div>
 
-                                    {/* Add Button */}
                                     <button
                                         disabled={isSoldOut}
-                                        className="absolute bottom-4 right-4 p-1.5 border border-zinc-600 rounded-full text-zinc-400 hover:text-white hover:border-white transition-all bg-[#0a0a0a] disabled:opacity-50 disabled:cursor-not-allowed"
-                                        onClick={(e) => {
-                                            e.preventDefault(); // Prevent navigating to the product page when just clicking add
-                                            // Handle add to cart logic for related product here if needed
-                                        }}
+                                        className={`absolute bottom-4 right-4 p-1.5 border rounded-full transition-all ${
+                                            isAdded 
+                                                ? "bg-[#ECE7D1] border-[#ECE7D1] text-[#050505]" 
+                                                : "border-zinc-600 text-zinc-400 hover:text-white hover:border-white bg-[#0a0a0a] disabled:opacity-50 disabled:cursor-not-allowed"
+                                        }`}
+                                        onClick={(e) => handleQuickAdd(e, relatedProduct)}
                                     >
-                                        <Plus size={18} strokeWidth={2} />
+                                        {isAdded ? <Check size={18} strokeWidth={2} /> : <Plus size={18} strokeWidth={2} />}
                                     </button>
                                 </div>
 
-                                {/* Details Area */}
                                 <div className="p-4 flex flex-col gap-1">
                                     <h3 className="text-sm text-zinc-200 truncate">{relatedProduct.name}</h3>
                                     <div className="flex items-center justify-between">
@@ -642,7 +714,7 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
                                             <span className="text-sm text-zinc-400">
                                                 Rs. {relatedProduct.final_price?.toLocaleString() || relatedProduct.price?.toLocaleString()}
                                             </span>
-                                            {relatedProduct.discount > 0 && (
+                                            {(relatedProduct.discount ?? 0) > 0 && (
                                                 <span className="text-xs text-zinc-600 line-through">
                                                     {relatedProduct.price?.toLocaleString()}
                                                 </span>
@@ -679,7 +751,6 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
           <h3 className="font-serif text-3xl md:text-4xl text-[#ECE7D1] mb-10">What buyers say</h3>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-0 border-t border-l border-[#1A1A17]">
-            {/* Rating summary */}
             <div className="border-r border-b border-[#1A1A17] p-8 flex flex-col justify-center gap-4">
               <div className="flex items-end gap-2">
                 <span className="font-serif text-[5rem] leading-none text-[#ECE7D1]">4.6</span>
@@ -696,7 +767,6 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
               </button>
             </div>
 
-            {/* Review cards */}
             {MOCK_REVIEWS.map((review) => (
               <div key={review.id} className="border-r border-b border-[#1A1A17] p-8 flex flex-col justify-between gap-6">
                 <div>

@@ -2,9 +2,9 @@
 
 import { useState, useMemo, useEffect } from "react";
 import { getAllCategories, getAllProducts, getAllProductTypes } from "@/services/products";
+import { useCart } from "@/lib/CartContext";
 
 // Components
-
 import ProductCard from "@/components/product/ProductCard";
 import { Product } from "@/components/product/ProductCard";
 import FilterSidebar from "@/components/filters/FilterSidebar";
@@ -32,6 +32,8 @@ type Product_Type = {
 };
 
 export default function ProductsPage() {
+    const { addToCart } = useCart();
+    
     // --- State ---
     const [activeCategory, setActiveCategory] = useState("All");
     const [activeType, setActiveType] = useState("All");
@@ -41,12 +43,20 @@ export default function ProductsPage() {
     const [categories, setCategories] = useState<Category[]>([]);
     const [productTypes, setProductTypes] = useState<Product_Type[]>([]);
 
+    // Interactivity States
+    const [wishlist, setWishlist] = useState<string[]>([]);
+    const [quickAddStatus, setQuickAddStatus] = useState<Record<string, boolean>>({});
+
     // --- Data Fetching ---
     useEffect(() => {
         const fetchProducts = async () => {
             try {
                 const fetchedProducts = await getAllProducts();
-                setProducts(fetchedProducts);
+                // Safely extract data in case API wraps it in { data: [...] }
+                const productsData = Array.isArray(fetchedProducts) 
+                    ? fetchedProducts 
+                    : (fetchedProducts as any)?.data || [];
+                setProducts(productsData);
             } catch (error) {
                 console.error("Error fetching products:", error);
             }
@@ -55,7 +65,6 @@ export default function ProductsPage() {
         const fetchCategories = async () => {
             try {
                 const fetchedCategories = await getAllCategories();
-                console.log("Fetched Categories:", fetchedCategories);
                 setCategories(fetchedCategories);
             } catch (error) {
                 console.error("Error fetching categories:", error);
@@ -75,6 +84,44 @@ export default function ProductsPage() {
         fetchCategories();
         fetchProductTypes();
     }, []);
+
+    // --- Action Handlers ---
+    const toggleWishlist = (e: React.MouseEvent, productId: string) => {
+        e.preventDefault();
+        e.stopPropagation();
+        setWishlist(prev => 
+            prev.includes(productId) ? prev.filter(id => id !== productId) : [...prev, productId]
+        );
+    };
+
+    const handleQuickAdd = async (e: React.MouseEvent, product: any) => {
+        e.preventDefault();
+        e.stopPropagation();
+        
+        // Default to the first available variant for quick add
+        const defaultVariant = product.variants?.[0];
+        
+        try {
+            await addToCart({
+                productId: product.id,
+                variantId: defaultVariant?.id || `${product.id}-default`,
+                name: product.name,
+                price: product.final_price || product.price,
+                image: product.product_images?.[0]?.url || product.images?.[0]?.url || "/placeholder-shirt.png",
+                size: defaultVariant?.size || "M",
+                gsm: String(defaultVariant?.gsm || "240"),
+                quantity: 1,
+                stock: defaultVariant?.stock || 10,
+            });
+            
+            setQuickAddStatus(prev => ({ ...prev, [product.id]: true }));
+            setTimeout(() => {
+                setQuickAddStatus(prev => ({ ...prev, [product.id]: false }));
+            }, 2000);
+        } catch (error) {
+            console.error("Error adding product to cart:", error);
+        }
+    };
 
     // --- Logic & Filtering ---
     const categoryTree = useMemo<CategoryWithSubs[]>(() => {
@@ -101,8 +148,8 @@ export default function ProductsPage() {
                 ];
             }
 
-            result = result.filter((p) =>
-                p.product_categories?.some((c) =>
+            result = result.filter((p: any) =>
+                p.product_categories?.some((c: any) =>
                     targetSlugs.includes(c.categories?.slug)
                 )
             );
@@ -111,11 +158,9 @@ export default function ProductsPage() {
         // 2. Filter by Product Type (from the drawer)
         if (activeType !== "All") {
             result = result.filter(
-                (p) => p.product_type?.name === activeType || p.product_type_id === activeType
+                (p: any) => p.product_type?.name === activeType || p.product_type_id === activeType
             );
         }
-
-        console.log("Filtered Products:", result);
 
         return result;
     }, [products, activeCategory, activeType, categoryTree]);
@@ -148,7 +193,14 @@ export default function ProductsPage() {
                         {/* Changed grid layout to 2 columns on mobile and adjusted gap sizing */}
                         {filteredAndSortedProducts.map((product) => (
                             <Link key={product.id} href={`/products/${product.id}`}>
-                                <ProductCard key={product.id} product={product} />
+                                <ProductCard 
+                                    product={product} 
+                                    // Pass down the interactivity props to the ProductCard
+                                    onQuickAdd={(e: React.MouseEvent) => handleQuickAdd(e, product)}
+                                    onToggleWishlist={(e: React.MouseEvent) => toggleWishlist(e, product.id)}
+                                    isWishlisted={wishlist.includes(product.id)}
+                                    isAdded={quickAddStatus[product.id]}
+                                />
                             </Link>
                         ))}
                     </div>
