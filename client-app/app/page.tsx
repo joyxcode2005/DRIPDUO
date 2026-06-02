@@ -44,7 +44,7 @@ function Stat({ value, suffix, label, trigger }: { value: number; suffix: string
   const count = useCounter(value, 1800, trigger);
   return (
     <div className="flex flex-col gap-1 items-center text-center md:items-start md:text-left">
-      <span className="font-serif text-[clamp(2rem,6vw,4rem)] leading-none text-[#ECE7D1] tabular-nums">
+      <span className="font-seulaga text-[clamp(2rem,6vw,4rem)] leading-none text-[#ECE7D1] tabular-nums">
         {count}<span className="text-[#EE3C24]">{suffix}</span>
       </span>
       <span className="font-sans text-[9px] sm:text-[10px] tracking-[0.2em] uppercase text-[#6B6A5E] mt-3">{label}</span>
@@ -78,7 +78,7 @@ function AppleCardCarousel({ categories }: { categories: typeof HOME_CATEGORIES 
                 <span className="font-sans text-[10px] tracking-[0.2em] uppercase text-[#ECE7D1]">0{i + 1}</span>
               </div>
               <div className="absolute bottom-0 left-0 right-0 p-6 md:p-8 z-10">
-                <h3 className="font-serif text-3xl md:text-4xl text-[#ECE7D1] leading-tight drop-shadow-md">{cat.name}</h3>
+                <h3 className="font-seulaga text-3xl md:text-4xl text-[#ECE7D1] leading-tight drop-shadow-md">{cat.name}</h3>
                 <div className="mt-4 md:mt-5 flex items-center gap-3">
                   <span className="font-sans text-[9px] uppercase tracking-[0.25em] text-[#EE3C24]">Explore</span>
                   <div className="h-px flex-1 bg-[#ECE7D1]/20" />
@@ -167,14 +167,14 @@ export default function HomePage() {
             <div className="flex flex-col items-center justify-center gap-1 sm:gap-0">
               <div className="overflow-hidden">
                 <Reveal>
-                  <h1 className="font-serif italic leading-[1.1] md:leading-[0.9] tracking-tight text-[#ECE7D1] drop-shadow-2xl whitespace-nowrap" style={{ fontSize: "clamp(4rem, 15vw, 12rem)" }}>
+                  <h1 className="font-seulaga italic leading-[1.1] md:leading-[0.9] tracking-tight text-[#ECE7D1] drop-shadow-2xl whitespace-nowrap" style={{ fontSize: "clamp(4rem, 15vw, 12rem)" }}>
                     New
                   </h1>
                 </Reveal>
               </div>
               <div className="overflow-hidden">
                 <Reveal className="delay-100">
-                  <h1 className="font-serif italic leading-[1.1] md:leading-[0.9] tracking-tight text-[#ECE7D1] drop-shadow-2xl flex justify-center" style={{ fontSize: "clamp(4rem, 15vw, 12rem)" }}>
+                  <h1 className="font-seulaga italic leading-[1.1] md:leading-[0.9] tracking-tight text-[#ECE7D1] drop-shadow-2xl flex justify-center" style={{ fontSize: "clamp(4rem, 15vw, 12rem)" }}>
                     <LayoutTextFlip words={["Collection.", "Standard.", "Drop.", "Era."]} />
                   </h1>
                 </Reveal>
@@ -195,7 +195,7 @@ export default function HomePage() {
       {/* ── LOOKBOOK SECTION ── */}
       <section className="py-20 md:py-24 bg-[#0D0D0B] border-t border-white/5 overflow-hidden">
         <Reveal className="mb-12 md:mb-16 text-center px-4">
-          <h2 className="font-serif text-[2rem] md:text-[3rem] text-[#ECE7D1] tracking-tight mb-3 md:mb-4">The Lookbook</h2>
+          <h2 className="font-seulaga text-[2rem] md:text-[3rem] text-[#ECE7D1] tracking-tight mb-3 md:mb-4">The Lookbook</h2>
           <p className="font-sans text-[10px] md:text-[11px] uppercase tracking-[0.2em] text-[#969382]">Curated fits for FW26</p>
         </Reveal>
 
@@ -240,7 +240,7 @@ export default function HomePage() {
                 </div>
               </Reveal>
               <Reveal delay={0.1}>
-                <h2 className="font-serif text-[2.25rem] sm:text-[2.5rem] md:text-[3.5rem] leading-[1.2] md:leading-none tracking-tight text-[#ECE7D1] mb-5 md:mb-8 flex flex-wrap gap-x-2">
+                <h2 className="font-seulaga text-[2.25rem] sm:text-[2.5rem] md:text-[3.5rem] leading-[1.2] md:leading-none tracking-tight text-[#ECE7D1] mb-5 md:mb-8 flex flex-wrap gap-x-2">
                   <LayoutTextFlip text="The Art of " words={["Subtraction.", "Minimalism.", "Essentialism.", "Restraint."]} />
                 </h2>
               </Reveal>
@@ -271,7 +271,7 @@ export default function HomePage() {
 
         <div className="absolute inset-0 flex flex-col items-center justify-center p-6 text-center z-10 pointer-events-none">
           <Reveal className="delay-100">
-            <h2 className="font-serif italic leading-[0.85] tracking-tight text-[#ECE7D1] mb-6" style={{ fontSize: "clamp(3rem,9vw,8.5rem)" }}>
+            <h2 className="font-seulaga italic leading-[0.85] tracking-tight text-[#ECE7D1] mb-6" style={{ fontSize: "clamp(3rem,9vw,8.5rem)" }}>
               Redefine<br />the Silhouette
             </h2>
           </Reveal>
@@ -292,7 +292,7 @@ export default function HomePage() {
       <section className="w-full py-20 md:py-32 bg-[#050505]">
         <div className="max-w-5xl mx-auto px-6 md:px-12 flex flex-col items-center justify-center text-center">
           <Reveal>
-            <div className="font-serif text-[clamp(1.5rem,5vw,3rem)] leading-[1.5] text-[#969382]">
+            <div className="font-seulaga text-[clamp(1.5rem,5vw,3rem)] leading-[1.5] text-[#969382]">
               Discover our roots. Read our{" "}
               <LinkPreview
                 url="/about"
@@ -321,7 +321,7 @@ export default function HomePage() {
       <section className="w-full py-20 md:py-32 bg-[#0D0D0B] border-y border-[#1A1A17]">
         <div className="px-6 md:px-12 mb-10 md:mb-12 flex items-end justify-between">
           <Reveal>
-            <h2 className="font-serif leading-[1.1] text-[#ECE7D1]" style={{ fontSize: "clamp(2.5rem,7vw,4.5rem)" }}>
+            <h2 className="font-seulaga leading-[1.1] text-[#ECE7D1]" style={{ fontSize: "clamp(2.5rem,7vw,4.5rem)" }}>
               Shop by<br /><em><SketchHighlight type="circle" delay={300} color="#EE3C24">Category</SketchHighlight></em>
             </h2>
           </Reveal>
@@ -350,7 +350,7 @@ export default function HomePage() {
         <div className="max-w-3xl mx-auto px-6 md:px-12 py-20 md:py-24 text-center">
           <Reveal>
             <div className="flex justify-center mb-3 md:mb-6">
-              <h2 className="font-serif leading-[1.1] md:leading-[0.92] tracking-tight text-[#ECE7D1]" style={{ fontSize: "clamp(2.25rem,8vw,4rem)" }}>
+              <h2 className="font-seulaga leading-[1.1] md:leading-[0.92] tracking-tight text-[#ECE7D1]" style={{ fontSize: "clamp(2.25rem,8vw,4rem)" }}>
                 <LayoutTextFlip text="Join the " words={["Edit.", "Archive.", "Culture.", "Movement."]} />
               </h2>
             </div>

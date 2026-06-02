@@ -1,54 +1,47 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { Filter, ChevronDown, LayoutGrid, List, Search, X } from "lucide-react";
-import { getAllCategories } from "@/services/products";
+import type { Category } from "@/types/product";
 
 interface FilterToolbarProps {
+  categories: Category[];
   activeCategory: string;
   setActiveCategory: (cat: string) => void;
+  searchQuery: string;
+  setSearchQuery: (query: string) => void;
   productCount: number;
   onOpenFilter: () => void;
 }
 
 export default function FilterToolbar({
+  categories,
   activeCategory,
   setActiveCategory,
+  searchQuery,
+  setSearchQuery,
   productCount,
   onOpenFilter
 }: FilterToolbarProps) {
-  const [categories, setCategories] = useState<string[]>([]);
   const [isSearchActive, setIsSearchActive] = useState(false);
-  const [searchQuery, setSearchQuery] = useState("All");
 
-
-  useEffect(() => {
-    const fetchCategories = async () => {
-      try {
-        const fetchedCategories = await getAllCategories();
-        const categoryNames = ["All", ...fetchedCategories.map((cat) => cat.name)];
-        setCategories(categoryNames);
-      } catch (error) {
-        console.error("Error fetching categories:", error);
-      }
-    };
-    fetchCategories();
-  }, []);
+  // Derive category names for the quick buttons
+  const categoryNames = ["All", ...categories.map((cat) => cat.name)];
 
   return (
-    <div className="bg-[#0a0a0a]/95 backdrop-blur-md border-b border-zinc-800/60 sticky top-16 z-40">
+    <div className="bg-[#0a0a0a]/95 backdrop-blur-md border-b border-zinc-800/60 mt-10 z-40">
       <div className="flex flex-wrap md:flex-nowrap items-center justify-between px-4 md:px-8 min-h-12 gap-x-6 gap-y-2 py-2 md:py-0 max-w-400 mx-auto">
 
         {/* 1. QUICK CATEGORIES (Left) */}
         <div className="flex items-center gap-1 overflow-x-auto w-full md:w-auto md:flex-1 no-scrollbar [-ms-overflow-style:none] [scrollbar-width:none]">
-          {categories.map(cat => (
+          {categoryNames.map(catName => (
             <button
-              key={cat}
-              onClick={() => setActiveCategory(cat)}
-              className={`whitespace-nowrap px-3 h-7 rounded-md text-[11px] font-medium tracking-wide transition-all ${activeCategory === cat
-                ? "bg-zinc-100 text-black shadow-sm"
-                : "bg-transparent text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800/50"
+              key={catName}
+              onClick={() => setActiveCategory(catName)}
+              className={`whitespace-nowrap px-3 h-7 rounded-md text-[11px] font-medium tracking-wide transition-all ${activeCategory === catName
+                  ? "bg-zinc-100 text-black shadow-sm"
+                  : "bg-transparent text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800/50"
                 }`}
             >
-              {cat}
+              {catName}
             </button>
           ))}
         </div>
@@ -77,7 +70,7 @@ export default function FilterToolbar({
                   onClick={(e) => {
                     e.stopPropagation();
                     setIsSearchActive(false);
-                    setSearchQuery("");
+                    setSearchQuery(""); // Clears the search in the parent component
                   }}
                   className="text-zinc-500 hover:text-zinc-300 shrink-0"
                 >
@@ -89,27 +82,6 @@ export default function FilterToolbar({
 
           <div className="h-4 w-px bg-zinc-800 hidden lg:block" />
 
-          {/* B. Sort Dropdown (Minimal) */}
-          <button className="flex items-center gap-1.5 h-8 px-2 rounded-md text-[11px] tracking-wide text-zinc-300 hover:text-white hover:bg-zinc-800/50 transition-all group">
-            <span className="text-zinc-500 hidden sm:inline">Sort:</span>
-            Newest
-            <ChevronDown size={14} className="text-zinc-500 group-hover:text-zinc-300" />
-          </button>
-
-          <div className="h-4 w-px bg-zinc-800 hidden sm:block" />
-
-          {/* C. View Toggles (Segmented Control Style) */}
-          <div className="hidden sm:flex items-center bg-zinc-900 p-0.5 rounded-md border border-zinc-800">
-            <button className="p-1 rounded-sm bg-zinc-700 text-white shadow-sm transition-all">
-              <LayoutGrid size={14} />
-            </button>
-            <button className="p-1 rounded-sm text-zinc-500 hover:text-zinc-300 transition-all">
-              <List size={14} />
-            </button>
-          </div>
-
-          <div className="h-4 w-px bg-zinc-800" />
-
           {/* D. Advanced Filter Action (Emphasized) */}
           <button
             onClick={onOpenFilter}
@@ -117,12 +89,7 @@ export default function FilterToolbar({
           >
             <Filter size={12} strokeWidth={2.5} />
             <span>Filter</span>
-            {/* Optional: Indicator for active filters */}
-            <span className="flex items-center justify-center h-4 w-4 rounded-full bg-black text-white text-[9px] ml-1">
-              3
-            </span>
           </button>
-
         </div>
       </div>
     </div>
