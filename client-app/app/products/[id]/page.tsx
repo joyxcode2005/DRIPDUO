@@ -1,25 +1,50 @@
 "use client";
 
-import { useState, use, useEffect, useRef } from "react";
+import { useState, use, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { ArrowLeft, Check, ChevronLeft, ChevronRight, Star, Plus, Minus, RotateCcw, ZoomIn, Info } from "lucide-react";
+import { ArrowLeft, Check, ChevronLeft, ChevronRight, Star, Plus, RotateCcw, Info, Bookmark } from "lucide-react";
 import { useCart } from "@/lib/CartContext";
-import { getProductById } from "@/services/products";
+import { getProductById, getAllProducts } from "@/services/products";
 import { motion, AnimatePresence } from "framer-motion";
+import { Badge } from "@/components/ui/Badge";
+
+// --- TYPE DEFINITIONS ---
+interface Category {
+  name: string;
+}
+
+interface ProductImage {
+  url: string;
+}
+
+interface Variant {
+  id: string;
+  size: string;
+  gsm: string | number;
+  stock: number;
+}
+
+interface Product {
+  id: string;
+  name: string;
+  description?: string;
+  price: number;
+  final_price?: number;
+  discount?: number;
+  categories?: Category[];
+  variants?: Variant[];
+  images?: ProductImage[];
+  product_images?: ProductImage[];
+  total_stock?: number;
+}
+// ------------------------
 
 const SIZES_ORDER = ["XS", "S", "M", "L", "XL", "XXL", "XXXL"];
 const GSM_DETAILS: Record<string, { label: string; desc: string }> = {
   "220": { label: "220 GSM", desc: "Lightweight & Breathable" },
   "240": { label: "240 GSM", desc: "Heavyweight Structure" },
 };
-
-interface Variant {
-  id: string;
-  size: string;
-  gsm: string;
-  stock: number;
-}
 
 const MOCK_REVIEWS = [
   { id: 1, name: "Arjun M.", verified: true, rating: 5, text: "The fabric feels exactly as described. Worth the price, beautifully weighted.", date: "2 weeks ago" },
@@ -46,7 +71,7 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
   const { id } = use(params);
   const { addToCart } = useCart();
 
-  const [product, setProduct] = useState<any | null>(null);
+  const [product, setProduct] = useState<Product | null>(null);
   const [selectedSize, setSelectedSize] = useState<string | null>(null);
   const [selectedGSM, setSelectedGSM] = useState<string>("");
   const [sizeError, setSizeError] = useState(false);
@@ -54,36 +79,56 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
   const [activeImageIndex, setActiveImageIndex] = useState(0);
   const [activeView, setActiveView] = useState<"FRONT" | "BACK" | "FABRIC" | "DETAIL">("FRONT");
   const [openFaq, setOpenFaq] = useState<number | null>(null);
-  const [relatedProducts, setRelatedProducts] = useState<any[]>([]);
+  const [relatedProducts, setRelatedProducts] = useState<Product[]>([]);
+  
+  // States for Related Products interactivity
+  const [wishlist, setWishlist] = useState<string[]>([]);
+  const [quickAddStatus, setQuickAddStatus] = useState<Record<string, boolean>>({});
 
   useEffect(() => {
     const fetchProduct = async () => {
-      const fetched = await getProductById(id);
+      const fetched: Product = await getProductById(id);
       setProduct(fetched);
-      if (fetched?.variants?.length > 0) setSelectedGSM(fetched.variants[0].gsm);
+      if (fetched?.variants && fetched.variants.length > 0) {
+        setSelectedGSM(String(fetched.variants[0].gsm));
+      }
+
+      // Fetch related products
+      try {
+        const related = await getAllProducts();
+        
+        // Safely extract the array by narrowing the type
+        const relatedResponse = related as { data?: Product[] } | Product[];
+        const relatedData = Array.isArray(relatedResponse) 
+          ? relatedResponse 
+          : relatedResponse?.data || [];
+
+        if (Array.isArray(relatedData)) {
+          // Filter out the current product from related list and grab up to 4
+          setRelatedProducts(relatedData.filter((p: Product) => p.id !== id).slice(0, 4));
+        }
+      } catch (err) {
+        console.error("Error fetching related products:", err);
+      }
     };
     fetchProduct();
   }, [id]);
 
-  useEffect(() => {
-    if (product && selectedSize) {
-      const variant = product.variants.find(
-        (v: Variant) => v.size === selectedSize && v.gsm === selectedGSM
-      );
-      if (!variant || variant.stock <= 0) setSelectedSize(null);
-    }
-  }, [selectedGSM, product, selectedSize]);
-
   const handleAddToCart = async () => {
     if (!selectedSize) { setSizeError(true); return; }
     setSizeError(false);
+    
+    if (!product || !product.variants) return;
+
     const selectedVariant = product.variants.find(
       (v: Variant) => v.size === selectedSize && String(v.gsm) === selectedGSM
     );
+    
     if (!selectedVariant || selectedVariant.stock <= 0) {
       alert("Sorry, this specific size and fabric weight is out of stock.");
       return;
     }
+    
     try {
       await addToCart({
         productId: product.id,
@@ -100,6 +145,43 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
       setTimeout(() => setAdded(false), 2000);
     } catch (error) {
       console.error("Error adding item to cart:", error);
+    }
+  };
+
+  // Handlers for Related Products interactivity
+  const toggleWishlist = (e: React.MouseEvent, productId: string) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setWishlist(prev => 
+        prev.includes(productId) ? prev.filter(item => item !== productId) : [...prev, productId]
+    );
+  };
+
+  const handleQuickAdd = async (e: React.MouseEvent, relatedProduct: Product) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    const defaultVariant = relatedProduct.variants?.[0];
+    
+    try {
+        await addToCart({
+            productId: relatedProduct.id,
+            variantId: defaultVariant?.id || `${relatedProduct.id}-default`,
+            name: relatedProduct.name,
+            price: relatedProduct.final_price || relatedProduct.price,
+            image: relatedProduct.product_images?.[0]?.url || "/placeholder-shirt.png",
+            size: defaultVariant?.size || "M",
+            gsm: String(defaultVariant?.gsm || "240"),
+            quantity: 1,
+            stock: defaultVariant?.stock || 10,
+        });
+        
+        setQuickAddStatus(prev => ({ ...prev, [relatedProduct.id]: true }));
+        setTimeout(() => {
+            setQuickAddStatus(prev => ({ ...prev, [relatedProduct.id]: false }));
+        }, 2000);
+    } catch (error) {
+        console.error("Error adding related product to cart:", error);
     }
   };
 
@@ -127,11 +209,9 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
 
   return (
     <div className="min-h-screen bg-[#050505] text-[#ECE7D1] font-sans">
-
       {/* ── SECTION 01: HERO PRODUCT VIEWER ── */}
       <section className="pt-20 border-b border-[#1A1A17]">
-        <div className="max-w-[1400px] mx-auto px-6 md:px-10">
-
+        <div className="max-w-350 mx-auto px-6 md:px-10">
           {/* Top breadcrumb bar */}
           <div className="flex items-center justify-between py-4 border-b border-[#1A1A17] mb-0">
             <Link href="/products" className="flex items-center gap-2 font-sans text-[10px] uppercase tracking-[0.2em] text-[#6B6A5E] hover:text-[#EE3C24] transition-colors">
@@ -147,10 +227,8 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-[auto_1fr_420px] gap-0">
-
             {/* Left: Thumbnail Rail */}
-            <div className="hidden lg:flex flex-col gap-3 py-10 pr-6 w-[90px]">
-              {/* View Labels */}
+            <div className="hidden lg:flex flex-col gap-3 py-10 pr-6 w-22.5">
               {(["FRONT", "BACK", "FABRIC", "DETAIL"] as const).map((view) => (
                 <button
                   key={view}
@@ -165,7 +243,7 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
                 </button>
               ))}
               {/* Image thumbnails */}
-              {images.slice(0, 4).map((img: any, i: number) => (
+              {images.slice(0, 4).map((img: ProductImage, i: number) => (
                 <button
                   key={i}
                   onClick={() => setActiveImageIndex(i)}
@@ -180,7 +258,7 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
 
             {/* Center: Main Image */}
             <div className="relative border-x border-[#1A1A17] overflow-hidden bg-[#0D0D0B]">
-              <div className="relative aspect-[3/4] w-full">
+              <div className="relative aspect-3/4 w-full">
                 <AnimatePresence mode="wait">
                   <motion.div
                     key={activeImageIndex}
@@ -241,7 +319,7 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
 
               {/* Mobile dot nav */}
               <div className="flex justify-center gap-2 py-4 lg:hidden border-t border-[#1A1A17]">
-                {images.map((_: any, i: number) => (
+                {images.map((_: ProductImage, i: number) => (
                   <button key={i} onClick={() => setActiveImageIndex(i)} className={`w-1 h-1 rounded-full transition-all ${i === activeImageIndex ? "bg-[#ECE7D1] w-4" : "bg-[#403F38]"}`} />
                 ))}
               </div>
@@ -264,7 +342,6 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
 
             {/* Right: Product Info Panel */}
             <div className="lg:pl-10 py-10 flex flex-col">
-
               {/* Rating row */}
               <div className="flex items-center gap-3 mb-6">
                 <div className="flex gap-0.5">
@@ -288,12 +365,12 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
 
               {/* Price */}
               <div className="flex items-center gap-4 mb-6 pb-6 border-b border-[#1A1A17]">
-                {product.discount > 0 ? (
+                {(product.discount ?? 0) > 0 ? (
                   <>
                     <span className="font-sans text-[11px] tracking-widest text-[#555450] line-through">₹{product.price}</span>
                     <span className="font-serif text-2xl text-[#ECE7D1]">₹{product.final_price}</span>
                     <span className="font-sans text-[9px] uppercase tracking-[0.15em] text-[#EE3C24] border border-[#EE3C24]/40 px-2 py-0.5">
-                      SAVE ₹{(product.price - product.final_price).toFixed(0)}
+                      SAVE ₹{(product.price - (product.final_price ?? product.price)).toFixed(0)}
                     </span>
                   </>
                 ) : (
@@ -355,7 +432,7 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
                         key={size}
                         onClick={() => { if (!isOutOfStock) { setSelectedSize(size); setSizeError(false); } }}
                         disabled={isOutOfStock}
-                        className={`py-3 border font-sans text-[10px] uppercase tracking-[0.1em] transition-all duration-200 relative ${
+                        className={`py-3 border font-sans text-[10px] uppercase tracking-widest transition-all duration-200 relative ${
                           isOutOfStock
                             ? "border-[#1A1A17] text-[#1A1A17] cursor-not-allowed"
                             : selectedSize === size
@@ -396,15 +473,41 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
               </div>
 
               {/* Trust badges */}
-              <div className="space-y-2.5 pt-4 border-t border-[#1A1A17]">
+              <div className="space-y-2.5 pt-6 border-t border-[#1A1A17]">
                 {[
                   "✓  Free worldwide shipping over ₹1999",
                   "✓  30-day returns policy",
                   "✓  Secure checkout",
                 ].map((badge) => (
-                  <p key={badge} className="font-sans text-[9px] tracking-[0.1em] text-[#555450]">{badge}</p>
+                  <p key={badge} className="font-sans text-[9px] tracking-widest text-[#555450]">{badge}</p>
                 ))}
               </div>
+
+              {/* ── TECHNICAL SPECIFICATION ── */}
+              <div className="mt-10 pt-10 border-t border-[#1A1A17]">
+                <div className="flex items-center gap-3 mb-6">
+                  <span className="font-sans text-[9px] uppercase tracking-[0.25em] text-[#EE3C24]">Fabric & Details</span>
+                  <div className="flex-1 h-px bg-[#1A1A17]" />
+                </div>
+                
+                <div className="grid grid-cols-2 gap-0 border-t border-l border-[#1A1A17]">
+                  {FABRIC_SPECS.map((spec, index) => (
+                    <div 
+                      key={spec.label} 
+                      className={`border-r border-b border-[#1A1A17] p-5 flex flex-col gap-2 ${
+                        index === FABRIC_SPECS.length - 1 && FABRIC_SPECS.length % 2 !== 0 ? 'col-span-2' : ''
+                      }`}
+                    >
+                      <span className="text-lg text-[#EE3C24]">{spec.icon}</span>
+                      <div>
+                        <p className="font-sans text-[8px] uppercase tracking-[0.2em] text-[#6B6A5E] mb-1">{spec.label}</p>
+                        <p className="font-sans text-[10px] uppercase tracking-[0.12em] text-[#ECE7D1]">{spec.value}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
             </div>
           </div>
         </div>
@@ -412,7 +515,7 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
 
       {/* ── SECTION 02: PRODUCT STORY ── */}
       <section className="border-b border-[#1A1A17] py-20 md:py-28">
-        <div className="max-w-[1400px] mx-auto px-6 md:px-10">
+        <div className="max-w-350 mx-auto px-6 md:px-10">
           <div className="flex items-center gap-4 mb-12">
             <span className="font-sans text-[9px] uppercase tracking-[0.25em] text-[#EE3C24]">02 / PRODUCT STORY</span>
             <div className="flex-1 h-px bg-[#1A1A17]" />
@@ -422,13 +525,13 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
             {/* Left: large lifestyle image + small fabric close-up */}
             <div className="relative border-r border-[#1A1A17]">
               <div className="grid grid-cols-2 gap-0 h-full">
-                <div className="relative aspect-[3/4] border-r border-[#1A1A17] bg-[#0D0D0B]">
+                <div className="relative aspect-3/4 border-r border-[#1A1A17] bg-[#0D0D0B]">
                   {images[1]?.url ? (
                     <Image src={images[1].url} alt="Lifestyle" fill className="object-cover" />
                   ) : (
                     <div className="w-full h-full flex flex-col items-center justify-center gap-3">
                       <span className="font-sans text-[9px] uppercase tracking-[0.15em] text-[#403F38]">[ LIFESTYLE IMAGE ]</span>
-                      <span className="font-sans text-[8px] uppercase tracking-[0.1em] text-[#1A1A17]">editorial · campaign</span>
+                      <span className="font-sans text-[8px] uppercase tracking-widest text-[#1A1A17]">editorial · campaign</span>
                     </div>
                   )}
                 </div>
@@ -466,46 +569,22 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
         </div>
       </section>
 
-      {/* ── SECTION 03: FABRIC & DETAILS ── */}
+      {/* ── SECTION 03: MODEL FIT PREVIEW ── */}
       <section className="border-b border-[#1A1A17] py-20">
-        <div className="max-w-[1400px] mx-auto px-6 md:px-10">
-          <div className="flex items-center gap-4 mb-12">
-            <span className="font-sans text-[9px] uppercase tracking-[0.25em] text-[#EE3C24]">03 / FABRIC & DETAILS</span>
-            <div className="flex-1 h-px bg-[#1A1A17]" />
-          </div>
-          <h3 className="font-serif text-3xl md:text-4xl text-[#ECE7D1] mb-10">Technical Specification</h3>
-
-          <div className="grid grid-cols-2 md:grid-cols-5 gap-0 border-t border-l border-[#1A1A17]">
-            {FABRIC_SPECS.map((spec) => (
-              <div key={spec.label} className="border-r border-b border-[#1A1A17] p-6 flex flex-col gap-3">
-                <span className="text-xl text-[#EE3C24]">{spec.icon}</span>
-                <div>
-                  <p className="font-sans text-[9px] uppercase tracking-[0.2em] text-[#6B6A5E] mb-1">{spec.label}</p>
-                  <p className="font-sans text-[11px] uppercase tracking-[0.12em] text-[#ECE7D1]">{spec.value}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ── SECTION 04: MODEL FIT PREVIEW ── */}
-      <section className="border-b border-[#1A1A17] py-20">
-        <div className="max-w-[1400px] mx-auto px-6 md:px-10">
+        <div className="max-w-350 mx-auto px-6 md:px-10">
           <div className="flex items-center gap-4 mb-4">
-            <span className="font-sans text-[9px] uppercase tracking-[0.25em] text-[#EE3C24]">04 / MODEL FIT PREVIEW</span>
+            <span className="font-sans text-[9px] uppercase tracking-[0.25em] text-[#EE3C24]">03 / MODEL FIT PREVIEW</span>
             <div className="flex-1 h-px bg-[#1A1A17]" />
           </div>
           <div className="flex items-end justify-between mb-10">
             <h3 className="font-serif text-3xl md:text-4xl text-[#ECE7D1]">On the<br />model.</h3>
             <p className="font-sans text-[9px] uppercase tracking-[0.15em] text-[#6B6A5E]">
-              Model 'height' · wearing size <span className="text-[#ECE7D1]">M</span>
+              Model height · wearing size <span className="text-[#ECE7D1]">M</span>
             </p>
           </div>
 
           <div className="grid grid-cols-2 md:grid-cols-4 gap-0 border-t border-l border-[#1A1A17]">
-            {/* Large front */}
-            <div className="col-span-1 row-span-2 border-r border-b border-[#1A1A17] relative aspect-[3/4] bg-[#0D0D0B]">
+            <div className="col-span-1 row-span-2 border-r border-b border-[#1A1A17] relative aspect-3/4 bg-[#0D0D0B]">
               {images[0]?.url ? (
                 <Image src={images[0].url} alt="Front view" fill className="object-cover" />
               ) : (
@@ -518,7 +597,7 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
               </div>
             </div>
             {/* Side view */}
-            <div className="border-r border-b border-[#1A1A17] relative aspect-[3/4] bg-[#0D0D0B]">
+            <div className="border-r border-b border-[#1A1A17] relative aspect-3/4 bg-[#0D0D0B]">
               {images[1]?.url ? (
                 <Image src={images[1].url} alt="Side view" fill className="object-cover" />
               ) : (
@@ -528,7 +607,7 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
               )}
             </div>
             {/* Back view */}
-            <div className="border-r border-b border-[#1A1A17] relative aspect-[3/4] bg-[#0D0D0B]">
+            <div className="border-r border-b border-[#1A1A17] relative aspect-3/4 bg-[#0D0D0B]">
               {images[2]?.url ? (
                 <Image src={images[2].url} alt="Back view" fill className="object-cover" />
               ) : (
@@ -567,54 +646,111 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
         </div>
       </section>
 
-      {/* ── SECTION 05: STYLED WITH ── */}
+      {/* ── SECTION 04: RELATED PRODUCTS ── */}
       <section className="border-b border-[#1A1A17] py-20">
-        <div className="max-w-[1400px] mx-auto px-6 md:px-10">
+        <div className="max-w-350 mx-auto px-6 md:px-10">
           <div className="flex items-center gap-4 mb-4">
-            <span className="font-sans text-[9px] uppercase tracking-[0.25em] text-[#EE3C24]">05 / COMPLETE THE FIT</span>
+            <span className="font-sans text-[9px] uppercase tracking-[0.25em] text-[#EE3C24]">04 / RELATED PRODUCT</span>
             <div className="flex-1 h-px bg-[#1A1A17]" />
           </div>
           <div className="flex items-end justify-between mb-10">
-            <h3 className="font-serif text-3xl md:text-4xl text-[#ECE7D1]">Styled with</h3>
+            <h3 className="font-serif text-3xl md:text-4xl text-[#ECE7D1]">You might also<br />like</h3>
             <Link href="/products" className="font-sans text-[9px] uppercase tracking-[0.18em] text-[#6B6A5E] hover:text-[#EE3C24] transition-colors flex items-center gap-1.5">
-              Upsell <ChevronRight size={10} />
+              View all <ChevronRight size={10} />
             </Link>
           </div>
 
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-0 border-t border-l border-[#1A1A17]">
-            {[1,2,3,4].map((i) => (
-              <div key={i} className="border-r border-b border-[#1A1A17] group cursor-pointer">
-                <div className="relative aspect-[3/4] bg-[#0D0D0B] overflow-hidden">
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <span className="font-sans text-[9px] uppercase tracking-[0.12em] text-[#403F38]">[ IMAGE ]</span>
-                  </div>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+            {relatedProducts.length > 0 ? (
+                relatedProducts.map((relatedProduct) => {
+                    const isSoldOut = (relatedProduct.total_stock ?? 0) <= 0;
+                    const imageUrl = relatedProduct.product_images?.[0]?.url || "/placeholder-shirt.png";
+                    const isWishlisted = wishlist.includes(relatedProduct.id);
+                    const isAdded = quickAddStatus[relatedProduct.id];
+
+                    return (
+                        <Link href={`/products/${relatedProduct.id}`} key={relatedProduct.id}>
+                            <div className="group flex flex-col border border-zinc-800 rounded-xl overflow-hidden bg-[#0a0a0a] hover:border-zinc-600 transition-colors">
+                                <div className="relative aspect-square flex items-center justify-center bg-[#0f0f0f] border-b border-zinc-800">
+                                    <div className="absolute top-4 left-4 w-full flex justify-between pr-8 z-10 text-red-700">
+                                        {isSoldOut && <Badge variant="soldOut">Sold Out</Badge>}
+                                        <button 
+                                            onClick={(e) => toggleWishlist(e, relatedProduct.id)}
+                                            className={`transition-colors ml-auto ${isWishlisted ? 'text-[#EE3C24]' : 'text-zinc-500 hover:text-white'}`}
+                                        >
+                                            <Bookmark size={20} strokeWidth={1.5} fill={isWishlisted ? "#EE3C24" : "none"} />
+                                        </button>
+                                    </div>
+
+                                    <div className="relative w-full h-full flex items-center justify-center opacity-80 group-hover:opacity-100 transition-opacity">
+                                        <Image
+                                            src={imageUrl}
+                                            alt={relatedProduct.name}
+                                            fill
+                                            className="object-contain"
+                                        />
+                                        <span className="absolute text-zinc-800 font-bold tracking-widest text-lg z-[-1] select-none">
+                                            DRIPDUO
+                                        </span>
+                                    </div>
+
+                                    <button
+                                        disabled={isSoldOut}
+                                        className={`absolute bottom-4 right-4 p-1.5 border rounded-full transition-all ${
+                                            isAdded 
+                                                ? "bg-[#ECE7D1] border-[#ECE7D1] text-[#050505]" 
+                                                : "border-zinc-600 text-zinc-400 hover:text-white hover:border-white bg-[#0a0a0a] disabled:opacity-50 disabled:cursor-not-allowed"
+                                        }`}
+                                        onClick={(e) => handleQuickAdd(e, relatedProduct)}
+                                    >
+                                        {isAdded ? <Check size={18} strokeWidth={2} /> : <Plus size={18} strokeWidth={2} />}
+                                    </button>
+                                </div>
+
+                                <div className="p-4 flex flex-col gap-1">
+                                    <h3 className="text-sm text-zinc-200 truncate">{relatedProduct.name}</h3>
+                                    <div className="flex items-center justify-between">
+                                        <div className="flex items-center gap-2">
+                                            <span className="text-sm text-zinc-400">
+                                                Rs. {relatedProduct.final_price?.toLocaleString() || relatedProduct.price?.toLocaleString()}
+                                            </span>
+                                            {(relatedProduct.discount ?? 0) > 0 && (
+                                                <span className="text-xs text-zinc-600 line-through">
+                                                    {relatedProduct.price?.toLocaleString()}
+                                                </span>
+                                            )}
+                                        </div>
+
+                                        <div className="flex gap-1">
+                                            <div className="w-2.5 h-2.5 rounded-full border border-zinc-500 bg-zinc-800" />
+                                            <div className="w-2.5 h-2.5 rounded-full border border-zinc-500 bg-zinc-400" />
+                                            <div className="w-2.5 h-2.5 rounded-full border border-zinc-500 bg-transparent" />
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </Link>
+                    );
+                })
+            ) : (
+                <div className="col-span-full py-10 flex items-center justify-center border border-[#1A1A17] rounded-xl bg-[#0a0a0a]">
+                    <p className="font-sans text-[10px] uppercase tracking-[0.2em] text-[#6B6A5E] animate-pulse">Loading archive...</p>
                 </div>
-                <div className="p-4 flex items-center justify-between border-t border-[#1A1A17]">
-                  <div>
-                    <p className="font-sans text-[10px] uppercase tracking-[0.1em] text-[#ECE7D1] mb-0.5">Archive Piece {i}</p>
-                    <p className="font-sans text-[9px] uppercase tracking-[0.12em] text-[#6B6A5E]">₹ {[660, 1320, 900, 2140][i-1]}</p>
-                  </div>
-                  <button className="w-6 h-6 border border-[#1A1A17] flex items-center justify-center hover:border-[#EE3C24] hover:text-[#EE3C24] transition-all text-[#6B6A5E]">
-                    <Plus size={10} strokeWidth={1.5} />
-                  </button>
-                </div>
-              </div>
-            ))}
+            )}
           </div>
         </div>
       </section>
 
-      {/* ── SECTION 06: REVIEWS ── */}
+      {/* ── SECTION 05: REVIEWS ── */}
       <section className="border-b border-[#1A1A17] py-20">
-        <div className="max-w-[1400px] mx-auto px-6 md:px-10">
+        <div className="max-w-350 mx-auto px-6 md:px-10">
           <div className="flex items-center gap-4 mb-12">
-            <span className="font-sans text-[9px] uppercase tracking-[0.25em] text-[#EE3C24]">06 / REVIEWS</span>
+            <span className="font-sans text-[9px] uppercase tracking-[0.25em] text-[#EE3C24]">05 / REVIEWS</span>
             <div className="flex-1 h-px bg-[#1A1A17]" />
           </div>
           <h3 className="font-serif text-3xl md:text-4xl text-[#ECE7D1] mb-10">What buyers say</h3>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-0 border-t border-l border-[#1A1A17]">
-            {/* Rating summary */}
             <div className="border-r border-b border-[#1A1A17] p-8 flex flex-col justify-center gap-4">
               <div className="flex items-end gap-2">
                 <span className="font-serif text-[5rem] leading-none text-[#ECE7D1]">4.6</span>
@@ -631,7 +767,6 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
               </button>
             </div>
 
-            {/* Review cards */}
             {MOCK_REVIEWS.map((review) => (
               <div key={review.id} className="border-r border-b border-[#1A1A17] p-8 flex flex-col justify-between gap-6">
                 <div>
@@ -645,12 +780,12 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
                       <span className="font-sans text-[8px] uppercase tracking-[0.12em] text-[#EE3C24] border border-[#EE3C24]/30 px-1.5 py-0.5">Verified</span>
                     )}
                   </div>
-                  <p className="font-sans text-[11px] leading-[1.8] text-[#969382]">"{review.text}"</p>
+                  <p className="font-sans text-[11px] leading-[1.8] text-[#969382]">&ldquo;{review.text}&rdquo;</p>
                 </div>
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="font-sans text-[10px] uppercase tracking-[0.12em] text-[#ECE7D1]">{review.name}</p>
-                    <p className="font-sans text-[9px] tracking-[0.1em] text-[#403F38] mt-0.5">{review.date}</p>
+                    <p className="font-sans text-[9px] tracking-widest text-[#403F38] mt-0.5">{review.date}</p>
                   </div>
                 </div>
               </div>
@@ -659,11 +794,11 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
         </div>
       </section>
 
-      {/* ── SECTION 07: FAQ ── */}
+      {/* ── SECTION 06: FAQ ── */}
       <section className="border-b border-[#1A1A17] py-20">
-        <div className="max-w-[1400px] mx-auto px-6 md:px-10">
+        <div className="max-w-350 mx-auto px-6 md:px-10">
           <div className="flex items-center gap-4 mb-12">
-            <span className="font-sans text-[9px] uppercase tracking-[0.25em] text-[#EE3C24]">07 / FAQ</span>
+            <span className="font-sans text-[9px] uppercase tracking-[0.25em] text-[#EE3C24]">06 / FAQ</span>
             <div className="flex-1 h-px bg-[#1A1A17]" />
           </div>
           <h3 className="font-serif text-3xl md:text-4xl text-[#ECE7D1] mb-10">Frequently asked</h3>
@@ -696,42 +831,6 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
                   )}
                 </AnimatePresence>
               </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ── SECTION 08: RELATED PRODUCTS ── */}
-      <section className="py-20">
-        <div className="max-w-[1400px] mx-auto px-6 md:px-10">
-          <div className="flex items-center gap-4 mb-4">
-            <span className="font-sans text-[9px] uppercase tracking-[0.25em] text-[#EE3C24]">08 / RELATED PRODUCT</span>
-            <div className="flex-1 h-px bg-[#1A1A17]" />
-          </div>
-          <div className="flex items-end justify-between mb-10">
-            <h3 className="font-serif text-3xl md:text-4xl text-[#ECE7D1]">You might also<br />like</h3>
-            <Link href="/products" className="font-sans text-[9px] uppercase tracking-[0.18em] text-[#6B6A5E] hover:text-[#EE3C24] transition-colors flex items-center gap-1.5">
-              View all <ChevronRight size={10} />
-            </Link>
-          </div>
-
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-0 border-t border-l border-[#1A1A17]">
-            {[1,2,3,4].map((i) => (
-              <Link key={i} href="/products" className="border-r border-b border-[#1A1A17] group">
-                <div className="relative aspect-[3/4] bg-[#0D0D0B] overflow-hidden">
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <span className="font-sans text-[9px] uppercase tracking-[0.12em] text-[#403F38]">[ PRODUCT ]</span>
-                  </div>
-                  <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-                </div>
-                <div className="p-4 flex items-center justify-between border-t border-[#1A1A17]">
-                  <div>
-                    <p className="font-sans text-[10px] uppercase tracking-[0.1em] text-[#ECE7D1] mb-0.5">Archive Piece {i}</p>
-                    <p className="font-sans text-[9px] uppercase tracking-[0.12em] text-[#6B6A5E]">₹ {[560, 980, 725, 1240][i-1]}</p>
-                  </div>
-                  <Plus size={12} strokeWidth={1.5} className="text-[#403F38] group-hover:text-[#EE3C24] transition-colors" />
-                </div>
-              </Link>
             ))}
           </div>
         </div>

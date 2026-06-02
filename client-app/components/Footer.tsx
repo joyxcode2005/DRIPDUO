@@ -77,7 +77,7 @@ export const Footer = () => {
   return (
     <footer className="bg-(--black) pt-16 md:pt-20 border-t border-(--gray-800) overflow-hidden flex flex-col">
 
-      
+
 
       {/* ── MAIN LINKS GRID ── */}
       <div className="px-6 md:px-12 mb-16 flex-1">
@@ -104,8 +104,8 @@ export const Footer = () => {
                 { name: "TIKTOK", href: "#" },
                 { name: "X", href: "#" }
               ].map((social) => (
-                <a 
-                  key={social.name} 
+                <a
+                  key={social.name}
                   href={social.href}
                   target={social.href !== "#" ? "_blank" : "_self"}
                   rel={social.href !== "#" ? "noopener noreferrer" : ""}
@@ -131,10 +131,10 @@ export const Footer = () => {
       <div className="w-full overflow-hidden border-t border-(--gray-800) flex items-center justify-center py-4 md:py-6 select-none">
         <h1
           className={`font-bold tracking-tighter w-full text-center transition-colors duration-700 cursor-default
-            text-(--gray-900) 
-            md:hover:text-(--orange) 
-            ${isScrolling ? "max-md:text-(--orange)" : ""}
-          `}
+            text-(--gray-900) 
+            md:hover:text-(--orange) 
+            ${isScrolling ? "max-md:text-(--orange)" : ""}
+          `}
           style={{ fontSize: "16vw", lineHeight: 0.75, marginTop: "-2.7vw", marginBottom: "-2.7vw" }}
         >
           DRIPDUO

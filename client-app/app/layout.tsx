@@ -4,9 +4,10 @@ import { CartProvider } from "@/lib/CartContext";
 import { QuickViewProvider } from "@/lib/QuickViewContext";
 
 import { Navbar } from "@/components/navbar";
-import { Footer } from "@/components/ui/footer";
+
 import CartDrawer from "@/components/ui/cart-drawer";
 import CinematicLoader from "@/components/CinematicLoader";
+import { Footer } from "@/components/Footer";
 
 export const metadata: Metadata = {
   title: "DRIPDUO | FW26",

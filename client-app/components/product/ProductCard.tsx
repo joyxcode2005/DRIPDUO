@@ -1,5 +1,5 @@
 import React from "react";
-import { Bookmark, Plus } from "lucide-react";
+import { Bookmark, Plus, Check } from "lucide-react";
 import { Badge } from "../ui/Badge";
 
 // Sub-types based on your provided interface
@@ -33,12 +33,25 @@ export interface Product {
     product_images: SupabaseProductImage[];
 }
 
-export default function ProductCard({ product }: { product: Product }) {
+interface ProductCardProps {
+    product: Product;
+    onQuickAdd?: (e: React.MouseEvent) => void;
+    onToggleWishlist?: (e: React.MouseEvent) => void;
+    isWishlisted?: boolean;
+    isAdded?: boolean;
+}
+
+export default function ProductCard({ 
+    product, 
+    onQuickAdd, 
+    onToggleWishlist, 
+    isWishlisted = false, 
+    isAdded = false 
+}: ProductCardProps) {
     // Real logic for "Sold Out" based on your interface
     const isSoldOut = product.total_stock <= 0;
 
     // Safely extract the image. 
-    // Adjust 'image_url' to whatever the exact property name is in your SupabaseProductImage interface.
     const imageUrl = product.product_images?.[0]?.url || "/placeholder-shirt.png";
 
     return (
@@ -50,8 +63,11 @@ export default function ProductCard({ product }: { product: Product }) {
                 {/* Top Badges & Icons */}
                 <div className="absolute top-4 left-4 w-full flex justify-between pr-8 z-10 text-red-700">
                     {isSoldOut && <Badge variant="soldOut">Sold Out</Badge>}
-                    <button className="text-zinc-500 hover:text-white transition-colors ml-auto">
-                        <Bookmark size={20} strokeWidth={1.5} />
+                    <button 
+                        onClick={onToggleWishlist}
+                        className={`transition-colors ml-auto ${isWishlisted ? 'text-[#EE3C24]' : 'text-zinc-500 hover:text-white'}`}
+                    >
+                        <Bookmark size={20} strokeWidth={1.5} fill={isWishlisted ? "#EE3C24" : "none"} />
                     </button>
                 </div>
 
@@ -71,9 +87,14 @@ export default function ProductCard({ product }: { product: Product }) {
                 {/* Add Button */}
                 <button
                     disabled={isSoldOut}
-                    className="absolute bottom-4 right-4 p-1.5 border border-zinc-600 rounded-full text-zinc-400 hover:text-white hover:border-white transition-all bg-[#0a0a0a] disabled:opacity-50 disabled:cursor-not-allowed"
+                    onClick={onQuickAdd}
+                    className={`absolute bottom-4 right-4 p-1.5 border rounded-full transition-all ${
+                        isAdded 
+                            ? "bg-[#ECE7D1] border-[#ECE7D1] text-[#050505]" 
+                            : "border-zinc-600 text-zinc-400 hover:text-white hover:border-white bg-[#0a0a0a] disabled:opacity-50 disabled:cursor-not-allowed"
+                    }`}
                 >
-                    <Plus size={18} strokeWidth={2} />
+                    {isAdded ? <Check size={18} strokeWidth={2} /> : <Plus size={18} strokeWidth={2} />}
                 </button>
             </div>
 
