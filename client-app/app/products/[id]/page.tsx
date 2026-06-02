@@ -7,38 +7,15 @@ import { ArrowLeft, Check, ChevronLeft, ChevronRight, Star, Plus, RotateCcw, Inf
 import { useCart } from "@/lib/CartContext";
 import { getProductById, getAllProducts } from "@/services/products";
 import { motion, AnimatePresence } from "framer-motion";
-import { Badge } from "@/components/ui/Badge";
+import ProductCard from "@/components/product/ProductCard";
 
-// --- TYPE DEFINITIONS ---
-interface Category {
-  name: string;
-}
-
-interface ProductImage {
-  url: string;
-}
-
-interface Variant {
-  id: string;
-  size: string;
-  gsm: string | number;
-  stock: number;
-}
-
+interface Category { name: string; }
+interface ProductImage { url: string; }
+interface Variant { id: string; size: string; gsm: string | number; stock: number; }
 interface Product {
-  id: string;
-  name: string;
-  description?: string;
-  price: number;
-  final_price?: number;
-  discount?: number;
-  categories?: Category[];
-  variants?: Variant[];
-  images?: ProductImage[];
-  product_images?: ProductImage[];
-  total_stock?: number;
+  id: string; name: string; description?: string; price: number; final_price?: number; discount?: number;
+  categories?: Category[]; variants?: Variant[]; images?: ProductImage[]; product_images?: ProductImage[]; total_stock?: number;
 }
-// ------------------------
 
 const SIZES_ORDER = ["XS", "S", "M", "L", "XL", "XXL", "XXXL"];
 const GSM_DETAILS: Record<string, { label: string; desc: string }> = {
@@ -60,9 +37,9 @@ const FABRIC_SPECS = [
 ];
 
 const FAQ_ITEMS = [
-  { q: "How does the fit run?", a: "Relaxed through the body, true to chest. Size down if you prefer a cropped silhouette. See model fit notes above." },
+  { q: "How does the fit run?", a: "Relaxed through the body, true to chest. Size down if you prefer a cropped silhouette." },
   { q: "What is the return policy?", a: "30-day returns on unworn, unwashed items with original tags. Exchanges processed within 5 business days." },
-  { q: "How should I care for this piece?", a: "Cold wash inside out, hang dry. Avoid tumble drying to preserve the weight and structure of the fabric." },
+  { q: "How should I care for this piece?", a: "Cold wash inside out, hang dry. Avoid tumble drying to preserve the weight and structure." },
   { q: "Do you restock the archive?", a: "Select pieces are restocked seasonally. Sign up for restock alerts on the product page." },
   { q: "Shipping & delivery times?", a: "Standard: 5–7 business days. Express: 2–3 business days. Free shipping on orders over ₹1999." },
 ];
@@ -79,9 +56,8 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
   const [activeImageIndex, setActiveImageIndex] = useState(0);
   const [activeView, setActiveView] = useState<"FRONT" | "BACK" | "FABRIC" | "DETAIL">("FRONT");
   const [openFaq, setOpenFaq] = useState<number | null>(null);
-  const [relatedProducts, setRelatedProducts] = useState<Product[]>([]);
   
-  // States for Related Products interactivity
+  const [relatedProducts, setRelatedProducts] = useState<Product[]>([]);
   const [wishlist, setWishlist] = useState<string[]>([]);
   const [quickAddStatus, setQuickAddStatus] = useState<Record<string, boolean>>({});
 
@@ -89,27 +65,16 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
     const fetchProduct = async () => {
       const fetched: Product = await getProductById(id);
       setProduct(fetched);
-      if (fetched?.variants && fetched.variants.length > 0) {
-        setSelectedGSM(String(fetched.variants[0].gsm));
-      }
+      if (fetched?.variants && fetched.variants.length > 0) setSelectedGSM(String(fetched.variants[0].gsm));
 
-      // Fetch related products
       try {
         const related = await getAllProducts();
-        
-        // Safely extract the array by narrowing the type
-        const relatedResponse = related as { data?: Product[] } | Product[];
-        const relatedData = Array.isArray(relatedResponse) 
-          ? relatedResponse 
-          : relatedResponse?.data || [];
-
+        const relatedData = Array.isArray(related) ? related : (related as any)?.data || [];
         if (Array.isArray(relatedData)) {
-          // Filter out the current product from related list and grab up to 4
-          setRelatedProducts(relatedData.filter((p: Product) => p.id !== id).slice(0, 4));
+          // Expanded related products slice to 5 for wider monitors
+          setRelatedProducts(relatedData.filter((p: Product) => p.id !== id).slice(0, 5));
         }
-      } catch (err) {
-        console.error("Error fetching related products:", err);
-      }
+      } catch (err) { console.error("Error fetching related products:", err); }
     };
     fetchProduct();
   }, [id]);
@@ -117,287 +82,192 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
   const handleAddToCart = async () => {
     if (!selectedSize) { setSizeError(true); return; }
     setSizeError(false);
-    
     if (!product || !product.variants) return;
 
-    const selectedVariant = product.variants.find(
-      (v: Variant) => v.size === selectedSize && String(v.gsm) === selectedGSM
-    );
-    
-    if (!selectedVariant || selectedVariant.stock <= 0) {
-      alert("Sorry, this specific size and fabric weight is out of stock.");
-      return;
-    }
+    const selectedVariant = product.variants.find((v: Variant) => v.size === selectedSize && String(v.gsm) === selectedGSM);
+    if (!selectedVariant || selectedVariant.stock <= 0) return alert("Sorry, this specific size and fabric weight is out of stock.");
     
     try {
       await addToCart({
-        productId: product.id,
-        variantId: selectedVariant.id,
-        name: product.name,
-        price: product.final_price || product.price,
-        image: product.images?.[0]?.url || "",
-        size: selectedSize,
-        gsm: selectedGSM,
-        quantity: 1,
-        stock: selectedVariant.stock,
+        productId: product.id, variantId: selectedVariant.id, name: product.name,
+        price: product.final_price || product.price, image: product.images?.[0]?.url || "",
+        size: selectedSize, gsm: selectedGSM, quantity: 1, stock: selectedVariant.stock,
       });
-      setAdded(true);
-      setTimeout(() => setAdded(false), 2000);
-    } catch (error) {
-      console.error("Error adding item to cart:", error);
-    }
+      setAdded(true); setTimeout(() => setAdded(false), 2000);
+    } catch (error) { console.error("Error adding item to cart:", error); }
   };
 
-  // Handlers for Related Products interactivity
   const toggleWishlist = (e: React.MouseEvent, productId: string) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setWishlist(prev => 
-        prev.includes(productId) ? prev.filter(item => item !== productId) : [...prev, productId]
-    );
+    e.preventDefault(); e.stopPropagation();
+    setWishlist(prev => prev.includes(productId) ? prev.filter(item => item !== productId) : [...prev, productId]);
   };
 
   const handleQuickAdd = async (e: React.MouseEvent, relatedProduct: Product) => {
-    e.preventDefault();
-    e.stopPropagation();
-    
+    e.preventDefault(); e.stopPropagation();
     const defaultVariant = relatedProduct.variants?.[0];
-    
     try {
         await addToCart({
-            productId: relatedProduct.id,
-            variantId: defaultVariant?.id || `${relatedProduct.id}-default`,
-            name: relatedProduct.name,
-            price: relatedProduct.final_price || relatedProduct.price,
-            image: relatedProduct.product_images?.[0]?.url || "/placeholder-shirt.png",
-            size: defaultVariant?.size || "M",
-            gsm: String(defaultVariant?.gsm || "240"),
-            quantity: 1,
-            stock: defaultVariant?.stock || 10,
+            productId: relatedProduct.id, variantId: defaultVariant?.id || `${relatedProduct.id}-default`, name: relatedProduct.name,
+            price: relatedProduct.final_price || relatedProduct.price, image: relatedProduct.product_images?.[0]?.url || "/placeholder-shirt.png",
+            size: defaultVariant?.size || "M", gsm: String(defaultVariant?.gsm || "240"), quantity: 1, stock: defaultVariant?.stock || 10,
         });
-        
         setQuickAddStatus(prev => ({ ...prev, [relatedProduct.id]: true }));
-        setTimeout(() => {
-            setQuickAddStatus(prev => ({ ...prev, [relatedProduct.id]: false }));
-        }, 2000);
-    } catch (error) {
-        console.error("Error adding related product to cart:", error);
-    }
+        setTimeout(() => setQuickAddStatus(prev => ({ ...prev, [relatedProduct.id]: false })), 2000);
+    } catch (error) { console.error("Error adding related product:", error); }
   };
 
   if (!product) {
     return (
-      <div className="min-h-screen bg-[#050505] flex items-center justify-center">
-        <div className="flex flex-col items-center gap-4">
-          <div className="w-12 h-12 border border-[#EE3C24]/30 animate-spin rounded-full border-t-[#EE3C24]" />
-          <p className="font-sans text-[10px] uppercase tracking-[0.25em] text-[#6B6A5E] animate-pulse">Loading Archive...</p>
+      <div className="min-h-screen flex items-center justify-center w-full">
+        <div className="glass-panel p-10 rounded-3xl flex flex-col items-center gap-4 shadow-2xl">
+          <div className="w-12 h-12 border-2 border-white/10 animate-spin rounded-full border-t-[#EE3C24]" />
+          <p className="font-sans text-[10px] uppercase tracking-[0.25em] text-white/50 animate-pulse">Loading Archive...</p>
         </div>
       </div>
     );
   }
 
-  const availableGSMs = Array.from(
-    new Set(product.variants?.map((v: Variant) => String(v.gsm)) || [])
-  ) as string[];
-
-  const currentGSMVariants = product.variants?.filter(
-    (v: Variant) => String(v.gsm) === selectedGSM
-  ) || [];
-
+  const availableGSMs = Array.from(new Set(product.variants?.map((v: Variant) => String(v.gsm)) || [])) as string[];
+  const currentGSMVariants = product.variants?.filter((v: Variant) => String(v.gsm) === selectedGSM) || [];
   const images = product.images || [];
   const currentImage = images[activeImageIndex]?.url || "";
 
   return (
-    <div className="min-h-screen bg-[#050505] text-[#ECE7D1] font-sans">
+    <div className="min-h-screen text-[#ECE7D1] font-sans relative z-10 pt-28 pb-20 w-full">
+      
       {/* ── SECTION 01: HERO PRODUCT VIEWER ── */}
-      <section className="pt-20 border-b border-[#1A1A17]">
-        <div className="max-w-350 mx-auto px-6 md:px-10">
-          {/* Top breadcrumb bar */}
-          <div className="flex items-center justify-between py-4 border-b border-[#1A1A17] mb-0">
-            <Link href="/products" className="flex items-center gap-2 font-sans text-[10px] uppercase tracking-[0.2em] text-[#6B6A5E] hover:text-[#EE3C24] transition-colors">
-              <ArrowLeft size={12} strokeWidth={1.5} /> Archive
+      <section className="mb-24 w-full">
+        {/* Changed to 2000px max width */}
+        <div className="w-full max-w-[2000px] mx-auto px-4 sm:px-8 md:px-12 lg:px-16 xl:px-24">
+          
+          <div className="flex items-center justify-between mb-8 glass-panel px-6 md:px-10 py-5 rounded-full shadow-lg">
+            <Link href="/products" className="flex items-center gap-3 font-sans text-[11px] uppercase tracking-[0.2em] text-white/60 hover:text-[#EE3C24] transition-colors">
+              <ArrowLeft size={14} strokeWidth={1.5} /> Archive
             </Link>
-            <div className="flex items-center gap-3 font-sans text-[9px] uppercase tracking-[0.18em] text-[#6B6A5E]">
-              <span className="text-[#6B6A5E]">Home</span>
-              <span>/</span>
-              <span className="text-[#6B6A5E]">Products</span>
-              <span>/</span>
-              <span className="text-[#ECE7D1]">{product.name}</span>
+            <div className="hidden sm:flex items-center gap-4 font-sans text-[10px] uppercase tracking-[0.18em] text-white/40">
+              <span>Home</span><span>/</span><span>Products</span><span>/</span>
+              <span className="text-white/80">{product.name}</span>
             </div>
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-[auto_1fr_420px] gap-0">
-            {/* Left: Thumbnail Rail */}
-            <div className="hidden lg:flex flex-col gap-3 py-10 pr-6 w-22.5">
+          <div className="grid grid-cols-1 lg:grid-cols-[auto_1fr_450px] xl:grid-cols-[auto_1fr_550px] 2xl:grid-cols-[auto_1fr_650px] gap-6 xl:gap-10">
+            
+            <div className="hidden lg:flex flex-col gap-4 w-24 xl:w-28">
               {(["FRONT", "BACK", "FABRIC", "DETAIL"] as const).map((view) => (
                 <button
-                  key={view}
-                  onClick={() => setActiveView(view)}
-                  className={`w-full aspect-square border flex items-center justify-center font-sans text-[8px] uppercase tracking-[0.12em] transition-all duration-300 ${
-                    activeView === view
-                      ? "border-[#ECE7D1] bg-[#ECE7D1]/5 text-[#ECE7D1]"
-                      : "border-[#1A1A17] text-[#6B6A5E] hover:border-[#555450]"
+                  key={view} onClick={() => setActiveView(view)}
+                  className={`w-full aspect-square rounded-[1.5rem] flex items-center justify-center font-sans text-[9px] xl:text-[10px] uppercase tracking-[0.12em] transition-all duration-300 ${
+                    activeView === view ? "glass-panel text-white shadow-[0_0_20px_rgba(255,255,255,0.1)]" : "glass-button text-white/40 hover:text-white/80"
                   }`}
                 >
                   {view}
                 </button>
               ))}
-              {/* Image thumbnails */}
               {images.slice(0, 4).map((img: ProductImage, i: number) => (
                 <button
-                  key={i}
-                  onClick={() => setActiveImageIndex(i)}
-                  className={`w-full aspect-square border overflow-hidden transition-all duration-300 ${
-                    activeImageIndex === i ? "border-[#ECE7D1]" : "border-[#1A1A17] opacity-50 hover:opacity-80"
+                  key={i} onClick={() => setActiveImageIndex(i)}
+                  className={`w-full aspect-square rounded-[1.5rem] overflow-hidden transition-all duration-300 p-1.5 ${
+                    activeImageIndex === i ? "glass-panel shadow-[0_0_20px_rgba(255,255,255,0.1)]" : "glass-button opacity-50 hover:opacity-100"
                   }`}
                 >
-                  <Image src={img.url} alt="" width={80} height={80} className="w-full h-full object-cover" />
+                  {img.url ? (
+                    <Image src={img.url} alt="" width={100} height={100} className="w-full h-full object-cover rounded-[1.2rem]" />
+                  ) : (
+                     <div className="w-full h-full bg-white/5 rounded-[1.2rem]" />
+                  )}
                 </button>
               ))}
             </div>
 
-            {/* Center: Main Image */}
-            <div className="relative border-x border-[#1A1A17] overflow-hidden bg-[#0D0D0B]">
-              <div className="relative aspect-3/4 w-full">
+            <div className="relative glass-panel rounded-[2.5rem] overflow-hidden p-2.5 shadow-2xl">
+              <div className="relative aspect-3/4 md:aspect-square lg:aspect-[4/5] xl:aspect-auto xl:h-full w-full rounded-3xl overflow-hidden">
                 <AnimatePresence mode="wait">
-                  <motion.div
-                    key={activeImageIndex}
-                    initial={{ opacity: 0, scale: 1.03 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    exit={{ opacity: 0 }}
-                    transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
-                    className="absolute inset-0"
-                  >
+                  <motion.div key={activeImageIndex} initial={{ opacity: 0, scale: 1.03 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.5 }} className="absolute inset-0">
                     {currentImage ? (
                       <Image src={currentImage} alt={product.name} fill className="object-cover object-top" />
                     ) : (
-                      <div className="w-full h-full flex items-center justify-center">
-                        <span className="font-sans text-[10px] uppercase tracking-[0.2em] text-[#403F38]">[ PRODUCT IMAGE ]</span>
+                      <div className="w-full h-full flex items-center justify-center bg-black/20">
+                        <span className="font-sans text-[11px] uppercase tracking-[0.2em] text-white/30">[ PRODUCT IMAGE ]</span>
                       </div>
                     )}
                   </motion.div>
                 </AnimatePresence>
 
-                {/* Image nav arrows */}
                 {images.length > 1 && (
                   <>
-                    <button
-                      onClick={() => setActiveImageIndex(i => (i - 1 + images.length) % images.length)}
-                      className="absolute left-4 top-1/2 -translate-y-1/2 w-8 h-8 border border-white/20 bg-black/40 backdrop-blur-sm flex items-center justify-center hover:border-white/60 transition-all z-10"
-                    >
-                      <ChevronLeft size={14} strokeWidth={1.5} />
+                    <button onClick={() => setActiveImageIndex(i => (i - 1 + images.length) % images.length)} className="absolute left-6 top-1/2 -translate-y-1/2 w-12 h-12 glass-button rounded-full flex items-center justify-center z-10 text-white hover:bg-white/20">
+                      <ChevronLeft size={20} strokeWidth={2} />
                     </button>
-                    <button
-                      onClick={() => setActiveImageIndex(i => (i + 1) % images.length)}
-                      className="absolute right-4 top-1/2 -translate-y-1/2 w-8 h-8 border border-white/20 bg-black/40 backdrop-blur-sm flex items-center justify-center hover:border-white/60 transition-all z-10"
-                    >
-                      <ChevronRight size={14} strokeWidth={1.5} />
+                    <button onClick={() => setActiveImageIndex(i => (i + 1) % images.length)} className="absolute right-6 top-1/2 -translate-y-1/2 w-12 h-12 glass-button rounded-full flex items-center justify-center z-10 text-white hover:bg-white/20">
+                      <ChevronRight size={20} strokeWidth={2} />
                     </button>
                   </>
                 )}
 
-                {/* View label overlay */}
-                <div className="absolute top-4 left-4 z-10">
-                  <span className="font-sans text-[9px] uppercase tracking-[0.2em] text-[#6B6A5E] border border-[#1A1A17] bg-black/60 backdrop-blur-sm px-2.5 py-1">
+                <div className="absolute top-8 left-8 z-10">
+                  <span className="font-sans text-[10px] uppercase tracking-[0.2em] text-white/90 glass-panel px-5 py-2.5 rounded-full shadow-lg">
                     {activeView} VIEW
                   </span>
                 </div>
-
-                {/* Image counter */}
-                <div className="absolute bottom-4 right-4 z-10">
-                  <span className="font-sans text-[9px] uppercase tracking-[0.12em] text-[#6B6A5E] bg-black/60 backdrop-blur-sm px-2.5 py-1 border border-[#1A1A17]">
+                <div className="absolute bottom-8 right-8 z-10">
+                  <span className="font-sans text-[10px] uppercase tracking-[0.12em] text-white/90 glass-panel px-5 py-2.5 rounded-full shadow-lg">
                     {activeImageIndex + 1} / {Math.max(images.length, 1)}
                   </span>
                 </div>
-
-                {/* Mobile scroll hint */}
-                <div className="absolute bottom-4 left-4 z-10 flex items-center gap-2 md:hidden">
-                  <RotateCcw size={10} strokeWidth={1.5} className="text-[#6B6A5E]" />
-                  <span className="font-sans text-[8px] uppercase tracking-[0.15em] text-[#6B6A5E]">scroll to rotate</span>
-                </div>
               </div>
-
-              {/* Mobile dot nav */}
-              <div className="flex justify-center gap-2 py-4 lg:hidden border-t border-[#1A1A17]">
+              
+              <div className="flex lg:hidden justify-center gap-3 p-5">
                 {images.map((_: ProductImage, i: number) => (
-                  <button key={i} onClick={() => setActiveImageIndex(i)} className={`w-1 h-1 rounded-full transition-all ${i === activeImageIndex ? "bg-[#ECE7D1] w-4" : "bg-[#403F38]"}`} />
-                ))}
-              </div>
-
-              {/* Mobile view tabs */}
-              <div className="flex lg:hidden border-t border-[#1A1A17]">
-                {(["FRONT", "BACK", "FABRIC", "DETAIL"] as const).map((view) => (
-                  <button
-                    key={view}
-                    onClick={() => setActiveView(view)}
-                    className={`flex-1 py-3 font-sans text-[8px] uppercase tracking-[0.12em] transition-colors ${
-                      activeView === view ? "text-[#ECE7D1] bg-[#ECE7D1]/5" : "text-[#6B6A5E]"
-                    }`}
-                  >
-                    {view}
-                  </button>
+                  <button key={i} onClick={() => setActiveImageIndex(i)} className={`h-2 rounded-full transition-all ${i === activeImageIndex ? "bg-white w-8" : "bg-white/20 w-2"}`} />
                 ))}
               </div>
             </div>
 
-            {/* Right: Product Info Panel */}
-            <div className="lg:pl-10 py-10 flex flex-col">
-              {/* Rating row */}
-              <div className="flex items-center gap-3 mb-6">
-                <div className="flex gap-0.5">
-                  {[1,2,3,4,5].map(s => (
-                    <Star key={s} size={10} fill={s <= 4 ? "#EE3C24" : "none"} stroke={s <= 4 ? "#EE3C24" : "#403F38"} />
-                  ))}
+            <div className="glass-panel p-8 md:p-12 xl:p-14 rounded-[2.5rem] flex flex-col h-fit shadow-2xl">
+              <div className="flex items-center gap-4 mb-8">
+                <div className="flex gap-1.5">
+                  {[1,2,3,4,5].map(s => <Star key={s} size={14} fill={s <= 4 ? "#EE3C24" : "none"} stroke={s <= 4 ? "#EE3C24" : "rgba(255,255,255,0.2)"} /> )}
                 </div>
-                <span className="font-sans text-[9px] uppercase tracking-[0.15em] text-[#6B6A5E]">4.6 · 120 reviews</span>
-                <span className="ml-auto font-sans text-[9px] uppercase tracking-[0.15em] text-[#6B6A5E]">ARCHIVE</span>
+                <span className="font-sans text-[11px] uppercase tracking-[0.15em] text-white/60">4.6 · 120 reviews</span>
               </div>
 
-              {/* Category */}
-              <p className="font-sans text-[9px] uppercase tracking-[0.25em] text-[#EE3C24] mb-3">
+              <p className="font-sans text-[10px] uppercase tracking-[0.25em] text-[#EE3C24] mb-4">
                 {product.categories?.[0]?.name || "Apparel"} / FW26
               </p>
 
-              {/* Name */}
-              <h1 className="font-serif text-[clamp(2rem,4vw,3rem)] leading-[0.92] text-[#ECE7D1] mb-4">
+              <h1 className="font-serif text-[clamp(2.5rem,4vw,4.5rem)] leading-[0.92] text-[#ECE7D1] mb-8">
                 {product.name}
               </h1>
 
-              {/* Price */}
-              <div className="flex items-center gap-4 mb-6 pb-6 border-b border-[#1A1A17]">
+              <div className="flex items-center gap-5 mb-10">
                 {(product.discount ?? 0) > 0 ? (
                   <>
-                    <span className="font-sans text-[11px] tracking-widest text-[#555450] line-through">₹{product.price}</span>
-                    <span className="font-serif text-2xl text-[#ECE7D1]">₹{product.final_price}</span>
-                    <span className="font-sans text-[9px] uppercase tracking-[0.15em] text-[#EE3C24] border border-[#EE3C24]/40 px-2 py-0.5">
+                    <span className="font-sans text-[14px] tracking-widest text-white/40 line-through">₹{product.price}</span>
+                    <span className="font-serif text-4xl text-white">₹{product.final_price}</span>
+                    <span className="font-sans text-[10px] uppercase tracking-[0.15em] text-[#EE3C24] border border-[#EE3C24]/30 bg-[#EE3C24]/10 rounded-full px-4 py-1.5">
                       SAVE ₹{(product.price - (product.final_price ?? product.price)).toFixed(0)}
                     </span>
                   </>
                 ) : (
-                  <span className="font-serif text-2xl text-[#ECE7D1]">₹{product.price}</span>
+                  <span className="font-serif text-4xl text-white">₹{product.price}</span>
                 )}
               </div>
 
-              {/* Short description */}
-              <p className="font-sans text-[11px] leading-[1.8] tracking-[0.04em] text-[#969382] mb-8">
-                {product.description?.slice(0, 150) || "Premium heavyweight cotton. Engineered for those who refuse to settle."}
+              <p className="font-sans text-[14px] xl:text-[15px] leading-[1.8] tracking-[0.02em] text-white/60 mb-12">
+                {product.description?.slice(0, 150) || "Premium heavyweight cotton. Engineered for those who refuse to settle. Experience the silhouette."}
               </p>
 
-              {/* GSM Selector */}
               {availableGSMs.length > 0 && (
-                <div className="mb-6">
-                  <p className="font-sans text-[9px] uppercase tracking-[0.22em] text-[#6B6A5E] mb-3">GSM / WEIGHT</p>
-                  <div className="flex gap-2 flex-wrap">
+                <div className="mb-10 glass-panel p-6 rounded-3xl">
+                  <p className="font-sans text-[10px] uppercase tracking-[0.22em] text-white/50 mb-5">Fabric Weight</p>
+                  <div className="flex gap-3 flex-wrap">
                     {availableGSMs.map((gsmValue) => {
                       const details = GSM_DETAILS[gsmValue] || { label: `${gsmValue} GSM`, desc: "" };
                       return (
                         <button
-                          key={gsmValue}
-                          onClick={() => { setSelectedGSM(gsmValue); setSizeError(false); }}
-                          className={`px-4 py-2.5 border font-sans text-[10px] uppercase tracking-[0.12em] transition-all duration-200 ${
-                            selectedGSM === gsmValue
-                              ? "border-[#ECE7D1] bg-[#ECE7D1]/5 text-[#ECE7D1]"
-                              : "border-[#1A1A17] text-[#6B6A5E] hover:border-[#403F38]"
+                          key={gsmValue} onClick={() => { setSelectedGSM(gsmValue); setSizeError(false); }}
+                          className={`px-6 py-4 rounded-[1.2rem] font-sans text-[11px] uppercase tracking-[0.12em] transition-all duration-200 ${
+                            selectedGSM === gsmValue ? "bg-white text-black shadow-lg" : "glass-button text-white/70 hover:bg-white/10"
                           }`}
                         >
                           {details.label}
@@ -408,236 +278,149 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
                 </div>
               )}
 
-              {/* Size Selector */}
-              <div className="mb-8">
-                <div className="flex items-center justify-between mb-3">
-                  <p className="font-sans text-[9px] uppercase tracking-[0.22em] text-[#6B6A5E]">SIZE</p>
-                  <button className="font-sans text-[9px] uppercase tracking-[0.15em] text-[#6B6A5E] hover:text-[#EE3C24] transition-colors flex items-center gap-1.5 underline underline-offset-4">
-                    <Info size={10} /> Size Guide
-                  </button>
+              <div className="mb-12 glass-panel p-6 rounded-3xl">
+                <div className="flex items-center justify-between mb-5">
+                  <p className="font-sans text-[10px] uppercase tracking-[0.22em] text-white/50">Select Size</p>
+                  <button className="font-sans text-[10px] uppercase tracking-[0.15em] text-white/50 hover:text-[#EE3C24] transition-colors underline underline-offset-4">Size Guide</button>
                 </div>
-
-                {sizeError && (
-                  <p className="font-sans text-[9px] uppercase tracking-[0.15em] text-[#EE3C24] mb-2 animate-pulse">
-                    Please select a size.
-                  </p>
-                )}
-
-                <div className="grid grid-cols-5 gap-1.5">
+                {sizeError && <p className="font-sans text-[10px] uppercase tracking-[0.15em] text-[#EE3C24] mb-4 animate-pulse">Please select a size.</p>}
+                
+                <div className="grid grid-cols-4 sm:grid-cols-5 gap-3">
                   {SIZES_ORDER.map((size) => {
                     const variant = currentGSMVariants.find((v: Variant) => v.size === size);
                     const isOutOfStock = !variant || variant.stock <= 0;
                     return (
                       <button
-                        key={size}
-                        onClick={() => { if (!isOutOfStock) { setSelectedSize(size); setSizeError(false); } }}
-                        disabled={isOutOfStock}
-                        className={`py-3 border font-sans text-[10px] uppercase tracking-widest transition-all duration-200 relative ${
-                          isOutOfStock
-                            ? "border-[#1A1A17] text-[#1A1A17] cursor-not-allowed"
-                            : selectedSize === size
-                            ? "border-[#ECE7D1] bg-[#ECE7D1] text-[#050505] font-bold"
-                            : "border-[#1A1A17] text-[#6B6A5E] hover:border-[#555450] hover:text-[#ECE7D1]"
+                        key={size} onClick={() => { if (!isOutOfStock) { setSelectedSize(size); setSizeError(false); } }} disabled={isOutOfStock}
+                        className={`py-4 rounded-[1.2rem] font-sans text-[12px] uppercase tracking-widest transition-all duration-200 relative ${
+                          isOutOfStock ? "bg-white/5 text-white/20 cursor-not-allowed border border-white/5" 
+                          : selectedSize === size ? "bg-white text-black shadow-lg font-bold" : "glass-button text-white/80 hover:bg-white/10"
                         }`}
                       >
                         {size}
-                        {isOutOfStock && (
-                          <span className="absolute inset-0 flex items-center justify-center">
-                            <span className="w-full h-px bg-[#1A1A17] rotate-45 absolute" />
-                          </span>
-                        )}
                       </button>
                     );
                   })}
                 </div>
               </div>
 
-              {/* CTA Buttons */}
-              <div className="flex gap-3 mb-8">
+              <div className="flex gap-5 mb-10">
                 <button
-                  onClick={handleAddToCart}
-                  disabled={availableGSMs.length === 0}
-                  className={`flex-1 py-4 font-sans text-[11px] font-bold uppercase tracking-[0.2em] flex items-center justify-center gap-2 transition-all duration-300 border ${
-                    added
-                      ? "bg-[#ECE7D1] border-[#ECE7D1] text-[#050505]"
-                      : availableGSMs.length === 0
-                      ? "bg-[#0D0D0B] border-[#1A1A17] text-[#403F38] cursor-not-allowed"
-                      : "bg-[#EE3C24] border-[#EE3C24] text-[#050505] hover:bg-[#ECE7D1] hover:border-[#ECE7D1]"
+                  onClick={handleAddToCart} disabled={availableGSMs.length === 0}
+                  className={`flex-1 py-6 rounded-full font-sans text-[12px] font-bold uppercase tracking-[0.2em] flex items-center justify-center gap-3 transition-all duration-300 shadow-xl ${
+                    added ? "bg-white text-black" : availableGSMs.length === 0 ? "glass-button text-white/30 cursor-not-allowed" : "bg-[#EE3C24] text-white hover:bg-white hover:text-black"
                   }`}
                 >
-                  {added ? <><Check size={14} strokeWidth={2} /> Added</> : availableGSMs.length === 0 ? "Out of Stock" : "Add to Cart"}
-                </button>
-                <button className="flex-1 py-4 font-sans text-[11px] font-bold uppercase tracking-[0.2em] border border-[#ECE7D1] text-[#ECE7D1] hover:bg-[#ECE7D1] hover:text-[#050505] transition-all duration-300">
-                  Buy Now
+                  {added ? <><Check size={18} strokeWidth={2} /> Added</> : availableGSMs.length === 0 ? "Out of Stock" : "Add to Cart"}
                 </button>
               </div>
 
-              {/* Trust badges */}
-              <div className="space-y-2.5 pt-6 border-t border-[#1A1A17]">
-                {[
-                  "✓  Free worldwide shipping over ₹1999",
-                  "✓  30-day returns policy",
-                  "✓  Secure checkout",
-                ].map((badge) => (
-                  <p key={badge} className="font-sans text-[9px] tracking-widest text-[#555450]">{badge}</p>
+              <div className="space-y-4 pt-8 border-t border-white/10">
+                {["✓ Free worldwide shipping over ₹1999", "✓ 30-day unworn returns", "✓ Encrypted secure checkout"].map((badge) => (
+                  <p key={badge} className="font-sans text-[11px] tracking-widest text-white/50">{badge}</p>
                 ))}
               </div>
-
-              {/* ── TECHNICAL SPECIFICATION ── */}
-              <div className="mt-10 pt-10 border-t border-[#1A1A17]">
-                <div className="flex items-center gap-3 mb-6">
-                  <span className="font-sans text-[9px] uppercase tracking-[0.25em] text-[#EE3C24]">Fabric & Details</span>
-                  <div className="flex-1 h-px bg-[#1A1A17]" />
-                </div>
-                
-                <div className="grid grid-cols-2 gap-0 border-t border-l border-[#1A1A17]">
-                  {FABRIC_SPECS.map((spec, index) => (
-                    <div 
-                      key={spec.label} 
-                      className={`border-r border-b border-[#1A1A17] p-5 flex flex-col gap-2 ${
-                        index === FABRIC_SPECS.length - 1 && FABRIC_SPECS.length % 2 !== 0 ? 'col-span-2' : ''
-                      }`}
-                    >
-                      <span className="text-lg text-[#EE3C24]">{spec.icon}</span>
-                      <div>
-                        <p className="font-sans text-[8px] uppercase tracking-[0.2em] text-[#6B6A5E] mb-1">{spec.label}</p>
-                        <p className="font-sans text-[10px] uppercase tracking-[0.12em] text-[#ECE7D1]">{spec.value}</p>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
             </div>
           </div>
         </div>
       </section>
 
-      {/* ── SECTION 02: PRODUCT STORY ── */}
-      <section className="border-b border-[#1A1A17] py-20 md:py-28">
-        <div className="max-w-350 mx-auto px-6 md:px-10">
-          <div className="flex items-center gap-4 mb-12">
-            <span className="font-sans text-[9px] uppercase tracking-[0.25em] text-[#EE3C24]">02 / PRODUCT STORY</span>
-            <div className="flex-1 h-px bg-[#1A1A17]" />
+      {/* ── TECHNICAL SPECIFICATION ── */}
+      <section className="mb-24 w-full">
+        <div className="w-full max-w-[2000px] mx-auto px-4 sm:px-8 md:px-12 lg:px-16 xl:px-24">
+          <div className="flex items-center gap-5 mb-10">
+            <span className="font-sans text-[10px] md:text-[11px] uppercase tracking-[0.25em] text-[#EE3C24]">Technical Specs</span>
+            <div className="flex-1 h-px bg-white/10" />
           </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-0">
-            {/* Left: large lifestyle image + small fabric close-up */}
-            <div className="relative border-r border-[#1A1A17]">
-              <div className="grid grid-cols-2 gap-0 h-full">
-                <div className="relative aspect-3/4 border-r border-[#1A1A17] bg-[#0D0D0B]">
-                  {images[1]?.url ? (
-                    <Image src={images[1].url} alt="Lifestyle" fill className="object-cover" />
-                  ) : (
-                    <div className="w-full h-full flex flex-col items-center justify-center gap-3">
-                      <span className="font-sans text-[9px] uppercase tracking-[0.15em] text-[#403F38]">[ LIFESTYLE IMAGE ]</span>
-                      <span className="font-sans text-[8px] uppercase tracking-widest text-[#1A1A17]">editorial · campaign</span>
-                    </div>
-                  )}
-                </div>
-                <div className="flex flex-col">
-                  <div className="flex-1 relative bg-[#0D0D0B] border-b border-[#1A1A17]">
-                    {images[2]?.url ? (
-                      <Image src={images[2].url} alt="Fabric close-up" fill className="object-cover" />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center">
-                        <span className="font-sans text-[9px] uppercase tracking-[0.12em] text-[#403F38]">[ FABRIC CLOSE-UP ]</span>
-                      </div>
-                    )}
-                  </div>
-                  <div className="p-6">
-                    <p className="font-sans text-[9px] uppercase tracking-[0.2em] text-[#EE3C24] mb-3">Item Description</p>
-                    <p className="font-sans text-[11px] leading-[1.8] text-[#6B6A5E]">
-                      {product.description || "Ultra-dense construction. Engineered for shape retention wash after wash. A statement in restraint."}
-                    </p>
+          <div className="grid grid-cols-2 md:grid-cols-5 gap-4 md:gap-6">
+             {FABRIC_SPECS.map((spec) => (
+                <div key={spec.label} className="glass-panel p-8 rounded-[2rem] flex flex-col gap-4 shadow-lg">
+                  <span className="text-3xl text-white/80 drop-shadow-md">{spec.icon}</span>
+                  <div>
+                    <p className="font-sans text-[10px] uppercase tracking-[0.2em] text-white/40 mb-2">{spec.label}</p>
+                    <p className="font-sans text-[12px] uppercase tracking-[0.12em] text-white/90">{spec.value}</p>
                   </div>
                 </div>
-              </div>
-            </div>
+             ))}
+          </div>
+        </div>
+      </section>
 
-            {/* Right: Headline + description */}
-            <div className="p-10 md:p-16 flex flex-col justify-center">
-              <h2 className="font-serif text-[clamp(2.5rem,5vw,4.5rem)] leading-[0.88] text-[#ECE7D1] mb-8">
-                A study in<br />restraint.<br />
-                <em className="text-[#EE3C24]">Crafted for<br />the archive.</em>
+      {/* ── SECTION 02: PRODUCT STORY ── */}
+      <section className="mb-24 w-full">
+        <div className="w-full max-w-[2000px] mx-auto px-4 sm:px-8 md:px-12 lg:px-16 xl:px-24">
+          <div className="glass-panel rounded-[3rem] overflow-hidden flex flex-col md:grid md:grid-cols-2 shadow-2xl">
+            <div className="p-10 md:p-16 lg:p-24 xl:p-32 flex flex-col justify-center">
+              <span className="font-sans text-[10px] uppercase tracking-[0.25em] text-white/40 mb-8 md:mb-12">02 / PRODUCT STORY</span>
+              <h2 className="font-serif text-[clamp(3rem,5vw,5.5rem)] leading-[0.9] text-white mb-8 md:mb-12 drop-shadow-lg">
+                A study in restraint.<br /><em className="text-[#EE3C24]">Crafted for the archive.</em>
               </h2>
-              <p className="font-sans text-[12px] leading-[1.9] tracking-[0.03em] text-[#969382] max-w-sm">
+              <p className="font-sans text-[14px] xl:text-[16px] leading-[1.9] tracking-[0.03em] text-white/60 max-w-xl">
                 Every garment begins with an obsession. Over fabric weight. Over silhouette. Over the exact moment a collar collapses just right. This piece is no different.
               </p>
+            </div>
+            <div className="relative aspect-square md:aspect-auto">
+              {images[1]?.url ? (
+                  <Image src={images[1].url} alt="Story" fill className="object-cover" />
+              ) : (
+                  <div className="w-full h-full bg-white/5 flex items-center justify-center">
+                      <span className="text-white/20 text-[11px] tracking-widest uppercase">No Image Available</span>
+                  </div>
+              )}
+              <div className="absolute inset-0 bg-linear-to-l from-transparent to-[#050505]/80 md:to-black/40" />
             </div>
           </div>
         </div>
       </section>
 
       {/* ── SECTION 03: MODEL FIT PREVIEW ── */}
-      <section className="border-b border-[#1A1A17] py-20">
-        <div className="max-w-350 mx-auto px-6 md:px-10">
-          <div className="flex items-center gap-4 mb-4">
-            <span className="font-sans text-[9px] uppercase tracking-[0.25em] text-[#EE3C24]">03 / MODEL FIT PREVIEW</span>
-            <div className="flex-1 h-px bg-[#1A1A17]" />
-          </div>
-          <div className="flex items-end justify-between mb-10">
-            <h3 className="font-serif text-3xl md:text-4xl text-[#ECE7D1]">On the<br />model.</h3>
-            <p className="font-sans text-[9px] uppercase tracking-[0.15em] text-[#6B6A5E]">
-              Model height · wearing size <span className="text-[#ECE7D1]">M</span>
+      <section className="mb-24 w-full">
+        <div className="w-full max-w-[2000px] mx-auto px-4 sm:px-8 md:px-12 lg:px-16 xl:px-24">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-10">
+            <h3 className="font-serif text-4xl md:text-5xl xl:text-6xl text-white">On the model.</h3>
+            <p className="font-sans text-[11px] uppercase tracking-[0.15em] glass-panel px-6 py-3 rounded-full text-white/70 w-fit shadow-lg">
+              Height 6'1" · <span className="text-white font-bold">Size M</span>
             </p>
           </div>
 
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-0 border-t border-l border-[#1A1A17]">
-            <div className="col-span-1 row-span-2 border-r border-b border-[#1A1A17] relative aspect-3/4 bg-[#0D0D0B]">
-              {images[0]?.url ? (
-                <Image src={images[0].url} alt="Front view" fill className="object-cover" />
-              ) : (
-                <div className="w-full h-full flex items-center justify-center">
-                  <span className="font-sans text-[9px] uppercase tracking-[0.12em] text-[#403F38]">[ FRONT VIEW ]</span>
-                </div>
-              )}
-              <div className="absolute bottom-4 left-4">
-                <span className="font-sans text-[8px] uppercase tracking-[0.15em] text-[#6B6A5E] bg-black/60 backdrop-blur-sm px-2 py-1 border border-[#1A1A17]">Front</span>
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
+            <div className="col-span-1 row-span-2 glass-panel rounded-[2rem] md:rounded-[3rem] relative aspect-3/4 overflow-hidden p-2 md:p-3 shadow-xl">
+              <div className="relative w-full h-full rounded-[1.5rem] md:rounded-[2.5rem] overflow-hidden">
+                {images[0]?.url ? (
+                    <Image src={images[0].url} alt="Front view" fill className="object-cover" />
+                ) : (
+                    <div className="w-full h-full bg-white/5 flex items-center justify-center"><span className="text-white/30 text-[10px] uppercase tracking-widest">No Image</span></div>
+                )}
+                <span className="absolute bottom-6 left-6 font-sans text-[10px] uppercase tracking-[0.15em] text-white glass-panel px-4 py-2 rounded-full shadow-lg">Front</span>
               </div>
             </div>
-            {/* Side view */}
-            <div className="border-r border-b border-[#1A1A17] relative aspect-3/4 bg-[#0D0D0B]">
-              {images[1]?.url ? (
-                <Image src={images[1].url} alt="Side view" fill className="object-cover" />
-              ) : (
-                <div className="w-full h-full flex items-center justify-center">
-                  <span className="font-sans text-[9px] uppercase tracking-[0.12em] text-[#403F38]">[ SIDE VIEW ]</span>
-                </div>
-              )}
+            
+            <div className="glass-panel rounded-[2rem] md:rounded-[3rem] relative aspect-3/4 overflow-hidden p-2 md:p-3 shadow-xl">
+              <div className="relative w-full h-full rounded-[1.5rem] md:rounded-[2.5rem] overflow-hidden">
+                 {images[1]?.url ? (
+                    <Image src={images[1].url} alt="Side view" fill className="object-cover" />
+                 ) : (
+                    <div className="w-full h-full bg-white/5 flex items-center justify-center"><span className="text-white/30 text-[10px] uppercase tracking-widest">No Image</span></div>
+                 )}
+              </div>
             </div>
-            {/* Back view */}
-            <div className="border-r border-b border-[#1A1A17] relative aspect-3/4 bg-[#0D0D0B]">
-              {images[2]?.url ? (
-                <Image src={images[2].url} alt="Back view" fill className="object-cover" />
-              ) : (
-                <div className="w-full h-full flex items-center justify-center">
-                  <span className="font-sans text-[9px] uppercase tracking-[0.12em] text-[#403F38]">[ BACK VIEW ]</span>
-                </div>
-              )}
+            
+            <div className="glass-panel rounded-[2rem] md:rounded-[3rem] relative aspect-3/4 overflow-hidden p-2 md:p-3 shadow-xl">
+               <div className="relative w-full h-full rounded-[1.5rem] md:rounded-[2.5rem] overflow-hidden">
+                 {images[2]?.url ? (
+                    <Image src={images[2].url} alt="Back view" fill className="object-cover" />
+                 ) : (
+                    <div className="w-full h-full bg-white/5 flex items-center justify-center"><span className="text-white/30 text-[10px] uppercase tracking-widest">No Image</span></div>
+                 )}
+               </div>
             </div>
-            {/* Detail shot */}
-            <div className="border-r border-b border-[#1A1A17] relative aspect-square bg-[#0D0D0B]">
-              {images[3]?.url ? (
-                <Image src={images[3].url} alt="Detail" fill className="object-cover" />
-              ) : (
-                <div className="w-full h-full flex items-center justify-center">
-                  <span className="font-sans text-[9px] uppercase tracking-[0.12em] text-[#403F38]">[ DETAIL ]</span>
-                </div>
-              )}
-            </div>
-            {/* Notes */}
-            <div className="border-r border-b border-[#1A1A17] p-6 flex flex-col gap-3">
-              <p className="font-sans text-[9px] uppercase tracking-[0.2em] text-[#EE3C24]">FIT NOTES</p>
-              <ul className="space-y-2">
-                {[
-                  "Shoulder seam past tip",
-                  "Sleeves hit mid forearm",
-                  "Canvas fits mid-thigh",
-                  "Size down for cropped",
-                ].map((note) => (
-                  <li key={note} className="font-sans text-[10px] text-[#6B6A5E] leading-[1.6] flex items-start gap-2">
-                    <span className="text-[#EE3C24] mt-0.5">—</span>{note}
+            
+            <div className="glass-panel rounded-[2rem] md:rounded-[3rem] p-10 xl:p-14 flex flex-col gap-6 justify-center shadow-xl">
+              <p className="font-sans text-[11px] uppercase tracking-[0.2em] text-[#EE3C24]">FIT NOTES</p>
+              <ul className="space-y-5">
+                {["Shoulder seam past tip", "Sleeves hit mid forearm", "Canvas fits mid-thigh", "Size down for cropped"].map((note) => (
+                  <li key={note} className="font-sans text-[12px] xl:text-[13px] text-white/70 leading-[1.6] flex items-start gap-4">
+                    <span className="text-white/30 mt-0.5">—</span>{note}
                   </li>
                 ))}
               </ul>
@@ -647,94 +430,30 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
       </section>
 
       {/* ── SECTION 04: RELATED PRODUCTS ── */}
-      <section className="border-b border-[#1A1A17] py-20">
-        <div className="max-w-350 mx-auto px-6 md:px-10">
-          <div className="flex items-center gap-4 mb-4">
-            <span className="font-sans text-[9px] uppercase tracking-[0.25em] text-[#EE3C24]">04 / RELATED PRODUCT</span>
-            <div className="flex-1 h-px bg-[#1A1A17]" />
-          </div>
-          <div className="flex items-end justify-between mb-10">
-            <h3 className="font-serif text-3xl md:text-4xl text-[#ECE7D1]">You might also<br />like</h3>
-            <Link href="/products" className="font-sans text-[9px] uppercase tracking-[0.18em] text-[#6B6A5E] hover:text-[#EE3C24] transition-colors flex items-center gap-1.5">
-              View all <ChevronRight size={10} />
+      <section className="mb-24 w-full">
+        <div className="w-full max-w-[2000px] mx-auto px-4 sm:px-8 md:px-12 lg:px-16 xl:px-24">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-10">
+            <h3 className="font-serif text-4xl md:text-5xl xl:text-6xl text-white">You might like</h3>
+            <Link href="/products" className="font-sans text-[11px] uppercase tracking-[0.18em] text-white/60 hover:text-black hover:bg-white transition-colors glass-button px-8 py-4 rounded-full shadow-lg w-fit">
+              View all 
             </Link>
           </div>
 
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+          <div className="grid grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-4 md:gap-6 xl:gap-8">
             {relatedProducts.length > 0 ? (
-                relatedProducts.map((relatedProduct) => {
-                    const isSoldOut = (relatedProduct.total_stock ?? 0) <= 0;
-                    const imageUrl = relatedProduct.product_images?.[0]?.url || "/placeholder-shirt.png";
-                    const isWishlisted = wishlist.includes(relatedProduct.id);
-                    const isAdded = quickAddStatus[relatedProduct.id];
-
-                    return (
-                        <Link href={`/products/${relatedProduct.id}`} key={relatedProduct.id}>
-                            <div className="group flex flex-col border border-zinc-800 rounded-xl overflow-hidden bg-[#0a0a0a] hover:border-zinc-600 transition-colors">
-                                <div className="relative aspect-square flex items-center justify-center bg-[#0f0f0f] border-b border-zinc-800">
-                                    <div className="absolute top-4 left-4 w-full flex justify-between pr-8 z-10 text-red-700">
-                                        {isSoldOut && <Badge variant="soldOut">Sold Out</Badge>}
-                                        <button 
-                                            onClick={(e) => toggleWishlist(e, relatedProduct.id)}
-                                            className={`transition-colors ml-auto ${isWishlisted ? 'text-[#EE3C24]' : 'text-zinc-500 hover:text-white'}`}
-                                        >
-                                            <Bookmark size={20} strokeWidth={1.5} fill={isWishlisted ? "#EE3C24" : "none"} />
-                                        </button>
-                                    </div>
-
-                                    <div className="relative w-full h-full flex items-center justify-center opacity-80 group-hover:opacity-100 transition-opacity">
-                                        <Image
-                                            src={imageUrl}
-                                            alt={relatedProduct.name}
-                                            fill
-                                            className="object-contain"
-                                        />
-                                        <span className="absolute text-zinc-800 font-bold tracking-widest text-lg z-[-1] select-none">
-                                            DRIPDUO
-                                        </span>
-                                    </div>
-
-                                    <button
-                                        disabled={isSoldOut}
-                                        className={`absolute bottom-4 right-4 p-1.5 border rounded-full transition-all ${
-                                            isAdded 
-                                                ? "bg-[#ECE7D1] border-[#ECE7D1] text-[#050505]" 
-                                                : "border-zinc-600 text-zinc-400 hover:text-white hover:border-white bg-[#0a0a0a] disabled:opacity-50 disabled:cursor-not-allowed"
-                                        }`}
-                                        onClick={(e) => handleQuickAdd(e, relatedProduct)}
-                                    >
-                                        {isAdded ? <Check size={18} strokeWidth={2} /> : <Plus size={18} strokeWidth={2} />}
-                                    </button>
-                                </div>
-
-                                <div className="p-4 flex flex-col gap-1">
-                                    <h3 className="text-sm text-zinc-200 truncate">{relatedProduct.name}</h3>
-                                    <div className="flex items-center justify-between">
-                                        <div className="flex items-center gap-2">
-                                            <span className="text-sm text-zinc-400">
-                                                Rs. {relatedProduct.final_price?.toLocaleString() || relatedProduct.price?.toLocaleString()}
-                                            </span>
-                                            {(relatedProduct.discount ?? 0) > 0 && (
-                                                <span className="text-xs text-zinc-600 line-through">
-                                                    {relatedProduct.price?.toLocaleString()}
-                                                </span>
-                                            )}
-                                        </div>
-
-                                        <div className="flex gap-1">
-                                            <div className="w-2.5 h-2.5 rounded-full border border-zinc-500 bg-zinc-800" />
-                                            <div className="w-2.5 h-2.5 rounded-full border border-zinc-500 bg-zinc-400" />
-                                            <div className="w-2.5 h-2.5 rounded-full border border-zinc-500 bg-transparent" />
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </Link>
-                    );
-                })
+                relatedProducts.map((relatedProduct) => (
+                    <ProductCard 
+                        key={relatedProduct.id}
+                        product={relatedProduct}
+                        onQuickAdd={(e: React.MouseEvent) => handleQuickAdd(e, relatedProduct)}
+                        onToggleWishlist={(e: React.MouseEvent) => toggleWishlist(e, relatedProduct.id)}
+                        isWishlisted={wishlist.includes(relatedProduct.id)}
+                        isAdded={quickAddStatus[relatedProduct.id]}
+                    />
+                ))
             ) : (
-                <div className="col-span-full py-10 flex items-center justify-center border border-[#1A1A17] rounded-xl bg-[#0a0a0a]">
-                    <p className="font-sans text-[10px] uppercase tracking-[0.2em] text-[#6B6A5E] animate-pulse">Loading archive...</p>
+                <div className="col-span-full py-32 flex items-center justify-center glass-panel rounded-3xl">
+                    <p className="font-sans text-[11px] uppercase tracking-[0.2em] text-white/40 animate-pulse">Loading archive...</p>
                 </div>
             )}
           </div>
@@ -742,51 +461,39 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
       </section>
 
       {/* ── SECTION 05: REVIEWS ── */}
-      <section className="border-b border-[#1A1A17] py-20">
-        <div className="max-w-350 mx-auto px-6 md:px-10">
-          <div className="flex items-center gap-4 mb-12">
-            <span className="font-sans text-[9px] uppercase tracking-[0.25em] text-[#EE3C24]">05 / REVIEWS</span>
-            <div className="flex-1 h-px bg-[#1A1A17]" />
+      <section className="mb-24 w-full">
+        <div className="w-full max-w-[2000px] mx-auto px-4 sm:px-8 md:px-12 lg:px-16 xl:px-24">
+          <div className="flex items-center gap-5 mb-10">
+            <span className="font-sans text-[10px] md:text-[11px] uppercase tracking-[0.25em] text-[#EE3C24]">Community Voice</span>
+            <div className="flex-1 h-px bg-white/10" />
           </div>
-          <h3 className="font-serif text-3xl md:text-4xl text-[#ECE7D1] mb-10">What buyers say</h3>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-0 border-t border-l border-[#1A1A17]">
-            <div className="border-r border-b border-[#1A1A17] p-8 flex flex-col justify-center gap-4">
-              <div className="flex items-end gap-2">
-                <span className="font-serif text-[5rem] leading-none text-[#ECE7D1]">4.6</span>
-                <span className="font-sans text-[11px] uppercase tracking-[0.15em] text-[#6B6A5E] mb-4">/ 5.0</span>
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 md:gap-8">
+            <div className="glass-panel rounded-[3rem] p-12 xl:p-16 flex flex-col justify-center gap-6 shadow-2xl">
+              <div className="flex items-end gap-4">
+                <span className="font-serif text-[7rem] xl:text-[8rem] leading-none text-white drop-shadow-lg">4.6</span>
+                <span className="font-sans text-[14px] uppercase tracking-[0.15em] text-white/40 mb-6">/ 5.0</span>
               </div>
-              <div className="flex gap-0.5">
-                {[1,2,3,4,5].map(s => (
-                  <Star key={s} size={14} fill={s <= 4 ? "#EE3C24" : "none"} stroke={s <= 4 ? "#EE3C24" : "#403F38"} />
-                ))}
+              <div className="flex gap-1.5 mb-2">
+                {[1,2,3,4,5].map(s => <Star key={s} size={20} fill={s <= 4 ? "#EE3C24" : "none"} stroke={s <= 4 ? "#EE3C24" : "rgba(255,255,255,0.2)"} /> )}
               </div>
-              <p className="font-sans text-[9px] uppercase tracking-[0.15em] text-[#6B6A5E]">Based on 120 reviews</p>
-              <button className="mt-2 font-sans text-[9px] uppercase tracking-[0.15em] text-[#EE3C24] border-b border-[#EE3C24]/40 pb-0.5 w-fit hover:border-[#EE3C24] transition-colors">
-                Read all 120
-              </button>
+              <p className="font-sans text-[12px] uppercase tracking-[0.15em] text-white/60">Based on 120 reviews</p>
             </div>
 
             {MOCK_REVIEWS.map((review) => (
-              <div key={review.id} className="border-r border-b border-[#1A1A17] p-8 flex flex-col justify-between gap-6">
+              <div key={review.id} className="glass-panel rounded-[3rem] p-12 xl:p-16 flex flex-col justify-between gap-10 shadow-xl">
                 <div>
-                  <div className="flex items-center gap-2 mb-3">
-                    <div className="flex gap-0.5">
-                      {[1,2,3,4,5].map(s => (
-                        <Star key={s} size={9} fill={s <= review.rating ? "#EE3C24" : "none"} stroke={s <= review.rating ? "#EE3C24" : "#403F38"} />
-                      ))}
+                  <div className="flex items-center gap-4 mb-6">
+                    <div className="flex gap-1">
+                      {[1,2,3,4,5].map(s => <Star key={s} size={14} fill={s <= review.rating ? "#EE3C24" : "none"} stroke={s <= review.rating ? "#EE3C24" : "rgba(255,255,255,0.2)"} /> )}
                     </div>
-                    {review.verified && (
-                      <span className="font-sans text-[8px] uppercase tracking-[0.12em] text-[#EE3C24] border border-[#EE3C24]/30 px-1.5 py-0.5">Verified</span>
-                    )}
+                    {review.verified && <span className="font-sans text-[10px] uppercase tracking-[0.12em] text-[#EE3C24] glass-panel px-3 py-1.5 rounded-lg shadow-md">Verified</span>}
                   </div>
-                  <p className="font-sans text-[11px] leading-[1.8] text-[#969382]">&ldquo;{review.text}&rdquo;</p>
+                  <p className="font-sans text-[14px] xl:text-[16px] leading-[1.8] text-white/80">&ldquo;{review.text}&rdquo;</p>
                 </div>
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="font-sans text-[10px] uppercase tracking-[0.12em] text-[#ECE7D1]">{review.name}</p>
-                    <p className="font-sans text-[9px] tracking-widest text-[#403F38] mt-0.5">{review.date}</p>
-                  </div>
+                <div>
+                  <p className="font-sans text-[12px] uppercase tracking-[0.12em] text-white">{review.name}</p>
+                  <p className="font-sans text-[11px] tracking-widest text-white/40 mt-2">{review.date}</p>
                 </div>
               </div>
             ))}
@@ -795,38 +502,31 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
       </section>
 
       {/* ── SECTION 06: FAQ ── */}
-      <section className="border-b border-[#1A1A17] py-20">
-        <div className="max-w-350 mx-auto px-6 md:px-10">
-          <div className="flex items-center gap-4 mb-12">
-            <span className="font-sans text-[9px] uppercase tracking-[0.25em] text-[#EE3C24]">06 / FAQ</span>
-            <div className="flex-1 h-px bg-[#1A1A17]" />
-          </div>
-          <h3 className="font-serif text-3xl md:text-4xl text-[#ECE7D1] mb-10">Frequently asked</h3>
+      <section className="mb-10 w-full">
+        <div className="w-full max-w-[1200px] mx-auto px-4 sm:px-8 md:px-12">
+          <h3 className="font-serif text-4xl md:text-5xl xl:text-6xl text-center text-white mb-14">Frequently asked</h3>
 
-          <div className="space-y-0 border-t border-[#1A1A17]">
+          <div className="space-y-5">
             {FAQ_ITEMS.map((item, i) => (
-              <div key={i} className="border-b border-[#1A1A17]">
+              <div key={i} className="glass-panel rounded-3xl overflow-hidden shadow-lg">
                 <button
                   onClick={() => setOpenFaq(openFaq === i ? null : i)}
-                  className="w-full flex items-center justify-between py-5 text-left group"
+                  className="w-full flex items-center justify-between p-8 text-left group transition-colors hover:bg-white/5"
                 >
-                  <span className="font-sans text-[11px] uppercase tracking-[0.12em] text-[#ECE7D1] group-hover:text-[#EE3C24] transition-colors">
+                  <span className="font-sans text-[13px] md:text-[14px] uppercase tracking-[0.12em] text-white/80 group-hover:text-white transition-colors">
                     {item.q}
                   </span>
                   <motion.div animate={{ rotate: openFaq === i ? 45 : 0 }} transition={{ duration: 0.3 }}>
-                    <Plus size={14} strokeWidth={1.5} className={`${openFaq === i ? "text-[#EE3C24]" : "text-[#403F38]"} transition-colors`} />
+                    <Plus size={20} strokeWidth={1.5} className={`${openFaq === i ? "text-[#EE3C24]" : "text-white/40"}`} />
                   </motion.div>
                 </button>
                 <AnimatePresence>
                   {openFaq === i && (
                     <motion.div
-                      initial={{ height: 0, opacity: 0 }}
-                      animate={{ height: "auto", opacity: 1 }}
-                      exit={{ height: 0, opacity: 0 }}
-                      transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
-                      className="overflow-hidden"
+                      initial={{ height: 0, opacity: 0 }} animate={{ height: "auto", opacity: 1 }} exit={{ height: 0, opacity: 0 }}
+                      transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }} className="overflow-hidden"
                     >
-                      <p className="font-sans text-[11px] leading-[1.8] text-[#6B6A5E] pb-5 max-w-2xl">{item.a}</p>
+                      <p className="font-sans text-[14px] leading-[1.8] text-white/60 p-8 pt-0">{item.a}</p>
                     </motion.div>
                   )}
                 </AnimatePresence>

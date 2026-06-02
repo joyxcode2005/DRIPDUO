@@ -4,14 +4,12 @@ import { useState, useMemo, useEffect } from "react";
 import { getAllCategories, getAllProducts, getAllProductTypes } from "@/services/products";
 import { useCart } from "@/lib/CartContext";
 
-// Components
 import ProductCard from "@/components/product/ProductCard";
 import { Product } from "@/components/product/ProductCard";
 import FilterSidebar from "@/components/filters/FilterSidebar";
 import FilterToolbar from "@/components/filters/FilterToolbar";
 import Link from "next/link";
 
-// --- Types ---
 type Category = {
     id: string;
     name: string;
@@ -20,9 +18,7 @@ type Category = {
     parent_id: string | null;
 };
 
-type CategoryWithSubs = Category & {
-    subcategories: Category[];
-};
+type CategoryWithSubs = Category & { subcategories: Category[]; };
 
 type Product_Type = {
     id: string;
@@ -34,7 +30,6 @@ type Product_Type = {
 export default function ProductsPage() {
     const { addToCart } = useCart();
     
-    // --- State ---
     const [activeCategory, setActiveCategory] = useState("All");
     const [activeType, setActiveType] = useState("All");
     const [filterDrawerOpen, setFilterDrawerOpen] = useState(false);
@@ -43,41 +38,32 @@ export default function ProductsPage() {
     const [categories, setCategories] = useState<Category[]>([]);
     const [productTypes, setProductTypes] = useState<Product_Type[]>([]);
 
-    // Interactivity States
     const [wishlist, setWishlist] = useState<string[]>([]);
     const [quickAddStatus, setQuickAddStatus] = useState<Record<string, boolean>>({});
 
-    // --- Data Fetching ---
     useEffect(() => {
         const fetchProducts = async () => {
             try {
                 const fetchedProducts = await getAllProducts();
-                // Safely extract data in case API wraps it in { data: [...] }
                 const productsData = Array.isArray(fetchedProducts) 
                     ? fetchedProducts 
                     : (fetchedProducts as any)?.data || [];
                 setProducts(productsData);
-            } catch (error) {
-                console.error("Error fetching products:", error);
-            }
+            } catch (error) { console.error("Error fetching products:", error); }
         };
 
         const fetchCategories = async () => {
             try {
                 const fetchedCategories = await getAllCategories();
                 setCategories(fetchedCategories);
-            } catch (error) {
-                console.error("Error fetching categories:", error);
-            }
+            } catch (error) { console.error("Error fetching categories:", error); }
         };
 
         const fetchProductTypes = async () => {
             try {
                 const types = await getAllProductTypes();
                 setProductTypes(types);
-            } catch (error) {
-                console.error("Error fetching product types:", error);
-            }
+            } catch (error) { console.error("Error fetching product types:", error); }
         };
 
         fetchProducts();
@@ -85,22 +71,17 @@ export default function ProductsPage() {
         fetchProductTypes();
     }, []);
 
-    // --- Action Handlers ---
     const toggleWishlist = (e: React.MouseEvent, productId: string) => {
         e.preventDefault();
         e.stopPropagation();
-        setWishlist(prev => 
-            prev.includes(productId) ? prev.filter(id => id !== productId) : [...prev, productId]
-        );
+        setWishlist(prev => prev.includes(productId) ? prev.filter(id => id !== productId) : [...prev, productId]);
     };
 
     const handleQuickAdd = async (e: React.MouseEvent, product: any) => {
         e.preventDefault();
         e.stopPropagation();
         
-        // Default to the first available variant for quick add
         const defaultVariant = product.variants?.[0];
-        
         try {
             await addToCart({
                 productId: product.id,
@@ -115,60 +96,38 @@ export default function ProductsPage() {
             });
             
             setQuickAddStatus(prev => ({ ...prev, [product.id]: true }));
-            setTimeout(() => {
-                setQuickAddStatus(prev => ({ ...prev, [product.id]: false }));
-            }, 2000);
-        } catch (error) {
-            console.error("Error adding product to cart:", error);
-        }
+            setTimeout(() => setQuickAddStatus(prev => ({ ...prev, [product.id]: false })), 2000);
+        } catch (error) { console.error("Error adding product to cart:", error); }
     };
 
-    // --- Logic & Filtering ---
     const categoryTree = useMemo<CategoryWithSubs[]>(() => {
         const parents = categories.filter((c) => !c.parent_id);
-        return parents.map((p) => ({
-            ...p,
-            subcategories: categories.filter((c) => c.parent_id === p.id),
-        }));
+        return parents.map((p) => ({ ...p, subcategories: categories.filter((c) => c.parent_id === p.id) }));
     }, [categories]);
 
     const filteredAndSortedProducts = useMemo(() => {
         let result = [...products];
 
-        // 1. Filter by Category
         if (activeCategory !== "All") {
             const parentCat = categoryTree.find((c) => c.slug === activeCategory);
             let targetSlugs = [activeCategory];
 
-            // If they selected a parent category, include all its subcategories in the search
             if (parentCat) {
-                targetSlugs = [
-                    activeCategory,
-                    ...parentCat.subcategories.map((sub) => sub.slug),
-                ];
+                targetSlugs = [activeCategory, ...parentCat.subcategories.map((sub) => sub.slug)];
             }
-
-            result = result.filter((p: any) =>
-                p.product_categories?.some((c: any) =>
-                    targetSlugs.includes(c.categories?.slug)
-                )
-            );
+            result = result.filter((p: any) => p.product_categories?.some((c: any) => targetSlugs.includes(c.categories?.slug)));
         }
 
-        // 2. Filter by Product Type (from the drawer)
         if (activeType !== "All") {
-            result = result.filter(
-                (p: any) => p.product_type?.name === activeType || p.product_type_id === activeType
-            );
+            result = result.filter((p: any) => p.product_type?.name === activeType || p.product_type_id === activeType);
         }
 
         return result;
     }, [products, activeCategory, activeType, categoryTree]);
 
     return (
-        <div className="min-h-screen bg-[#0a0a0a] text-white font-sans pt-16 selection:bg-zinc-800 relative">
+        <div className="min-h-screen text-white font-sans pt-20 relative z-10 w-full">
 
-            {/* 1. The new compact toolbar */}
             <FilterToolbar
                 activeCategory={activeCategory}
                 setActiveCategory={setActiveCategory}
@@ -176,26 +135,25 @@ export default function ProductsPage() {
                 onOpenFilter={() => setFilterDrawerOpen(true)}
             />
 
-            {/* 2. Main Product Grid */}
-            <main className="p-4 md:p-8 max-w-350 mx-auto">
+            <main className="p-4 sm:p-6 md:p-8 lg:p-12 xl:p-16 w-full max-w-[2000px] mx-auto">
                 {filteredAndSortedProducts.length === 0 ? (
-                    <div className="text-center py-32 flex flex-col items-center">
-                        <p className="text-zinc-500 text-xs tracking-widest uppercase mb-4">No items found</p>
+                    <div className="text-center py-32 flex flex-col items-center glass-panel rounded-3xl max-w-lg mx-auto mt-10">
+                        <p className="text-white/50 text-sm tracking-widest uppercase mb-6">No items found in archive</p>
                         <button
                             onClick={() => { setActiveCategory("All"); setActiveType("All"); }}
-                            className="text-white border-b border-white pb-1 text-xs tracking-widest uppercase hover:opacity-70 transition-opacity"
+                            className="glass-button px-8 py-4 text-xs tracking-widest uppercase text-white rounded-full hover:bg-white hover:text-black transition-colors"
                         >
                             Clear Filters
                         </button>
                     </div>
                 ) : (
-                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-6">
-                        {/* Changed grid layout to 2 columns on mobile and adjusted gap sizing */}
+                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-4 md:gap-6 xl:gap-8 pt-6">
+                        {/* Moved the comment inside the element to fix the JSX parsing error */}
+                        {/* Added xl:grid-cols-5 and 2xl:grid-cols-6 to take advantage of wide monitors */}
                         {filteredAndSortedProducts.map((product) => (
-                            <Link key={product.id} href={`/products/${product.id}`}>
+                            <Link key={product.id} href={`/products/${product.id}`} className="w-full">
                                 <ProductCard 
                                     product={product} 
-                                    // Pass down the interactivity props to the ProductCard
                                     onQuickAdd={(e: React.MouseEvent) => handleQuickAdd(e, product)}
                                     onToggleWishlist={(e: React.MouseEvent) => toggleWishlist(e, product.id)}
                                     isWishlisted={wishlist.includes(product.id)}
@@ -207,7 +165,6 @@ export default function ProductsPage() {
                 )}
             </main>
 
-            {/* 3. The sliding side drawer for advanced filters */}
             <FilterSidebar
                 isOpen={filterDrawerOpen}
                 onClose={() => setFilterDrawerOpen(false)}

@@ -24,14 +24,14 @@ export default function RootLayout({
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
       </head>
-      <body className="min-h-screen overflow-x-hidden bg-[#050505] text-[#ECE7D1] antialiased selection:bg-[#EE3C24] selection:text-black">
+      {/* Background updated to include a subtle ambient radial glow for glassmorphism refraction */}
+      <body className="min-h-screen overflow-x-hidden bg-[#050505] bg-[radial-gradient(ellipse_80%_80%_at_50%_-20%,rgba(120,119,198,0.12),rgba(255,255,255,0))] text-[#ECE7D1] antialiased selection:bg-[#EE3C24] selection:text-[#050505]">
 
         <CinematicLoader />
 
         <CartProvider>
           <QuickViewProvider>
             <Navbar />
-            {/* Removed pb-16 to allow images to hit the true bottom of the screen on mobile */}
             <div className="page-transition">{children}</div>
             <Footer />
             <CartDrawer />
