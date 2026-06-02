@@ -1,234 +1,112 @@
 "use client";
 
-import React, { useRef } from "react";
+import React from "react";
 import Link from "next/link";
-import Image from "next/image";
-import { ArrowRight } from "lucide-react";
-import { motion, useScroll, useTransform } from "framer-motion";
+import { ArrowLeft } from "lucide-react";
 import Reveal from "@/components/Reveal";
-import { SketchHighlight } from "@/components/SktechHighlight";
-import ClothButton from "@/components/ClothButton";
-
-const NOISE_SVG = `url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.08'/%3E%3C/svg%3E")`;
-
-const VALUES = [
-  {
-    num: "01",
-    title: "Obsession over compromise.",
-    body: "We don't settle for 'good enough'. Every GSM, every stitch, every silhouette is interrogated before it reaches you.",
-  },
-  {
-    num: "02",
-    title: "The archive mentality.",
-    body: "We build pieces meant to outlast trends. Not fast fashion. Not seasonal filler. Garments you keep for a decade.",
-  },
-  {
-    num: "03",
-    title: "Restraint as luxury.",
-    body: "No logos screaming. No excess decoration. The fabric does the talking. That's the DRIPDUO signature.",
-  },
-];
-
-const MILESTONES = [
-  { year: "2024", event: "Founded in Kolkata. First 100 units sold in 72 hours." },
-  { year: "2025", event: "Launched the 240 GSM heavyweight line. Partnership with premium Indian mills." },
-  { year: "2026", event: "FW26 collection. 5000+ members. International shipping begins." },
-];
+import { LayoutTextFlip } from "@/components/ui/layout-text-flip";
+import { SketchHighlight } from "@/components/ui/sketch-highlight";
 
 export default function AboutPage() {
-  const heroRef = useRef<HTMLElement>(null);
-  const coinRef = useRef<HTMLDivElement>(null);
-  const { scrollYProgress: heroScroll } = useScroll({ target: heroRef, offset: ["start start", "end start"] });
-  const heroParallax = useTransform(heroScroll, [0, 1], ["0%", "30%"]);
-
   return (
-    <main className="w-full overflow-x-clip bg-[#050505] text-[#ECE7D1] font-sans">
+    <div className="min-h-screen text-[#ECE7D1] font-sans relative z-10 pt-24 md:pt-32 pb-20 w-full overflow-x-hidden">
+      
+      {/* ── BACKGROUND NOISE ── */}
+      <div className="fixed inset-0 pointer-events-none mix-blend-overlay z-0 opacity-30 w-full" 
+           style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.05'/%3E%3C/svg%3E")` }} 
+      />
 
-      {/* ── HERO ── */}
-      <section ref={heroRef} className="relative h-[70vh] w-full overflow-hidden border-b border-[#1A1A17]">
-        <motion.div className="absolute inset-0 w-full h-[130%]" style={{ y: heroParallax }}>
-          <div className="absolute inset-0 bg-[#050505]" />
-          <div className="absolute inset-0" style={{ backgroundImage: NOISE_SVG, opacity: 0.04 }} />
-          {/* Abstract geometric */}
-          <div className="absolute inset-0 flex items-center justify-center overflow-hidden">
-            <div className="w-[600px] h-[600px] border border-[#1A1A17] rounded-full absolute opacity-20" />
-            <div className="w-[400px] h-[400px] border border-[#EE3C24]/10 rounded-full absolute opacity-30" />
-            <div className="w-[200px] h-[200px] border border-[#1A1A17] rounded-full absolute" />
+      <div className="w-full max-w-[2000px] mx-auto px-4 sm:px-8 md:px-12 lg:px-16 xl:px-24 relative z-10">
+        
+        {/* ── BACK BUTTON ── */}
+        <Reveal>
+          <div className="mb-8 md:mb-12">
+            <Link href="/" className="inline-flex items-center gap-3 font-sans text-[10px] md:text-[11px] uppercase tracking-[0.2em] text-white/60 hover:text-white transition-colors glass-panel px-6 py-3 rounded-full hover:bg-white/10 w-fit shadow-md">
+              <ArrowLeft size={14} strokeWidth={1.5} /> Back to Home
+            </Link>
           </div>
-        </motion.div>
+        </Reveal>
 
-        <div className="absolute inset-0 bg-gradient-to-t from-[#050505] via-transparent to-transparent pointer-events-none" />
-
-        <div className="absolute inset-0 flex flex-col items-start justify-end px-6 md:px-12 pb-16 z-10">
-          <Reveal>
-            <p className="font-sans text-[11px] tracking-[0.25em] uppercase text-[#EE3C24] flex items-center gap-3 mb-6">
-              <span className="w-8 h-px bg-[#EE3C24]" />Our Story
-            </p>
-          </Reveal>
-          <div className="overflow-hidden">
-            <Reveal>
-              <h1 className="font-serif italic leading-[0.85] tracking-[-0.02em] text-[#ECE7D1]" style={{ fontSize: "clamp(4rem,12vw,10rem)" }}>
-                Built from
+        {/* ── HERO EDITORIAL ── */}
+        <Reveal>
+          <div className="relative w-full h-[60vh] md:h-[75vh] glass-panel rounded-[2.5rem] md:rounded-[4rem] overflow-hidden mb-16 md:mb-24 shadow-2xl">
+            <img 
+              src="https://images.unsplash.com/photo-1550614000-4b95d4ebf6eb?q=80&w=2000&auto=format&fit=crop" 
+              alt="DRIPDUO Studio" 
+              className="absolute inset-0 w-full h-full object-cover grayscale-[0.8] opacity-60 hover:grayscale-0 transition-all duration-1000"
+            />
+            <div className="absolute inset-0 bg-linear-to-t from-[#050505] via-black/40 to-transparent" />
+            
+            <div className="absolute inset-0 flex flex-col items-center justify-center p-6 text-center">
+              <span className="font-sans text-[10px] md:text-[12px] uppercase tracking-[0.4em] text-[#EE3C24] mb-6 drop-shadow-md">The Genesis</span>
+              <h1 className="font-serif italic leading-[0.9] tracking-tight text-[#ECE7D1] drop-shadow-2xl" style={{ fontSize: "clamp(3.5rem, 10vw, 10rem)" }}>
+                <LayoutTextFlip words={["Our Story.", "The Archive.", "The Vision."]} />
               </h1>
-            </Reveal>
+            </div>
           </div>
-          <div className="overflow-hidden">
-            <Reveal className="delay-100">
-              <h1 className="font-serif italic leading-[0.85] tracking-[-0.02em] text-[#EE3C24]" style={{ fontSize: "clamp(4rem,12vw,10rem)" }}>
-                obsession.
-              </h1>
-            </Reveal>
-          </div>
-        </div>
+        </Reveal>
 
-        {/* Year stamp */}
-        <div className="absolute top-24 right-6 md:right-12 z-10">
-          <p className="font-sans text-[9px] uppercase tracking-[0.3em] text-[#403F38]">Est. 2024 · Kolkata</p>
-        </div>
-      </section>
-
-      {/* ── BRAND STATEMENT ── */}
-      <section className="border-b border-[#1A1A17] py-20 md:py-32">
-        <div className="max-w-[1400px] mx-auto px-6 md:px-12">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-0">
-            <Reveal className="border-r border-[#1A1A17] pr-0 md:pr-16 pb-12 md:pb-0">
-              <p className="font-sans text-[9px] uppercase tracking-[0.25em] text-[#EE3C24] mb-8 flex items-center gap-2">
-                <span className="w-6 h-px bg-[#EE3C24]" />The Brand
-              </p>
-              <p className="font-serif text-[clamp(1.5rem,3vw,2.5rem)] leading-[1.2] text-[#ECE7D1] mb-8">
-                "We don't make clothes. We make statements you wear for a decade."
-              </p>
-              <p className="font-sans text-[12px] leading-[1.9] tracking-[0.03em] text-[#969382] mb-6">
-                DRIPDUO began as a frustration. Premium heavyweight garments that didn't exist at the price point they should. So we made them.
-              </p>
-              <p className="font-sans text-[12px] leading-[1.9] tracking-[0.03em] text-[#969382]">
-                Starting from Kolkata in 2024, we sourced the mills, figured out the GSM, obsessed over the fit — and built something the Indian streetwear market had never quite seen.
-              </p>
-            </Reveal>
-
-            <Reveal className="delay-150 pl-0 md:pl-16 pt-12 md:pt-0 flex flex-col justify-between">
-              <div className="grid grid-cols-2 gap-0 border border-[#1A1A17]">
-                {[
-                  { value: "240", label: "GSM Fabric Weight" },
-                  { value: "100%", label: "Premium Cotton" },
-                  { value: "5K+", label: "Archive Members" },
-                  { value: "2024", label: "Founded" },
-                ].map((stat) => (
-                  <div key={stat.label} className="border-r border-b border-[#1A1A17] p-6 last:border-r-0 even:border-r-0 md:even:border-r">
-                    <p className="font-serif text-[2.5rem] leading-none text-[#ECE7D1] mb-2">{stat.value}</p>
-                    <p className="font-sans text-[9px] uppercase tracking-[0.2em] text-[#6B6A5E]">{stat.label}</p>
-                  </div>
-                ))}
+        {/* ── THE FOUNDERS & PHILOSOPHY ── */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 md:gap-12 lg:gap-16 mb-16 md:mb-24">
+          <Reveal className="w-full h-full">
+            <div className="glass-panel p-10 md:p-16 lg:p-20 rounded-[2.5rem] md:rounded-[3rem] shadow-xl h-full flex flex-col justify-center">
+              <div className="flex items-center gap-4 mb-8">
+                <span className="w-12 h-px bg-[#EE3C24]" />
+                <span className="font-sans text-[10px] md:text-[11px] uppercase tracking-[0.2em] text-[#EE3C24]">The Architects</span>
               </div>
-            </Reveal>
-          </div>
-        </div>
-      </section>
-
-      {/* ── 3D COIN — THE BRAND OBJECT ── */}
-      <section className="border-b border-[#1A1A17] py-20 md:py-32 bg-[#0D0D0B] overflow-hidden">
-        <div className="max-w-[1400px] mx-auto px-6 md:px-12">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-0 items-center">
-            {/* Text */}
-            <Reveal className="order-2 md:order-1 pt-12 md:pt-0 md:pr-16">
-              <p className="font-sans text-[9px] uppercase tracking-[0.25em] text-[#EE3C24] mb-6 flex items-center gap-2">
-                <span className="w-6 h-px bg-[#EE3C24]" />The Archive Coin
-              </p>
-              <h2 className="font-serif text-[clamp(2.5rem,5vw,5rem)] leading-[0.9] text-[#ECE7D1] mb-8">
-                The mark of<br /><em className="text-[#EE3C24]">the archive.</em>
+              <h2 className="font-serif text-[2.5rem] md:text-[4rem] leading-[1.1] text-white mb-8">
+                Forged by<br /><em><SketchHighlight type="underline" delay={300} color="#EE3C24">Ayush & Joy</SketchHighlight></em>
               </h2>
-              <p className="font-sans text-[12px] leading-[1.9] tracking-[0.03em] text-[#969382] mb-8 max-w-sm">
-                Every DRIPDUO piece carries this emblem. It represents our obsession with craft — the coin that only drops when quality is uncompromised.
+              <p className="font-sans text-[14px] md:text-[16px] leading-[1.9] text-white/70 mb-6">
+                Founded by Ayush Kirtania and Joy Sengupta, DRIPDUO was born from a mutual frustration with the modern fashion landscape. Too much noise. Too little substance.
               </p>
-              <p className="font-sans text-[11px] leading-[1.8] tracking-[0.04em] text-[#6B6A5E] italic">
-                Drag to spin. Feel the weight.
+              <p className="font-sans text-[14px] md:text-[16px] leading-[1.9] text-white/70">
+                What started as late-night conceptualizing at Scottish Church College evolved into a meticulous design endeavor. The goal was simple: engineer garments that speak for themselves through weight, texture, and uncompromising silhouette.
               </p>
-            </Reveal>
+            </div>
+          </Reveal>
 
-            {/* 3D Coin */}
-            <Reveal className="order-1 md:order-2 flex items-center justify-center" ref={coinRef}>
-              <div className="flex items-center justify-center w-full h-[400px] md:h-[500px]">
-                <ClothButton size={420} logoSrc="/images/transLoader.png" />
+          <Reveal className="w-full h-full">
+            <div className="glass-panel p-2 md:p-3 rounded-[2.5rem] md:rounded-[3rem] shadow-xl h-full min-h-[400px]">
+              <div className="relative w-full h-full rounded-[2rem] md:rounded-[2.5rem] overflow-hidden bg-black/40">
+                 <img 
+                    src="https://images.unsplash.com/photo-1617137984095-74e4e5e3613f?q=80&w=1200&auto=format&fit=crop" 
+                    alt="Fabric details" 
+                    className="absolute inset-0 w-full h-full object-cover opacity-80"
+                 />
               </div>
-            </Reveal>
+            </div>
+          </Reveal>
+        </div>
+
+        {/* ── THE CRAFT ── */}
+        <Reveal>
+          <div className="glass-panel rounded-[2.5rem] md:rounded-[4rem] overflow-hidden flex flex-col md:grid md:grid-cols-12 shadow-2xl">
+            <div className="md:col-span-5 relative aspect-square md:aspect-auto">
+              <img 
+                  src="https://images.unsplash.com/photo-1523381210434-271e8be1f52b?q=80&w=1200&auto=format&fit=crop" 
+                  alt="Craftsmanship" 
+                  className="absolute inset-0 w-full h-full object-cover"
+              />
+              <div className="absolute inset-0 bg-linear-to-t md:bg-linear-to-r from-[#050505]/90 to-transparent" />
+            </div>
+            
+            <div className="md:col-span-7 p-10 md:p-16 lg:p-24 xl:p-32 flex flex-col justify-center">
+              <span className="font-sans text-[10px] uppercase tracking-[0.25em] text-white/40 mb-6 md:mb-10">03 / The Craft</span>
+              <h2 className="font-serif text-[clamp(2.5rem,4vw,4.5rem)] leading-[1] text-white mb-8 md:mb-10 drop-shadow-lg">
+                Obsessive<br />Essentialism.
+              </h2>
+              <p className="font-sans text-[14px] md:text-[16px] leading-[1.9] tracking-[0.03em] text-white/60 mb-8 max-w-xl">
+                We don't do seasonal fast fashion. We build an archive. Every piece in the DRIPDUO collection utilizes custom-milled 240 GSM heavyweight cotton. 
+              </p>
+              <p className="font-sans text-[14px] md:text-[16px] leading-[1.9] tracking-[0.03em] text-white/60 max-w-xl">
+                By stripping away aggressive branding and relying entirely on structural integrity and drape, we let the garment become the statement. A study in absolute restraint.
+              </p>
+            </div>
           </div>
-        </div>
-      </section>
+        </Reveal>
 
-      {/* ── TIMELINE ── */}
-      <section className="border-b border-[#1A1A17] py-20 md:py-32">
-        <div className="max-w-[1400px] mx-auto px-6 md:px-12">
-          <Reveal>
-            <p className="font-sans text-[9px] uppercase tracking-[0.25em] text-[#EE3C24] mb-4 flex items-center gap-2">
-              <span className="w-6 h-px bg-[#EE3C24]" />Timeline
-            </p>
-            <h2 className="font-serif text-[clamp(2.5rem,5vw,4.5rem)] leading-[0.9] text-[#ECE7D1] mb-16">
-              The <em>journey.</em>
-            </h2>
-          </Reveal>
-
-          <div className="space-y-0">
-            {MILESTONES.map((m, i) => (
-              <Reveal key={m.year} className={`delay-${i * 100}`}>
-                <div className="grid grid-cols-[80px_1fr] md:grid-cols-[120px_1fr] gap-0 border-t border-[#1A1A17] py-8 md:py-10 group">
-                  <div className="flex flex-col gap-1">
-                    <span className="font-serif text-2xl md:text-3xl text-[#EE3C24]">{m.year}</span>
-                  </div>
-                  <div className="flex items-center">
-                    <p className="font-sans text-[12px] md:text-[13px] leading-[1.8] text-[#969382] group-hover:text-[#ECE7D1] transition-colors duration-300 max-w-2xl">
-                      {m.event}
-                    </p>
-                  </div>
-                </div>
-              </Reveal>
-            ))}
-            <div className="border-t border-[#1A1A17]" />
-          </div>
-        </div>
-      </section>
-
-      {/* ── VALUES ── */}
-      <section className="border-b border-[#1A1A17] py-20 md:py-32 bg-[#0D0D0B]">
-        <div className="max-w-[1400px] mx-auto px-6 md:px-12">
-          <Reveal>
-            <p className="font-sans text-[9px] uppercase tracking-[0.25em] text-[#EE3C24] mb-4 flex items-center gap-2">
-              <span className="w-6 h-px bg-[#EE3C24]" />Our Values
-            </p>
-            <h2 className="font-serif text-[clamp(2.5rem,5vw,4.5rem)] leading-[0.9] text-[#ECE7D1] mb-16">
-              What we<br /><em className="text-[#EE3C24]">stand for.</em>
-            </h2>
-          </Reveal>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-0 border-t border-l border-[#1A1A17]">
-            {VALUES.map((v, i) => (
-              <Reveal key={v.num} className={`delay-${i * 100} border-r border-b border-[#1A1A17] p-8 md:p-10`}>
-                <span className="font-sans text-[9px] uppercase tracking-[0.25em] text-[#EE3C24] block mb-6">{v.num}</span>
-                <h3 className="font-serif text-xl md:text-2xl text-[#ECE7D1] leading-[1.2] mb-5">{v.title}</h3>
-                <p className="font-sans text-[12px] leading-[1.9] text-[#969382]">{v.body}</p>
-              </Reveal>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ── CTA ── */}
-      <section className="py-20 md:py-32">
-        <div className="max-w-[1400px] mx-auto px-6 md:px-12 text-center">
-          <Reveal>
-            <h2 className="font-serif text-[clamp(3rem,8vw,8rem)] leading-[0.85] text-[#ECE7D1] mb-10">
-              <em className="text-[#EE3C24]">Join</em><br />the Archive.
-            </h2>
-          </Reveal>
-          <Reveal className="delay-150 flex flex-col sm:flex-row gap-4 justify-center">
-            <Link href="/products" className="inline-flex items-center gap-3 bg-[#EE3C24] text-black font-sans text-[11px] font-bold uppercase tracking-[0.2em] px-10 py-5 hover:bg-[#ECE7D1] transition-colors duration-300">
-              Shop the Collection <ArrowRight size={13} strokeWidth={2} />
-            </Link>
-            <Link href="/behind-the-scenes" className="inline-flex items-center gap-3 border border-[#ECE7D1] text-[#ECE7D1] font-sans text-[11px] font-bold uppercase tracking-[0.2em] px-10 py-5 hover:bg-[#ECE7D1] hover:text-black transition-colors duration-300">
-              Behind the Scenes <ArrowRight size={13} strokeWidth={2} />
-            </Link>
-          </Reveal>
-        </div>
-      </section>
-    </main>
+      </div>
+    </div>
   );
 }

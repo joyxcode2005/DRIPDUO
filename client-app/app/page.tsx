@@ -56,7 +56,8 @@ function AppleCardCarousel({ categories }: { categories: typeof HOME_CATEGORIES 
   const trackRef = useRef<HTMLDivElement>(null);
 
   return (
-    <div className="relative w-full">
+    /* Added max-w-[2000px] wrapper to perfectly align the carousel padding with the title on ultra-wide screens */
+    <div className="relative w-full max-w-[2000px] mx-auto">
       <div
         ref={trackRef}
         className="flex overflow-x-auto no-scroll px-4 sm:px-8 md:px-12 lg:px-16 xl:px-24 pb-12 cursor-grab active:cursor-grabbing [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
@@ -65,7 +66,7 @@ function AppleCardCarousel({ categories }: { categories: typeof HOME_CATEGORIES 
         {categories.map((cat, i) => (
           <motion.div
             key={cat.name}
-            className="relative shrink-0 overflow-hidden glass-panel glass-panel-hover rounded-3xl w-[85vw] sm:w-95 md:w-105 lg:w-112.5 h-112.5 md:h-137.5"
+            className="relative shrink-0 overflow-hidden glass-panel glass-panel-hover rounded-3xl w-[85vw] sm:w-[380px] md:w-[420px] lg:w-[450px] h-[450px] md:h-[550px]"
             style={{ scrollSnapAlign: "start" }}
             whileHover={{ scale: 1.02 }}
             transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
@@ -184,23 +185,26 @@ export default function HomePage() {
         </motion.div>
 
         <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-center w-full px-4 z-20 flex flex-col items-center">
-          <h2 className="font-sans text-[10px] sm:text-[12px] md:text-[14px] uppercase tracking-[0.4em] sm:tracking-[0.6em] text-[#ECE7D1]/90 mb-4 sm:mb-6 drop-shadow-md">FW26 ARCHIVE</h2>
-          <div className="flex flex-col items-center justify-center gap-1 sm:gap-0">
-            <div className="overflow-hidden">
-              <Reveal>
-                <h1 className="font-serif italic leading-[1.1] md:leading-[0.9] tracking-tight text-[#ECE7D1] drop-shadow-2xl whitespace-nowrap" style={{ fontSize: "clamp(3.5rem, 12vw, 9rem)" }}>
-                  New
-                </h1>
-              </Reveal>
+          {/* Removed the glass-panel card wrapper here */}
+          <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1], delay: 0.2 }} className="w-full max-w-[90vw] md:max-w-max">
+            <h2 className="font-sans text-[10px] sm:text-[12px] md:text-[14px] uppercase tracking-[0.4em] sm:tracking-[0.6em] text-[#ECE7D1]/90 mb-4 sm:mb-6 drop-shadow-md">FW26 ARCHIVE</h2>
+            <div className="flex flex-col items-center justify-center gap-1 sm:gap-0">
+              <div className="overflow-hidden">
+                <Reveal>
+                  <h1 className="font-serif italic leading-[1.1] md:leading-[0.9] tracking-tight text-[#ECE7D1] drop-shadow-2xl whitespace-nowrap" style={{ fontSize: "clamp(3.5rem, 12vw, 9rem)" }}>
+                    New
+                  </h1>
+                </Reveal>
+              </div>
+              <div className="overflow-hidden">
+                <Reveal className="delay-100">
+                  <h1 className="font-serif italic leading-[1.1] md:leading-[0.9] tracking-tight text-[#ECE7D1] drop-shadow-2xl flex justify-center" style={{ fontSize: "clamp(3.5rem, 12vw, 9rem)" }}>
+                    <LayoutTextFlip words={["Collection.", "Standard.", "Drop.", "Era."]} />
+                  </h1>
+                </Reveal>
+              </div>
             </div>
-            <div className="overflow-hidden">
-              <Reveal className="delay-100">
-                <h1 className="font-serif italic leading-[1.1] md:leading-[0.9] tracking-tight text-[#ECE7D1] drop-shadow-2xl flex justify-center" style={{ fontSize: "clamp(3.5rem, 12vw, 9rem)" }}>
-                  <LayoutTextFlip words={["Collection.", "Standard.", "Drop.", "Era."]} />
-                </h1>
-              </Reveal>
-            </div>
-          </div>
+          </motion.div>
         </div>
 
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 1.5, duration: 1 }} className="absolute bottom-12 md:bottom-10 left-1/2 transform -translate-x-1/2 z-20 flex flex-col items-center">
@@ -214,32 +218,34 @@ export default function HomePage() {
 
       {/* ── LOOKBOOK SECTION ── */}
       <section className="py-20 md:py-32 relative z-10 w-full">
-        <Reveal className="mb-12 md:mb-20 text-center px-4">
-          <h2 className="font-serif text-[2.5rem] md:text-[5rem] text-[#ECE7D1] tracking-tight mb-3 md:mb-6 drop-shadow-lg">The Lookbook</h2>
-          <p className="font-sans text-[10px] md:text-[12px] uppercase tracking-[0.2em] text-white/60">Curated fits for FW26</p>
-        </Reveal>
+        <div className="w-full max-w-[2000px] mx-auto">
+            <Reveal className="mb-12 md:mb-20 text-center px-4">
+            <h2 className="font-serif text-[2.5rem] md:text-[5rem] text-[#ECE7D1] tracking-tight mb-3 md:mb-6 drop-shadow-lg">The Lookbook</h2>
+            <p className="font-sans text-[10px] md:text-[12px] uppercase tracking-[0.2em] text-white/60">Curated fits for FW26</p>
+            </Reveal>
 
-        <div
-          ref={lookbookCarouselRef}
-          onMouseEnter={() => setIsLookbookHovered(true)}
-          onMouseLeave={() => setIsLookbookHovered(false)}
-          onTouchStart={() => setIsLookbookHovered(true)}
-          onTouchEnd={() => setIsLookbookHovered(false)}
-          className="w-full overflow-x-auto snap-x snap-mandatory cursor-grab active:cursor-grabbing pb-12 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden scroll-smooth"
-        >
-          <div className="w-max pl-4 sm:pl-8 md:pl-12 lg:pl-16 xl:pl-24 flex gap-6 pr-4 sm:pr-8 md:pr-12 lg:pr-16 xl:pr-24">
-            {featuredProducts.length > 0 ? (
-              featuredProducts.map((product) => (
-                <div key={product.id} className="snap-center md:snap-start block lookbook-card-wrapper">
-                  <Lookbook product={product} />
+            <div
+            ref={lookbookCarouselRef}
+            onMouseEnter={() => setIsLookbookHovered(true)}
+            onMouseLeave={() => setIsLookbookHovered(false)}
+            onTouchStart={() => setIsLookbookHovered(true)}
+            onTouchEnd={() => setIsLookbookHovered(false)}
+            className="w-full overflow-x-auto snap-x snap-mandatory cursor-grab active:cursor-grabbing pb-12 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden scroll-smooth"
+            >
+            <div className="w-max pl-4 sm:pl-8 md:pl-12 lg:pl-16 xl:pl-24 flex gap-6 pr-4 sm:pr-8 md:pr-12 lg:pr-16 xl:pr-24">
+                {featuredProducts.length > 0 ? (
+                featuredProducts.map((product) => (
+                    <div key={product.id} className="snap-center md:snap-start block lookbook-card-wrapper">
+                    <Lookbook product={product} />
+                    </div>
+                ))
+                ) : (
+                <div className="w-[85vw] md:w-[45vw] lg:w-[30vw] h-[50vh] md:h-[60vh] flex items-center justify-center glass-panel rounded-2xl snap-center lookbook-card-wrapper">
+                    <p className="font-sans text-[10px] md:text-[11px] tracking-[0.2em] uppercase text-white/50 animate-pulse">Loading Archive…</p>
                 </div>
-              ))
-            ) : (
-              <div className="w-[85vw] md:w-[45vw] lg:w-[30vw] h-[50vh] md:h-[60vh] flex items-center justify-center glass-panel rounded-2xl snap-center lookbook-card-wrapper">
-                <p className="font-sans text-[10px] md:text-[11px] tracking-[0.2em] uppercase text-white/50 animate-pulse">Loading Archive…</p>
-              </div>
-            )}
-          </div>
+                )}
+            </div>
+            </div>
         </div>
       </section>
 
@@ -248,13 +254,19 @@ export default function HomePage() {
         <div className="w-full max-w-[2000px] mx-auto px-4 sm:px-8 md:px-12 lg:px-16 xl:px-24">
           <div className="flex flex-col md:grid md:grid-cols-2 gap-10 lg:gap-16 xl:gap-24 items-center">
 
-            <div className="order-2 md:order-1 relative aspect-4/5 md:aspect-3/4 w-full glass-panel rounded-[3rem] p-3 shadow-2xl">
-              <Reveal className="w-full h-full rounded-[2.5rem] overflow-hidden">
-                <Image src="https://images.unsplash.com/photo-1550614000-4b95d4ebf6eb?q=80&w=1600&auto=format&fit=crop" fill alt="Studio Setup" className="object-cover grayscale hover:grayscale-0 transition-all duration-1000" />
-              </Reveal>
-            </div>
+            <Reveal className="order-2 md:order-1 w-full">
+              <div className="relative aspect-4/5 md:aspect-3/4 w-full glass-panel rounded-[3rem] p-3 shadow-2xl">
+                <div className="relative w-full h-full rounded-[2.5rem] overflow-hidden bg-white/5">
+                  <img
+                    src="https://images.unsplash.com/photo-1550614000-4b95d4ebf6eb?q=80&w=1600&auto=format&fit=crop"
+                    alt="Studio Setup"
+                    className="absolute inset-0 w-full h-full object-cover grayscale hover:grayscale-0 transition-all duration-1000"
+                  />
+                </div>
+              </div>
+            </Reveal>
 
-            <div className="order-1 md:order-2 flex flex-col justify-center glass-panel p-10 md:p-14 lg:p-20 rounded-[3rem] shadow-2xl">
+            <div className="order-1 md:order-2 flex flex-col justify-center glass-panel p-10 md:p-14 lg:p-20 rounded-[3rem] shadow-2xl h-full">
               <Reveal>
                 <div className="flex items-center gap-4 mb-4 md:mb-8">
                   <span className="w-12 h-px bg-[#EE3C24]" />
@@ -272,7 +284,7 @@ export default function HomePage() {
                 </p>
               </Reveal>
               <Reveal>
-                <Link href="/about" className="inline-block glass-button text-[#ECE7D1] px-10 py-5 rounded-full font-sans text-[11px] md:text-[12px] uppercase tracking-[0.2em] w-max hover:bg-white hover:text-black">
+                <Link href="/about" className="inline-block glass-button text-[#ECE7D1] px-10 py-5 rounded-full font-sans text-[11px] md:text-[12px] uppercase tracking-[0.2em] w-max hover:bg-white hover:text-black shadow-lg">
                   Our Story
                 </Link>
               </Reveal>
@@ -283,9 +295,9 @@ export default function HomePage() {
       </section>
 
       {/* ── EDITORIAL BANNER ── */}
-      <section ref={bannerRef} className="relative h-[85svh] overflow-hidden glass-panel rounded-4xl md:rounded-[4rem] mx-auto w-[calc(100%-2rem)] md:w-[calc(100%-4rem)] xl:w-[calc(100%-12rem)] max-w-">
+      <section ref={bannerRef} className="relative h-[85svh] w-full overflow-hidden my-10 md:my-20 glass-panel rounded-[2rem] md:rounded-[4rem] mx-auto w-[calc(100%-2rem)] md:w-[calc(100%-4rem)] xl:w-[calc(100%-8rem)] max-w-[2200px]">
         <motion.div className="absolute inset-0 w-full h-[140%] top-[-20%]" style={{ y: bannerParallax }}>
-          <Image src="/images/mockup.png" alt="Editorial Banner" fill className="absolute inset-0 object-cover" />
+          <img src="/images/mockup.png" alt="Editorial Banner" className="absolute inset-0 w-full h-full object-cover" />
         </motion.div>
         <div className="absolute inset-0 bg-linear-to-br from-black/80 via-black/40 to-black/80 pointer-events-none" />
 
@@ -310,7 +322,7 @@ export default function HomePage() {
 
       {/* ── STUDIO & STORY PREVIEW ── */}
       <section className="w-full py-24 md:py-32 z-10 relative">
-        <div className="w-full max-w-500 mx-auto px-4 sm:px-8 md:px-12 lg:px-16 xl:px-24 flex flex-col items-center justify-center text-center">
+        <div className="w-full max-w-[2000px] mx-auto px-4 sm:px-8 md:px-12 lg:px-16 xl:px-24 flex flex-col items-center justify-center text-center">
           <Reveal>
             <div className="font-serif text-[clamp(1.8rem,5vw,4.5rem)] leading-[1.3] text-white/60 max-w-6xl">
               Discover our roots. Read our{" "}
@@ -339,7 +351,7 @@ export default function HomePage() {
 
       {/* ── SHOP BY CATEGORY ── */}
       <section className="w-full py-20 relative z-10">
-        <div className="w-full max-w-500 mx-auto px-4 sm:px-8 md:px-12 lg:px-16 xl:px-24 mb-12 flex items-end justify-between">
+        <div className="w-full max-w-[2000px] mx-auto px-4 sm:px-8 md:px-12 lg:px-16 xl:px-24 mb-12 flex items-end justify-between">
           <Reveal>
             <h2 className="font-serif leading-[1.1] text-[#ECE7D1]" style={{ fontSize: "clamp(3rem,8vw,6rem)" }}>
               Shop by<br /><em><SketchHighlight type="circle" delay={300} color="#EE3C24">Category</SketchHighlight></em>
