@@ -8,9 +8,6 @@ import ProductCard from "@/components/product/ProductCard";
 import { Product } from "@/components/product/ProductCard";
 import FilterSidebar from "@/components/filters/FilterSidebar";
 import FilterToolbar from "@/components/filters/FilterToolbar";
-import ProductGrid from "@/components/product/ProductGrid";
-import { useProductsData, useFilteredProducts } from "@/hooks/useProducts";
-import { Category, CategoryWithSubs } from "@/types/product";
 import Link from "next/link";
 
 type Category = {
@@ -142,21 +139,21 @@ export default function ProductsPage() {
                 onOpenFilter={() => setFilterDrawerOpen(true)}
             />
 
-            <main className="p-4 sm:p-6 md:p-8 lg:p-12 xl:p-16 w-full max-w-[2000px] mx-auto">
+            {/* Reduced padding on mobile (p-3) to maximize space for cards */}
+            <main className="p-3 sm:p-6 md:p-8 lg:p-12 xl:p-16 w-full max-w-500 mx-auto">
                 {filteredAndSortedProducts.length === 0 ? (
                     <div className="text-center py-32 flex flex-col items-center glass-panel rounded-3xl max-w-lg mx-auto mt-10">
-                        <p className="text-white/50 text-sm tracking-widest uppercase mb-6">No items found in archive</p>
+                        <p className="text-white/50 text-xs sm:text-sm tracking-widest uppercase mb-6">No items found in archive</p>
                         <button
                             onClick={() => { setActiveCategory("All"); setActiveType("All"); }}
-                            className="glass-button px-8 py-4 text-xs tracking-widest uppercase text-white rounded-full hover:bg-white hover:text-black transition-colors"
+                            className="glass-button px-8 py-4 text-[10px] sm:text-xs tracking-widest uppercase text-white rounded-full hover:bg-white hover:text-black transition-colors"
                         >
                             Clear Filters
                         </button>
                     </div>
                 ) : (
-                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-4 md:gap-6 xl:gap-8 pt-6">
-                        {/* Moved the comment inside the element to fix the JSX parsing error */}
-                        {/* Added xl:grid-cols-5 and 2xl:grid-cols-6 to take advantage of wide monitors */}
+                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 sm:gap-6 md:gap-8 xl:gap-10 pt-4 sm:pt-6">
+                        {/* grid-cols-2 ensures 2 items side-by-side on mobile. gap-3 keeps them tight together. */}
                         {filteredAndSortedProducts.map((product) => (
                             <Link key={product.id} href={`/products/${product.id}`} className="w-full">
                                 <ProductCard 
