@@ -1,6 +1,10 @@
-import React from "react";
+'use client';
+
+import React, { useState, useEffect } from 'react';
 import { Bookmark, Plus, Check } from "lucide-react";
 import { Badge } from "../ui/Badge";
+import { addToWishlist, removeFromWishlist } from '@/services/wishlist';
+
 
 export interface SupabaseCategory { id: string; name: string; slug: string; }
 export interface SupabaseProductImage { id: string; url: string; is_primary?: boolean; }
@@ -12,46 +16,106 @@ export interface Product {
 }
 
 interface ProductCardProps {
-    product: Product; onQuickAdd?: (e: React.MouseEvent) => void; onToggleWishlist?: (e: React.MouseEvent) => void;
-    isWishlisted?: boolean; isAdded?: boolean;
+    product: Product;
+    userId?: string; // Passed down from the parent server component session
+    initialIsWishlisted?: boolean; 
+    isAdded?: boolean;
+    onQuickAdd?: (e: React.MouseEvent) => void;
+    onWishlistError?: (error: any) => void;
 }
 
 export default function ProductCard({ 
-    product, onQuickAdd, onToggleWishlist, isWishlisted = false, isAdded = false 
+    product, 
+    userId,
+    initialIsWishlisted = false, 
+    isAdded = false,
+    onQuickAdd,
+    onWishlistError
 }: ProductCardProps) {
+    const [isWishlisted, setIsWishlisted] = useState(initialIsWishlisted);
+    const [isMutatingWishlist, setIsMutatingWishlist] = useState(false);
+
     const isSoldOut = product.total_stock <= 0;
     const imageUrl = product.product_images?.[0]?.url || "/placeholder-shirt.png";
 
+    // Sync state if initialIsWishlisted changes from parent tree
+    useEffect(() => {
+        setIsWishlisted(initialIsWishlisted);
+    }, [initialIsWishlisted]);
+
+    const handleToggleWishlist = async (e: React.MouseEvent) => {
+        e.preventDefault();
+        e.stopPropagation();
+
+        // Redirect or warn if user isn't logged in
+        if (!userId) {
+            alert("Please log in to save items to your wishlist.");
+            return;
+        }
+
+        if (isMutatingWishlist) return;
+
+        // 1. Optimistic Update: Instantly flip the UI bookmark state
+        const previousState = isWishlisted;
+        setIsWishlisted(!previousState);
+        setIsMutatingWishlist(true);
+
+        try {
+            if (previousState) {
+                // If already wishlisted, delete it
+                await removeFromWishlist(product.id, userId);
+            } else {
+                // If not wishlisted, insert it
+                await addToWishlist(product.id, userId);
+            }
+        } catch (error) {
+            // 2. Rollback UI state if the backend database request fails
+            setIsWishlisted(previousState);
+            if (onWishlistError) onWishlistError(error);
+            console.error("Wishlist sync error:", error);
+        } finally {
+            setIsMutatingWishlist(false);
+        }
+    };
+
     return (
-        // Removed `p-1.5` so the image can span the full width of the card. 
-        // Kept `overflow-hidden` so the image respects the rounded corners.
         <div className="group flex flex-col glass-panel glass-panel-hover rounded-3xl overflow-hidden transition-all duration-300 shadow-xl h-full">
+            
+            {/* Image Container */}
+            <div className="relative aspect-4/5 w-full flex items-center justify-center bg-black/20 overflow-hidden">
 
-            {/* Changed `aspect-square` to `aspect-[4/5]` to make the card taller and larger */}
-            {/* Removed `rounded-3xl` and `mb-2` to remove the border effect */}
-            <div className="relative aspect-[4/5] w-full flex items-center justify-center bg-black/20 overflow-hidden">
-
-                {/* Adjusted positioning for badges and buttons since padding was removed */}
+                {/* Top Overlay Actions */}
                 <div className="absolute top-4 left-4 right-4 flex justify-between z-10 text-red-700">
                     {isSoldOut && <Badge variant="soldOut">Sold Out</Badge>}
                     <button 
-                        onClick={onToggleWishlist}
-                        className={`glass-button p-2.5 rounded-full transition-colors ml-auto shadow-md ${isWishlisted ? 'text-[#EE3C24] border-[#EE3C24]/30' : 'text-white/60 hover:text-white'}`}
+                        onClick={handleToggleWishlist}
+                        disabled={isMutatingWishlist}
+                        aria-label={isWishlisted ? "Remove from wishlist" : "Add to wishlist"}
+                        className={`glass-button p-2.5 rounded-full transition-colors ml-auto shadow-md ${
+                            isWishlisted 
+                                ? 'text-[#EE3C24] border-[#EE3C24]/30' 
+                                : 'text-white/60 hover:text-white'
+                        } ${isMutatingWishlist ? 'opacity-70' : ''}`}
                     >
-                        <Bookmark size={18} strokeWidth={1.5} fill={isWishlisted ? "#EE3C24" : "none"} />
+                        <Bookmark 
+                            size={18} 
+                            strokeWidth={1.5} 
+                            fill={isWishlisted ? "#EE3C24" : "none"} 
+                            className="transition-transform duration-200 active:scale-90"
+                        />
                     </button>
                 </div>
 
-                {/* Removed `p-6` so the image can hit the edges */}
+                {/* Product Image */}
                 <div className="relative w-full h-full flex items-center justify-center opacity-90 group-hover:opacity-100 transition-opacity">
                     <img
                         src={imageUrl}
                         alt={product.name}
-                        // Added `w-full h-full object-cover` to make the image fill the entire space
                         className="object-cover w-full h-full drop-shadow-[0_20px_30px_rgba(0,0,0,0.5)]"
                     />
                 </div>
 
+                {/* Quick Add Button */}
                 <button
                     disabled={isSoldOut}
                     onClick={onQuickAdd}
@@ -65,7 +129,7 @@ export default function ProductCard({
                 </button>
             </div>
 
-            {/* Increased padding and text sizes to match the larger card footprint */}
+            {/* Product Details Text */}
             <div className="p-5 flex flex-col gap-2 mt-auto">
                 <h3 className="text-[15px] text-[#ECE7D1] font-medium truncate tracking-wide">{product.name}</h3>
                 <div className="flex items-center justify-between mt-1">

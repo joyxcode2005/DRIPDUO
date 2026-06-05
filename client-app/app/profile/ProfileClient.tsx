@@ -10,66 +10,6 @@ import { getSupabaseClient } from "@/lib/supabase"; // Use your standard supabas
 
 type Tab = "orders" | "addresses" | "wishlist" | "settings";
 
-// ... Keep your MOCK_ORDERS, MOCK_WISHLIST, and StatusBadge code exactly as is ...
-const MOCK_ORDERS = [
-
-    {
-
-        id: "DRP-48291",
-
-        date: "April 18, 2026",
-
-        status: "delivered",
-
-        items: [
-
-            { name: "Gothic Skull Premium", size: "L", qty: 1, price: 145, image: "https://images.unsplash.com/photo-1583743814966-8936f5b7be1a?w=400&q=80" },
-
-            { name: "Urban Essentials Tee", size: "M", qty: 2, price: 130, image: "https://images.unsplash.com/photo-1503342217505-b0a15ec3261c?w=400&q=80" },
-
-        ],
-
-        total: 405,
-
-    },
-
-    {
-
-        id: "DRP-31827",
-
-        date: "March 5, 2026",
-
-        status: "delivered",
-
-        items: [
-
-            { name: "Kashmir Cashmere Hoodie", size: "L", qty: 1, price: 240, image: "https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=400&q=80" },
-
-        ],
-
-        total: 240,
-
-    },
-
-    {
-
-        id: "DRP-19034",
-
-        date: "April 25, 2026",
-
-        status: "processing",
-
-        items: [
-
-            { name: "Raw Architecture Jacket", size: "XL", qty: 1, price: 220, image: "https://images.unsplash.com/photo-1509631179647-0177331693ae?w=400&q=80" },
-
-        ],
-
-        total: 220,
-
-    },
-
-];
 
 
 

@@ -10,8 +10,8 @@ import { getProductsForLookbookSection } from "@/services/products";
 import Reveal from "@/components/Reveal";
 import Lookbook from "@/components/Lookbook";
 import Image from "next/image";
-import { LayoutTextFlip } from "@/components/ui/layout-text-flip";
-import { LinkPreview } from "@/components/ui/link-preview";
+import { LayoutTextFlip } from "@/components/ui/LayoutTextFlip";
+import { LinkPreview } from "@/components/ui/LinkPreview";
 
 export type FeaturedProduct = {
   id: string;

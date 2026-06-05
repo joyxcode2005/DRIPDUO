@@ -5,7 +5,7 @@ import { QuickViewProvider } from "@/lib/QuickViewContext";
 
 import { Navbar } from "@/components/navbar";
 
-import CartDrawer from "@/components/ui/cart-drawer";
+import CartDrawer from "@/components/ui/CartDrawer";
 import CinematicLoader from "@/components/CinematicLoader";
 import { Footer } from "@/components/Footer";
 

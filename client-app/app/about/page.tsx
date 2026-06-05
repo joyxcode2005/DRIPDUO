@@ -4,7 +4,7 @@ import React from "react";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 import Reveal from "@/components/Reveal";
-import { LayoutTextFlip } from "@/components/ui/layout-text-flip";
+import { LayoutTextFlip } from "@/components/ui/LayoutTextFlip";
 import { SketchHighlight } from "@/components/ui/sketch-highlight";
 
 export default function AboutPage() {
