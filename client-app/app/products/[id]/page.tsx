@@ -44,6 +44,57 @@ const FAQ_ITEMS = [
   { q: "Shipping & delivery times?", a: "Standard: 5–7 business days. Express: 2–3 business days. Free shipping on orders over ₹1999." },
 ];
 
+// ── 3D APERTURE CAROUSEL LOGIC ──
+const getCardState = (index: number, activeIndex: number, total: number) => {
+  if (total <= 1) return "center";
+  if (total === 2) return index === activeIndex ? "center" : "right";
+
+  const diff = (index - activeIndex + total) % total;
+  if (diff === 0) return "center";
+  if (diff === 1) return "right";
+  if (diff === total - 1) return "left";
+  return "hidden";
+};
+
+const carouselVariants = {
+  center: {
+    x: "0%",
+    z: 0,
+    rotateY: 0,
+    scale: 1,
+    zIndex: 30,
+    opacity: 1,
+    filter: "blur(0px)",
+  },
+  left: {
+    x: "-55%",
+    z: -100,
+    rotateY: 15,
+    scale: 0.8,
+    zIndex: 20,
+    opacity: 0.6,
+    filter: "blur(8px)",
+  },
+  right: {
+    x: "55%",
+    z: -100,
+    rotateY: -15,
+    scale: 0.8,
+    zIndex: 20,
+    opacity: 0.6,
+    filter: "blur(8px)",
+  },
+  hidden: {
+    x: "0%",
+    z: -200,
+    rotateY: 0,
+    scale: 0.5,
+    zIndex: 10,
+    opacity: 0,
+    filter: "blur(12px)",
+  },
+};
+
 export default function ProductDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
   const { addToCart, openCart } = useCart();
@@ -89,7 +140,7 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
     try {
       await addToCart({
         productId: product.id, variantId: selectedVariant.id, name: product.name,
-        price: product.final_price || product.price, image: product.images?.[0]?.url || "",
+        price: product.final_price || product.price, image: product.product_images?.[0]?.url || product.images?.[0]?.url || "",
         size: selectedSize, gsm: selectedGSM, quantity: 1, stock: selectedVariant.stock,
       });
       setAdded(true); 
@@ -131,11 +182,24 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
 
   const availableGSMs = Array.from(new Set(product.variants?.map((v: Variant) => String(v.gsm)) || [])) as string[];
   const currentGSMVariants = product.variants?.filter((v: Variant) => String(v.gsm) === selectedGSM) || [];
-  const images = product.images || [];
-  const currentImage = images[activeImageIndex]?.url || "";
+  
+  // ── FIX: PADDING IMAGES IF THERE ARE LESS THAN 3 ──
+  // Supabase usually returns 'product_images' instead of 'images'. Let's ensure we grab the right ones.
+  const actualImages = product.product_images || product.images || [];
+  
+  // If we have fewer than 3 images, the 3D carousel won't look right. So we pad it with our local mockups.
+  const images = actualImages.length >= 3 
+    ? actualImages 
+    : [
+        ...actualImages,
+        { url: "/images/mockup.png" },
+        { url: "/images/about.webp" },
+        { url: "/images/bts.jpeg" },
+        { url: "/images/studio.avif" }
+      ].slice(0, 5); // Keep a max of 5 images so it's clean
 
   return (
-    <div className="min-h-screen text-[#ECE7D1] font-sans relative z-10 pt-6 md:pt-10 pb-20 w-full">
+    <div className="min-h-screen text-[#ECE7D1] font-sans relative z-10 pt-6 md:pt-10 pb-20 w-full overflow-x-hidden">
       
       {/* ── SECTION 01: HERO PRODUCT VIEWER ── */}
       <section className="mb-24 w-full">
@@ -178,47 +242,75 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
               ))}
             </div>
 
-            {/* Center: Main Image */}
+            {/* Center: Main Image Carousel (3D Aperture) */}
             <div className="relative glass-panel rounded-[2.5rem] overflow-hidden p-2 md:p-2.5 shadow-2xl w-full lg:flex-1 flex flex-col">
-              <div className="relative w-full aspect-[4/5] sm:aspect-square lg:aspect-auto lg:h-[80vh] min-h-[500px] rounded-2xl md:rounded-3xl overflow-hidden">
-                <AnimatePresence mode="wait">
-                  <motion.div key={activeImageIndex} initial={{ opacity: 0, scale: 1.03 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.5 }} className="absolute inset-0">
-                    {currentImage ? (
-                      <Image src={currentImage} alt={product.name} fill className="object-cover object-top" />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center bg-black/20">
-                        <span className="font-sans text-[11px] uppercase tracking-[0.2em] text-white/30">[ PRODUCT IMAGE ]</span>
-                      </div>
-                    )}
-                  </motion.div>
-                </AnimatePresence>
+              <div 
+                className="relative w-full aspect-[4/5] sm:aspect-square lg:aspect-auto lg:h-[80vh] min-h-[500px] rounded-2xl md:rounded-3xl overflow-hidden flex items-center justify-center bg-black/40"
+                style={{ perspective: "1200px", transformStyle: "preserve-3d" }} // Required for 3D
+              >
+                
+                {images.length > 0 ? (
+                  images.map((img: ProductImage, i: number) => {
+                    const state = getCardState(i, activeImageIndex, images.length);
+                    return (
+                      <motion.div
+                        key={i}
+                        variants={carouselVariants}
+                        initial={false}
+                        animate={state}
+                        transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }} // Buttery smooth Apple-like easing
+                        className="absolute w-[75%] h-[85%] md:w-[65%] md:h-[90%] rounded-2xl md:rounded-3xl overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.5)] origin-center"
+                        onClick={() => {
+                          if (state !== "center") setActiveImageIndex(i);
+                        }}
+                        style={{ cursor: state === "center" ? "default" : "pointer" }}
+                      >
+                        <Image src={img.url} alt={product.name} fill className="object-cover object-top" />
+                        
+                        {/* Moody dark overlay for the items pushed to the side */}
+                        <motion.div
+                          animate={{ opacity: state === "center" ? 0 : 0.3 }}
+                          transition={{ duration: 0.8 }}
+                          className="absolute inset-0 bg-black pointer-events-none"
+                        />
+                      </motion.div>
+                    );
+                  })
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center">
+                    <span className="font-sans text-[11px] uppercase tracking-[0.2em] text-white/30">[ NO IMAGES ]</span>
+                  </div>
+                )}
 
+                {/* Left/Right Carousel Controls */}
                 {images.length > 1 && (
                   <>
-                    <button onClick={() => setActiveImageIndex(i => (i - 1 + images.length) % images.length)} className="absolute left-4 md:left-6 top-1/2 -translate-y-1/2 w-10 h-10 md:w-12 md:h-12 glass-button rounded-full flex items-center justify-center z-10 text-white hover:bg-white/20">
+                    <button onClick={() => setActiveImageIndex(i => (i - 1 + images.length) % images.length)} className="absolute left-3 md:left-6 top-1/2 -translate-y-1/2 w-10 h-10 md:w-12 md:h-12 glass-panel hover:bg-white/20 rounded-full flex items-center justify-center z-40 text-white shadow-xl backdrop-blur-md border border-white/20 transition-colors">
                       <ChevronLeft size={20} strokeWidth={2} />
                     </button>
-                    <button onClick={() => setActiveImageIndex(i => (i + 1) % images.length)} className="absolute right-4 md:right-6 top-1/2 -translate-y-1/2 w-10 h-10 md:w-12 md:h-12 glass-button rounded-full flex items-center justify-center z-10 text-white hover:bg-white/20">
+                    <button onClick={() => setActiveImageIndex(i => (i + 1) % images.length)} className="absolute right-3 md:right-6 top-1/2 -translate-y-1/2 w-10 h-10 md:w-12 md:h-12 glass-panel hover:bg-white/20 rounded-full flex items-center justify-center z-40 text-white shadow-xl backdrop-blur-md border border-white/20 transition-colors">
                       <ChevronRight size={20} strokeWidth={2} />
                     </button>
                   </>
                 )}
 
-                <div className="absolute top-6 left-6 md:top-8 md:left-8 z-10">
+                {/* Overlays / Badges */}
+                <div className="absolute top-6 left-6 md:top-8 md:left-8 z-40">
                   <span className="font-sans text-[9px] md:text-[10px] uppercase tracking-[0.2em] text-white/90 glass-panel px-4 py-2 md:px-5 md:py-2.5 rounded-full shadow-lg">
                     {activeView} VIEW
                   </span>
                 </div>
-                <div className="absolute bottom-6 right-6 md:bottom-8 md:right-8 z-10">
+                <div className="absolute bottom-6 right-6 md:bottom-8 md:right-8 z-40">
                   <span className="font-sans text-[9px] md:text-[10px] uppercase tracking-[0.12em] text-white/90 glass-panel px-4 py-2 md:px-5 md:py-2.5 rounded-full shadow-lg">
                     {activeImageIndex + 1} / {Math.max(images.length, 1)}
                   </span>
                 </div>
               </div>
               
+              {/* Mobile pagination dots */}
               <div className="flex lg:hidden justify-center gap-3 p-4 md:p-5">
                 {images.map((_: ProductImage, i: number) => (
-                  <button key={i} onClick={() => setActiveImageIndex(i)} className={`h-2 rounded-full transition-all ${i === activeImageIndex ? "bg-white w-8" : "bg-white/20 w-2"}`} />
+                  <button key={i} onClick={() => setActiveImageIndex(i)} className={`h-2 rounded-full transition-all duration-500 ${i === activeImageIndex ? "bg-white w-8" : "bg-white/20 w-2"}`} />
                 ))}
               </div>
             </div>
@@ -370,7 +462,7 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
                       <span className="text-white/20 text-[11px] tracking-widest uppercase">No Image Available</span>
                   </div>
               )}
-              <div className="absolute inset-0 bg-linear-to-t md:bg-linear-to-l from-transparent to-[#050505]/80 md:to-black/40" />
+              <div className="absolute inset-0 bg-gradient-to-t md:bg-gradient-to-l from-[#050505] to-transparent opacity-80" />
             </div>
           </div>
         </div>
