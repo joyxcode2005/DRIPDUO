@@ -1,14 +1,15 @@
-
 "use client";
 
 import { useState, useMemo, useEffect } from "react";
 import { getAllCategories, getAllProducts, getAllProductTypes } from "@/services/products";
+import { addToWishlist, removeFromWishlist } from "@/services/wishlist"; // Added this import
 import { useCart } from "@/lib/CartContext";
+
 import ProductCard from "@/components/product/ProductCard";
+import { Product } from "@/components/product/ProductCard";
 import FilterSidebar from "@/components/filters/FilterSidebar";
 import FilterToolbar from "@/components/filters/FilterToolbar";
 import Link from "next/link";
-import { Product } from "@/components/product/ProductCard";
 
 type Category = {
     id: string;
@@ -27,15 +28,13 @@ type Product_Type = {
     is_active: boolean;
 };
 
-
-// 1. Add the interface for your component props
 interface ProductsClientProps {
-    userId: string;
+    userId?: string;
 }
 
-export default function ProductClient({ userId }: ProductsClientProps) {
+export default function ProductsClient({ userId }: ProductsClientProps) {
     const { addToCart } = useCart();
-
+    
     const [activeCategory, setActiveCategory] = useState("All");
     const [activeType, setActiveType] = useState("All");
     const [searchQuery, setSearchQuery] = useState("");
@@ -52,8 +51,8 @@ export default function ProductClient({ userId }: ProductsClientProps) {
         const fetchProducts = async () => {
             try {
                 const fetchedProducts = await getAllProducts();
-                const productsData = Array.isArray(fetchedProducts)
-                    ? fetchedProducts
+                const productsData = Array.isArray(fetchedProducts) 
+                    ? fetchedProducts 
                     : (fetchedProducts as any)?.data || [];
                 setProducts(productsData);
             } catch (error) { console.error("Error fetching products:", error); }
@@ -76,18 +75,51 @@ export default function ProductClient({ userId }: ProductsClientProps) {
         fetchProducts();
         fetchCategories();
         fetchProductTypes();
-    }, []);
 
-    const toggleWishlist = (e: React.MouseEvent, productId: string) => {
+        // NOTE: If you have a function to fetch the user's existing wishlist on load, 
+        // you would call it here if `userId` exists, and setWishlist() with the result.
+    }, [userId]);
+
+    const toggleWishlist = async (e: React.MouseEvent, productId: string) => {
         e.preventDefault();
         e.stopPropagation();
-        setWishlist(prev => prev.includes(productId) ? prev.filter(id => id !== productId) : [...prev, productId]);
+
+        if (!userId) {
+            alert("Please log in to save items to your wishlist.");
+            return;
+        }
+
+        const isCurrentlyWishlisted = wishlist.includes(productId);
+
+        // 1. Optimistic Update: Instantly flip the UI state
+        setWishlist(prev => 
+            isCurrentlyWishlisted 
+                ? prev.filter(id => id !== productId) 
+                : [...prev, productId]
+        );
+
+        // 2. Perform Backend Request
+        try {
+            if (isCurrentlyWishlisted) {
+                await removeFromWishlist(productId, userId);
+            } else {
+                await addToWishlist(productId, userId);
+            }
+        } catch (error) {
+            // 3. Rollback UI if backend fails
+            console.error("Wishlist sync error:", error);
+            setWishlist(prev => 
+                isCurrentlyWishlisted 
+                    ? [...prev, productId] 
+                    : prev.filter(id => id !== productId)
+            );
+        }
     };
 
     const handleQuickAdd = async (e: React.MouseEvent, product: any) => {
         e.preventDefault();
         e.stopPropagation();
-
+        
         const defaultVariant = product.variants?.[0];
         try {
             await addToCart({
@@ -101,7 +133,7 @@ export default function ProductClient({ userId }: ProductsClientProps) {
                 quantity: 1,
                 stock: defaultVariant?.stock || 10,
             });
-
+            
             setQuickAddStatus(prev => ({ ...prev, [product.id]: true }));
             setTimeout(() => setQuickAddStatus(prev => ({ ...prev, [product.id]: false })), 2000);
         } catch (error) { console.error("Error adding product to cart:", error); }
@@ -145,30 +177,28 @@ export default function ProductClient({ userId }: ProductsClientProps) {
                 onOpenFilter={() => setFilterDrawerOpen(true)}
             />
 
-            <main className="p-4 sm:p-6 md:p-8 lg:p-12 xl:p-16 w-full max-w-[2000px] mx-auto">
+            <main className="p-3 sm:p-6 md:p-8 lg:p-12 xl:p-16 w-full max-w-500 mx-auto">
                 {filteredAndSortedProducts.length === 0 ? (
                     <div className="text-center py-32 flex flex-col items-center glass-panel rounded-3xl max-w-lg mx-auto mt-10">
-                        <p className="text-white/50 text-sm tracking-widest uppercase mb-6">No items found in archive</p>
+                        <p className="text-white/50 text-xs sm:text-sm tracking-widest uppercase mb-6">No items found in archive</p>
                         <button
                             onClick={() => { setActiveCategory("All"); setActiveType("All"); }}
-                            className="glass-button px-8 py-4 text-xs tracking-widest uppercase text-white rounded-full hover:bg-white hover:text-black transition-colors"
+                            className="glass-button px-8 py-4 text-[10px] sm:text-xs tracking-widest uppercase text-white rounded-full hover:bg-white hover:text-black transition-colors"
                         >
                             Clear Filters
                         </button>
                     </div>
                 ) : (
-                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-4 md:gap-6 xl:gap-8 pt-6">
-                        {/* Moved the comment inside the element to fix the JSX parsing error */}
-                        {/* Added xl:grid-cols-5 and 2xl:grid-cols-6 to take advantage of wide monitors */}
+                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 sm:gap-6 md:gap-8 xl:gap-10 pt-4 sm:pt-6">
                         {filteredAndSortedProducts.map((product) => (
                             <Link key={product.id} href={`/products/${product.id}`} className="w-full">
-                                <ProductCard
-                                    product={product}
-                                    userId={userId} // <-- 1. Add your logged-in user's ID here
-                                    initialIsWishlisted={wishlist.includes(product.id)} // <-- 2. Change prop name from isWishlisted to initialIsWishlisted
-                                    isAdded={quickAddStatus[product.id]}
+                                <ProductCard 
+                                    product={product} 
                                     onQuickAdd={(e: React.MouseEvent) => handleQuickAdd(e, product)}
-                                // onToggleWishlist is no longer needed here since the card handles it internally
+                                    userId={userId}
+                                    // onToggleWishlist={(e: React.MouseEvent) => toggleWishlist(e, product.id)}
+                                    // isWishlisted={wishlist.includes(product.id)}
+                                    isAdded={quickAddStatus[product.id]}
                                 />
                             </Link>
                         ))}

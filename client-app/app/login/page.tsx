@@ -25,13 +25,13 @@ export default function LoginPage() {
     setLoading(true);
     setError(null);
 
-    const { error } = await supabase.auth.signInWithOtp({
+    const { data, error } = await supabase.auth.signInWithOtp({
       email: email.trim(),
     });
 
     setLoading(false);
 
-    console.log("OTP Request Result:", { email, error });
+    console.log("OTP Request Result:", { email, data, error });
 
     if (error) {
       setError(error.message);
