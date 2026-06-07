@@ -3,18 +3,43 @@
 
 @import "tailwindcss";
 
-
-
-
+/* ── 1. REGULAR WEIGHT ── */
 @font-face {
-  font-family: "Seulaga";
-  src: url("/fonts/seulaga.otf") format("opentype");
+  font-family: "Neue Metana";
+  src: url("/fonts/NeueMetana-Regular.otf") format("opentype");
+  font-weight: 400;
+  font-style: normal;
+}
+
+/* ── 2. BOLD WEIGHT ── */
+@font-face {
+  font-family: "Neue Metana";
+  src: url("/fonts/NeueMetana-Bold.otf") format("opentype");
+  font-weight: 700;
+  font-style: normal;
+}
+
+/* ── DX-BURST (For Logo) ── */
+@font-face {
+  font-family: "Dx-Burst";
+  src: url("/fonts/Dx-Burst.otf") format("opentype"); 
   font-weight: normal;
   font-style: normal;
 }
 
-body {
-  font-family: "Seulaga", sans-serif;
+/* ── CASTA FONT FAMILY ── */
+@font-face {
+  font-family: "Casta";
+  src: url("/fonts/Casta-Thin.otf") format("opentype");
+  font-weight: 300;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: "Casta";
+  src: url("/fonts/Casta-ThinSlanted.otf") format("opentype");
+  font-weight: 300;
+  font-style: italic; /* This tells CSS: use this file when font-style is italic */
 }
 
 :root {
@@ -31,8 +56,9 @@ body {
   --gray-800: #2A2A2A; 
   --gray-900: #1A1A1A; 
 
-  --font-sans: 'Helvetica Neue', Helvetica, 'Arial Nova', Arial, sans-serif;
-  --font-serif: 'EB Garamond', 'Cormorant Garamond', Georgia, serif;
+  /* ── GLOBALLY APPLIED SANS FONT ── */
+  --font-sans: 'Neue Metana', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  --font-serif: 'Casta', 'EB Garamond', Georgia, serif;
   --font-saira: 'Saira', 'Helvetica Neue', Helvetica, 'Arial Nova', Arial, sans-serif;
 
   --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
@@ -59,7 +85,8 @@ html {
 body {
   background: var(--black);
   color: var(--beige);
-  font-family: var(--font-stone-board);
+  /* ── CHANGED FROM STONE-BOARD TO SANS ── */
+  font-family: var(--font-sans);
   font-weight: 400;
   letter-spacing: 0.04em;
   line-height: 1.6;
@@ -80,7 +107,7 @@ body {
   background: rgba(255, 255, 255, 0.03);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
-  border: 1px solid rgba(255, 255, 255, 0.08); /* Soft specular highlight, NOT a harsh stroke */
+  border: 1px solid rgba(255, 255, 255, 0.08); 
   box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.2);
 }
 
@@ -104,8 +131,6 @@ body {
 /* ─────────────────────────────────────────
    TYPOGRAPHY
 ───────────────────────────────────────── */
-.font-stone-board { font-family: var(--font-stone-board); }
-
 .label {
   font-family: var(--font-sans);
   font-size: 11px;
