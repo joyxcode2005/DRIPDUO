@@ -762,8 +762,8 @@ export default function HomePage() {
             <div className="flex flex-col items-center justify-center gap-0">
               <div className="overflow-hidden">
                 <Reveal>
-                  <h1 className="font-serif italic leading-[1.05] md:leading-[0.95] tracking-tight text-[#ECE7D1] drop-shadow-2xl whitespace-nowrap" style={{ fontSize: "clamp(3.5rem, 12vw, 9rem)" }}>
-                    New
+                  <h1 className="font-serif leading-[1.05] md:leading-[0.95] tracking-tight text-[#ECE7D1] drop-shadow-2xl whitespace-nowrap" style={{ fontSize: "clamp(3.5rem, 12vw, 9rem)" }}>
+                    Redesigned
                   </h1>
                 </Reveal>
               </div>
@@ -1012,50 +1012,6 @@ export default function HomePage() {
             <Stat key={s.label} {...s} trigger={statsVisible} />
           ))}
           </div>
-        </div>
-      </section>
-
-      {/* ── EMAIL JOIN ── */}
-      <section className="w-full relative z-10 py-16 md:py-20 pb-24 md:pb-32">
-        <div className="w-full max-w-300 mx-auto px-4 sm:px-8 md:px-12">
-          <Reveal>
-            <div className="relative bg-white/3 backdrop-blur-md border border-white/10 rounded-4xl p-8 sm:p-12 md:p-16 lg:p-20 text-center flex flex-col items-center shadow-2xl overflow-hidden">
-              
-              {/* Subtle background accent */}
-              <div className="absolute -top-32 -right-32 w-64 h-64 rounded-full bg-[#EE3C24]/5 blur-3xl pointer-events-none" />
-              <div className="absolute -bottom-24 -left-24 w-48 h-48 rounded-full bg-[#EE3C24]/3 blur-3xl pointer-events-none" />
-
-              <div className="flex items-center gap-4 mb-6 md:mb-8">
-                <div className="w-6 h-px bg-[#EE3C24]" />
-                <span className="font-sans text-[9px] uppercase tracking-[0.3em] text-[#EE3C24]">Stay Connected</span>
-                <div className="w-6 h-px bg-[#EE3C24]" />
-              </div>
-
-              <div className="flex justify-center mb-5 md:mb-6">
-                <h2 className="font-serif leading-[1.05] tracking-tight text-[#ECE7D1] relative z-10" style={{ fontSize: "clamp(2.2rem,8vw,5rem)" }}>
-                  <LayoutTextFlip text="Join the " words={["Edit.", "Archive.", "Culture.", "Movement."]} />
-                </h2>
-              </div>
-              <p className="font-sans text-[10px] sm:text-[11px] md:text-[13px] tracking-[0.08em] text-white/50 mb-10 md:mb-14 max-w-sm px-2 leading-[1.9] relative z-10">
-                New drops. Exclusive access. Zero noise.<br className="hidden md:block" />
-                Subscribe to stay ahead of the archive.
-              </p>
-
-              <form onSubmit={(e) => e.preventDefault()} className="w-full max-w-xl flex flex-col sm:flex-row items-stretch gap-3 sm:gap-0 sm:bg-black/50 sm:border sm:border-white/15 sm:rounded-full overflow-hidden sm:p-2 group sm:focus-within:border-white/40 transition-all duration-300 relative z-10">
-                <input
-                  type="email"
-                  placeholder="YOUR EMAIL ADDRESS"
-                  className="flex-1 bg-black/40 sm:bg-transparent border border-white/15 sm:border-none rounded-full sm:rounded-none outline-none font-sans text-[10px] md:text-[11px] uppercase tracking-[0.25em] text-[#ECE7D1] placeholder-white/25 px-7 sm:px-8 py-4 sm:py-5 text-center sm:text-left focus:border-white/40 sm:focus:border-none transition-colors"
-                />
-                <button
-                  type="submit"
-                  className="bg-[#ECE7D1] text-black rounded-full font-sans text-[10px] md:text-[11px] font-bold uppercase tracking-[0.25em] px-8 sm:px-10 py-4 sm:py-5 hover:bg-[#EE3C24] hover:text-white transition-colors duration-300 shrink-0 w-full sm:w-auto"
-                >
-                  Subscribe
-                </button>
-              </form>
-            </div>
-          </Reveal>
         </div>
       </section>
     </div>
