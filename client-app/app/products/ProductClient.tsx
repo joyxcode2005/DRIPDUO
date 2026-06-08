@@ -34,7 +34,7 @@ interface ProductsClientProps {
 
 export default function ProductsClient({ userId }: ProductsClientProps) {
     const { addToCart } = useCart();
-    
+
     const [activeCategory, setActiveCategory] = useState("All");
     const [activeType, setActiveType] = useState("All");
     const [searchQuery, setSearchQuery] = useState("");
@@ -51,8 +51,8 @@ export default function ProductsClient({ userId }: ProductsClientProps) {
         const fetchProducts = async () => {
             try {
                 const fetchedProducts = await getAllProducts();
-                const productsData = Array.isArray(fetchedProducts) 
-                    ? fetchedProducts 
+                const productsData = Array.isArray(fetchedProducts)
+                    ? fetchedProducts
                     : (fetchedProducts as any)?.data || [];
                 setProducts(productsData);
             } catch (error) { console.error("Error fetching products:", error); }
@@ -92,9 +92,9 @@ export default function ProductsClient({ userId }: ProductsClientProps) {
         const isCurrentlyWishlisted = wishlist.includes(productId);
 
         // 1. Optimistic Update: Instantly flip the UI state
-        setWishlist(prev => 
-            isCurrentlyWishlisted 
-                ? prev.filter(id => id !== productId) 
+        setWishlist(prev =>
+            isCurrentlyWishlisted
+                ? prev.filter(id => id !== productId)
                 : [...prev, productId]
         );
 
@@ -108,9 +108,9 @@ export default function ProductsClient({ userId }: ProductsClientProps) {
         } catch (error) {
             // 3. Rollback UI if backend fails
             console.error("Wishlist sync error:", error);
-            setWishlist(prev => 
-                isCurrentlyWishlisted 
-                    ? [...prev, productId] 
+            setWishlist(prev =>
+                isCurrentlyWishlisted
+                    ? [...prev, productId]
                     : prev.filter(id => id !== productId)
             );
         }
@@ -119,7 +119,7 @@ export default function ProductsClient({ userId }: ProductsClientProps) {
     const handleQuickAdd = async (e: React.MouseEvent, product: any) => {
         e.preventDefault();
         e.stopPropagation();
-        
+
         const defaultVariant = product.variants?.[0];
         try {
             await addToCart({
@@ -133,7 +133,7 @@ export default function ProductsClient({ userId }: ProductsClientProps) {
                 quantity: 1,
                 stock: defaultVariant?.stock || 10,
             });
-            
+
             setQuickAddStatus(prev => ({ ...prev, [product.id]: true }));
             setTimeout(() => setQuickAddStatus(prev => ({ ...prev, [product.id]: false })), 2000);
         } catch (error) { console.error("Error adding product to cart:", error); }
@@ -192,12 +192,9 @@ export default function ProductsClient({ userId }: ProductsClientProps) {
                     <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 sm:gap-6 md:gap-8 xl:gap-10 pt-4 sm:pt-6">
                         {filteredAndSortedProducts.map((product) => (
                             <Link key={product.id} href={`/products/${product.id}`} className="w-full">
-                                <ProductCard 
-                                    product={product} 
+                                <ProductCard
+                                    product={product}
                                     onQuickAdd={(e: React.MouseEvent) => handleQuickAdd(e, product)}
-                                    userId={userId}
-                                    // onToggleWishlist={(e: React.MouseEvent) => toggleWishlist(e, product.id)}
-                                    // isWishlisted={wishlist.includes(product.id)}
                                     isAdded={quickAddStatus[product.id]}
                                 />
                             </Link>

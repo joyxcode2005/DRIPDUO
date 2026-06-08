@@ -8,17 +8,21 @@ import { Navbar } from "@/components/navbar";
 import CartDrawer from "@/components/ui/CartDrawer";
 import CinematicLoader from "@/components/CinematicLoader";
 import { Footer } from "@/components/Footer";
+import { WishlistProvider } from "@/lib/WishlistContext";
+import { getSupabaseClient } from "@/lib/supabase";
 
 export const metadata: Metadata = {
   title: "DRIPDUO | FW26",
   description: "New Collection. Premium heavyweight garments.",
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const supabase = getSupabaseClient();
+  const user = await supabase.auth.getUser().then(({ data: { user } }) => user);
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
@@ -32,10 +36,12 @@ export default function RootLayout({
 
         <CartProvider>
           <QuickViewProvider>
-            <Navbar />
-            <div className="page-transition">{children}</div>
-            <Footer />
-            <CartDrawer />
+            <WishlistProvider userId={user?.id}>
+              <Navbar />
+              <div className="page-transition">{children}</div>
+              <Footer />
+              <CartDrawer />
+            </WishlistProvider>
           </QuickViewProvider>
         </CartProvider>
       </body>
