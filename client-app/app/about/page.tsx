@@ -9,11 +9,11 @@ import { LayoutTextFlip } from "@/components/ui/LayoutTextFlip";
 import { SketchHighlight } from "@/components/ui/sketch-highlight";
 import dynamic from "next/dynamic";
 
-// FIX 1: Dynamically import the 3D Canvas component to prevent Next.js SSR from breaking it
+
 const ClothButton = dynamic(() => import("@/components/ClothButton"), {
   ssr: false,
   loading: () => (
-    <div className="w-[220px] h-[220px] rounded-full border border-white/10 animate-pulse flex items-center justify-center bg-white/5">
+    <div className="w-55 h-55 rounded-full border border-white/10 animate-pulse flex items-center justify-center bg-white/5">
       <span className="text-[10px] uppercase tracking-widest text-white/30">Loading 3D...</span>
     </div>
   ),
@@ -30,7 +30,7 @@ export default function AboutPage() {
         style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.05'/%3E%3C/svg%3E")` }}
       />
 
-      <div className="w-full max-w-[2000px] mx-auto px-4 sm:px-8 md:px-12 lg:px-16 xl:px-24">
+      <div className="w-full max-w-500 mx-auto px-4 sm:px-8 md:px-12 lg:px-16 xl:px-24">
 
         <Link href="/" className="inline-flex items-center gap-2 text-white/50 hover:text-white transition-colors mb-12 md:mb-20 font-sans text-[10px] uppercase tracking-[0.2em]">
           <ArrowLeft size={14} /> Back to Archive
@@ -53,7 +53,7 @@ export default function AboutPage() {
           {/* INTERACTIVE 3D CLOTH BUTTON */}
           <Reveal delay={0.3}>
             {/* Added explicit height here so Reveal doesn't collapse */}
-            <div className="flex flex-col items-center justify-center group relative z-20 w-full min-h-[260px]">
+            <div className="flex flex-col items-center justify-center group relative z-20 w-full min-h-65">
               <ClothButton
                 size={220}
                 logoSrc="/images/reallogo.png"
@@ -72,9 +72,9 @@ export default function AboutPage() {
 
           {/* Main Image */}
           {/* FIX 2: Wrapped the Reveal AROUND the fully sized explicit container so it doesn't shrink to 0px */}
-          <div className="md:col-span-7 w-full h-[400px] md:h-[600px]">
+          <div className="md:col-span-7 w-full h-100 md:h-150">
             <Reveal>
-              <div className="relative w-full h-[400px] md:h-[600px] rounded-3xl overflow-hidden glass-panel p-2">
+              <div className="relative w-full h-100 md:h-150 rounded-3xl overflow-hidden glass-panel p-2">
                 <div className="relative w-full h-full rounded-2xl overflow-hidden">
                   <img
                     src="/images/studio.avif"
@@ -89,9 +89,9 @@ export default function AboutPage() {
           {/* Side Images */}
           <div className="md:col-span-5 flex flex-col gap-4 md:gap-6 lg:gap-8">
 
-            <div className="w-full h-[250px] md:h-[285px]">
+            <div className="w-full h-62.5 md:h-71.25">
               <Reveal>
-                <div className="relative w-full h-[250px] md:h-[285px] rounded-3xl overflow-hidden glass-panel p-2">
+                <div className="relative w-full h-62.5 md:h-71.25 rounded-3xl overflow-hidden glass-panel p-2">
                   <div className="relative w-full h-full rounded-2xl overflow-hidden">
                     <img
                       src="/images/about.webp"
@@ -103,9 +103,9 @@ export default function AboutPage() {
               </Reveal>
             </div>
 
-            <div className="w-full h-[250px] md:h-[285px]">
+            <div className="w-full h-62.5 md:h-71.25">
               <Reveal delay={0.2}>
-                <div className="relative w-full h-[250px] md:h-[285px] rounded-3xl overflow-hidden glass-panel p-2">
+                <div className="relative w-full h-62.5 md:h-71.25 rounded-3xl overflow-hidden glass-panel p-2">
                   <div className="relative w-full h-full rounded-2xl overflow-hidden">
                     <img
                       src="https://images.unsplash.com/photo-1523381210434-271e8be1f52b?q=80&w=800&auto=format&fit=crop"
@@ -126,7 +126,7 @@ export default function AboutPage() {
           {/* 02 Philosophy */}
           <Reveal>
             <div className="grid grid-cols-1 md:grid-cols-12 gap-8 md:gap-16 items-center">
-              <div className="md:col-span-5 font-serif text-[clamp(2.5rem,4vw,4rem)] leading-[1] text-white/20">
+              <div className="md:col-span-5 font-serif text-[clamp(2.5rem,4vw,4rem)] leading-none text-white/20">
                 02
               </div>
               <div className="md:col-span-7">
@@ -149,7 +149,7 @@ export default function AboutPage() {
       {/* ── FULL WIDTH BREAKOUT SECTION ── */}
       <div className="w-full my-24 md:my-40">
         <Reveal>
-          <div className="w-full grid grid-cols-1 md:grid-cols-12 glass-panel border-y border-white/10 min-h-[400px]">
+          <div className="w-full grid grid-cols-1 md:grid-cols-12 glass-panel border-y border-white/10 min-h-100">
             {/* Added explicit h-[400px] on mobile to prevent collapse */}
             <div className="md:col-span-5 relative h-[400px] md:h-auto overflow-hidden">
               <img
@@ -157,12 +157,12 @@ export default function AboutPage() {
                 alt="Craftsmanship"
                 className="absolute inset-0 w-full h-full object-cover"
               />
-              <div className="absolute inset-0 bg-gradient-to-t md:bg-gradient-to-r from-[#050505]/90 to-transparent" />
+              <div className="absolute inset-0 bg-linear-to-t md:bg-linear-to-r from-[#050505]/90 to-transparent" />
             </div>
 
             <div className="md:col-span-7 p-10 md:p-16 lg:p-24 xl:p-32 flex flex-col justify-center">
               <span className="font-sans text-[10px] uppercase tracking-[0.25em] text-white/40 mb-6 md:mb-10">03 / The Craft</span>
-              <h2 className="font-serif text-[clamp(2.5rem,4vw,4.5rem)] leading-[1] text-white mb-8 md:mb-10 drop-shadow-lg">
+              <h2 className="font-serif text-[clamp(2.5rem,4vw,4.5rem)] leading-none text-white mb-8 md:mb-10 drop-shadow-lg">
                 Obsessive<br />Essentialism.
               </h2>
               <p className="font-sans text-[14px] md:text-[16px] leading-[1.9] tracking-[0.03em] text-white/60 mb-8 max-w-xl">

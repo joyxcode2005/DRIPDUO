@@ -58,7 +58,7 @@
 
   /* ── GLOBALLY APPLIED SANS FONT ── */
   --font-sans: 'Neue Metana', 'Helvetica Neue', Helvetica, Arial, sans-serif;
-  --font-serif: 'Casta', 'EB Garamond', Georgia, serif;
+  --font-serif: 'Neue Metana', 'Helvetica Neue', Helvetica, Arial, sans-serif;
   --font-saira: 'Saira', 'Helvetica Neue', Helvetica, 'Arial Nova', Arial, sans-serif;
 
   --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
