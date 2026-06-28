@@ -1,3 +1,4 @@
+import { ImageType } from "@/app/dashboard/products/page";
 import {
   CategoryRow,
   OrderItemRow,
@@ -45,7 +46,8 @@ export async function upsertProduct(payload: {
   stock?: number;
   isActive: boolean;
   categoryIds: string[];
-  imageUrls: string[];
+  // Replaced imageUrls: string[] with the new typed image array
+  images?: { url: string; type: ImageType }[];
 }) {
   // Calculate final price automatically
   const calculatedFinalPrice = payload.price - (payload.discount || 0);
@@ -91,7 +93,11 @@ export async function upsertProduct(payload: {
   if (payload.categoryIds && payload.categoryIds.length > 0) {
     await mutate(
       supabase.from("product_categories").insert(
-        payload.categoryIds.map((categoryId) => ({ product_id: productId, category_id: categoryId, product_type_id: payload.product_type_id }))
+        payload.categoryIds.map((categoryId) => ({
+          product_id: productId,
+          category_id: categoryId,
+          product_type_id: payload.product_type_id
+        }))
       )
     );
   }
@@ -105,23 +111,23 @@ export async function upsertProduct(payload: {
       .select("id")
   );
 
-  const filteredImageUrls = payload.imageUrls
-    ? payload.imageUrls.map((url) => url.trim()).filter(Boolean)
+  // Filter out any empty/undefined images
+  const filteredImages = payload.images
+    ? payload.images.filter(img => img.url && img.url.trim() !== '')
     : [];
 
-  if (filteredImageUrls.length > 0) {
+  if (filteredImages.length > 0) {
     await mutate(
       supabase.from("product_images")
         .insert(
-          filteredImageUrls.map((url) => ({
+          filteredImages.map((img) => ({
             product_id: productId,
-            url: url,
-            // NOTE: I removed 'is_primary' here. 
-            // If you actually DO have an 'is_primary' column in your Supabase table, 
-            // you can add it back as: is_primary: index === 0
+            url: img.url.trim(),
+            type: img.type, // Injecting the specific type (FRONT, BACK, etc.)
+            // is_primary: img.type === 'FRONT' // Optional: if you want the FRONT image to automatically be primary
           }))
         )
-        .select() // <-- CRITICAL: Add .select() so the mutate wrapper doesn't fail
+        .select() // <-- CRITICAL: Required so the mutate wrapper doesn't fail
     );
   }
 

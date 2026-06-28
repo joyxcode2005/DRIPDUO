@@ -168,7 +168,7 @@ export default function ProductsClient({ userId }: ProductsClientProps) {
         <div className="min-h-screen text-white font-sans pt-20 relative z-10 w-full">
 
             <FilterToolbar
-                categories={categories}
+                categoryTree={categoryTree}
                 activeCategory={activeCategory}
                 setActiveCategory={setActiveCategory}
                 searchQuery={searchQuery}

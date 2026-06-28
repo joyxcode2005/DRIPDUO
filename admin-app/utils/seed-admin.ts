@@ -34,7 +34,7 @@ async function seedAdmin() {
     const adminEmail = "coder.joy2005@gmail.com"; // Add your email here
     const adminPassword = "joy.admin@2005"; // Add your password here
     const fullname = "Joy Sengupta"; // Add your full name here
-    const phone = "8777699459"; // Add your phone number here
+    const phone = "6289666500"; // Add your phone number here
 
     console.log(`Attempting to seed the admin user with email: ${adminEmail}`);
 
@@ -45,33 +45,22 @@ async function seedAdmin() {
             email_confirm: true,
             user_metadata: {
                 role: 'ADMIN',
+                phone: phone,
+                fullname: fullname
             },
         });
 
+
+        console.log('Supabase auth response:', authData);
+
         if (authError) {
+            console.error('❌ Error creating admin user:', authError);
             console.error('❌ Error seeding admin user:', authError.message);
         } else {
             // Using optional chaining just to be perfectly type-safe with the Supabase response
             console.log('✅ Admin user seeded successfully! User ID:', authData?.user?.id);
         }
 
-        if (authData?.user) {
-            const { error: dbError } = await supabase
-                .from('users')
-                .insert({
-                    id: authData.user.id, // Crucial: Link the public profile to the auth UUID
-                    email: adminEmail,
-                    fullname,
-                    phone,
-                    role: 'ADMIN' // Assuming you have a role column in your public table
-                });
-
-            if (dbError) {
-                console.error('❌ Error inserting into public.users table:', dbError.message);
-            } else {
-                console.log('✅ User profile successfully added to the public.users table!');
-            }
-        }
     } catch (error) {
         // TypeScript Fix: Safely handling the 'unknown' error type
         if (error instanceof Error) {

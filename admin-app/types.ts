@@ -1,3 +1,5 @@
+import { ImageType } from "./app/dashboard/products/page";
+
 export type ProductTypeRow = {
     id: string;
     name: string;
@@ -32,6 +34,7 @@ export type ProductImageRow = {
     product_id: string;
     url: string;
     isPrimary: boolean;
+    type: ImageType;
 };
 
 export type ProductCategoryRow = {
