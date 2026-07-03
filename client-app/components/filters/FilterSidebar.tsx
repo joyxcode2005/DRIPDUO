@@ -1,20 +1,27 @@
-import React from "react";
-import { X } from "lucide-react";
+"use client";
 
-// Mirroring the type from your main page
-type Product_Type = {
-    id: string;
-    name: string;
-    slug: string;
-    is_active: boolean;
-};
+import { useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { X, ChevronDown } from "lucide-react";
+
+// Assuming these types match your main file
+type Category = { id: string; name: string; slug: string; parent_id: string | null; };
+type CategoryWithSubs = Category & { subcategories: Category[]; };
+type Product_Type = { id: string; name: string; slug: string; };
 
 interface FilterSidebarProps {
     isOpen: boolean;
     onClose: () => void;
+
+    // Product Types
     productTypes: Product_Type[];
     activeType: string;
-    setActiveType: (type: string) => void;
+    setActiveType: (val: string) => void;
+
+    // Categories (Added these to handle the parent/child structure)
+    categoryTree: CategoryWithSubs[];
+    activeCategory: string;
+    setActiveCategory: (val: string) => void;
 }
 
 export default function FilterSidebar({
@@ -22,81 +29,156 @@ export default function FilterSidebar({
     onClose,
     productTypes,
     activeType,
-    setActiveType
+    setActiveType,
+    categoryTree,
+    activeCategory,
+    setActiveCategory,
 }: FilterSidebarProps) {
+    // Keep track of which parent categories are expanded in the UI
+    const [expandedParents, setExpandedParents] = useState<Record<string, boolean>>({});
+
+    const toggleExpand = (slug: string) => {
+        setExpandedParents(prev => ({ ...prev, [slug]: !prev[slug] }));
+    };
 
     return (
         <>
-            <div
-                className={`fixed inset-0 bg-black/80 backdrop-blur-sm z-50 transition-opacity duration-300 ${isOpen ? "opacity-100 visible" : "opacity-0 invisible"
-                    }`}
-                onClick={onClose}
-            />
-            <aside
-                className={`fixed top-0 right-0 h-full w-full max-w-100 bg-[#0a0a0a] border-l border-zinc-800 z-50 transform transition-transform duration-500 ease-[cubic-bezier(0.25,1,0.5,1)] flex flex-col ${isOpen ? "translate-x-0" : "translate-x-full"
-                    }`}
-            >
-                <div className="flex items-center justify-between px-8 py-6 border-b border-zinc-800 shrink-0">
-                    <span className="font-sans text-[11px] font-semibold tracking-[0.2em] uppercase text-zinc-100">
-                        Filter & Sort
-                    </span>
-                    <button
+            {/* Backdrop */}
+            <AnimatePresence>
+                {isOpen && (
+                    <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
                         onClick={onClose}
-                        className="text-zinc-500 hover:text-white transition-colors"
+                        className="fixed inset-0 bg-black/60 z-55 backdrop-blur-sm"
+                    />
+                )}
+            </AnimatePresence>
+
+            {/* Sidebar Panel */}
+            <AnimatePresence>
+                {isOpen && (
+                    <motion.div
+                        initial={{ x: "100%" }}
+                        animate={{ x: 0 }}
+                        exit={{ x: "100%" }}
+                        transition={{ type: "spring", damping: 25, stiffness: 200 }}
+                        className="fixed top-0 right-0 z-55 h-full w-full max-w-sm bg-neutral-900 border-l border-neutral-800 text-white overflow-y-auto shadow-2xl"
                     >
-                        <X size={20} strokeWidth={1.5} />
-                    </button>
-                </div>
-                <div className="flex-1 overflow-y-auto px-8 py-6 flex flex-col gap-10">
-                    <div>
-                        <h4 className="text-[11px] tracking-[0.15em] uppercase text-zinc-500 mb-6">
-                            Product Type
-                        </h4>
+                        <div className="p-6">
+                            <div className="flex items-center justify-between mb-8">
+                                <h2 className="text-xl font-medium tracking-wide">Filters</h2>
+                                <button onClick={onClose} className="p-2 hover:bg-neutral-800 rounded-full transition-colors">
+                                    <X size={20} />
+                                </button>
+                            </div>
 
-                        <div className="flex flex-col gap-2">
-                            <button
-                                onClick={() => setActiveType("All")}
-                                className={`text-left py-2 text-[12px] tracking-[0.12em] uppercase transition-colors ${activeType === "All"
-                                    ? "text-white font-semibold"
-                                    : "text-zinc-400 hover:text-zinc-200"
-                                    }`}
-                            >
-                                ALL TYPES
-                            </button>
+                            {/* --- PRODUCT TYPES --- */}
+                            <div className="mb-8">
+                                <h3 className="text-sm text-neutral-400 uppercase tracking-widest mb-4">Product Type</h3>
+                                <div className="flex flex-wrap gap-2">
+                                    <button
+                                        onClick={() => setActiveType("All")}
+                                        className={`px-4 py-2 text-sm rounded-full transition-all ${activeType === "All" ? "bg-white text-black" : "bg-neutral-800 text-neutral-300 hover:bg-neutral-700"
+                                            }`}
+                                    >
+                                        All
+                                    </button>
+                                    {productTypes.map((type) => (
+                                        <button
+                                            key={type.id}
+                                            onClick={() => setActiveType(type.slug)}
+                                            className={`px-4 py-2 text-sm rounded-full transition-all ${activeType === type.slug ? "bg-white text-black" : "bg-neutral-800 text-neutral-300 hover:bg-neutral-700"
+                                                }`}
+                                        >
+                                            {type.name}
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
 
-                            {productTypes?.map((t) => (
+                            <hr className="border-neutral-800 mb-8" />
+
+                            {/* --- CATEGORIES WITH SUB-CATEGORIES --- */}
+                            <div>
+                                <h3 className="text-sm text-neutral-400 uppercase tracking-widest mb-4">Categories</h3>
+
                                 <button
-                                    key={t.id}
-                                    onClick={() => setActiveType(t.is_active ? t.slug : "All")}
-                                    className={`text-left py-2 text-[12px] tracking-[0.12em] uppercase transition-colors ${activeType === t.slug
-                                        ? "text-white font-semibold"
-                                        : "text-zinc-400 hover:text-zinc-200"
+                                    onClick={() => setActiveCategory("All")}
+                                    className={`w-full text-left px-4 py-3 rounded-xl mb-2 transition-all ${activeCategory === "All" ? "bg-neutral-800 font-medium" : "hover:bg-neutral-800/50 text-neutral-300"
                                         }`}
                                 >
-                                    {t.name}
+                                    All Categories
                                 </button>
-                            ))}
+
+                                <div className="space-y-2">
+                                    {categoryTree.map((parent) => {
+                                        const isExpanded = expandedParents[parent.slug];
+                                        const hasSubs = parent.subcategories && parent.subcategories.length > 0;
+
+                                        return (
+                                            <div key={parent.id} className="rounded-xl overflow-hidden">
+                                                {/* Parent Button */}
+                                                <div className="flex">
+                                                    <button
+                                                        onClick={() => setActiveCategory(parent.slug)}
+                                                        className={`flex-1 text-left px-4 py-3 transition-all ${activeCategory === parent.slug ? "bg-neutral-800 font-medium" : "hover:bg-neutral-800/50 text-neutral-300"
+                                                            }`}
+                                                    >
+                                                        {parent.name}
+                                                    </button>
+
+                                                    {/* Toggle Subcategories Button */}
+                                                    {hasSubs && (
+                                                        <button
+                                                            onClick={() => toggleExpand(parent.slug)}
+                                                            className="px-4 py-3 hover:bg-neutral-800/50 text-neutral-400 transition-colors flex items-center justify-center"
+                                                        >
+                                                            <motion.div animate={{ rotate: isExpanded ? 180 : 0 }}>
+                                                                <ChevronDown size={18} />
+                                                            </motion.div>
+                                                        </button>
+                                                    )}
+                                                </div>
+
+                                                {/* Animated Subcategories Dropdown */}
+                                                <AnimatePresence initial={false}>
+                                                    {hasSubs && isExpanded && (
+                                                        <motion.div
+                                                            initial={{ height: 0, opacity: 0 }}
+                                                            animate={{ height: "auto", opacity: 1 }}
+                                                            exit={{ height: 0, opacity: 0 }}
+                                                            transition={{ duration: 0.3, ease: "easeInOut" }}
+                                                            className="overflow-hidden bg-neutral-950/30"
+                                                        >
+                                                            <div className="py-1 px-4 flex flex-col border-l-2 border-neutral-800 ml-4 mb-2 mt-1">
+                                                                {parent.subcategories.map((sub) => (
+                                                                    <button
+                                                                        key={sub.id}
+                                                                        onClick={() => setActiveCategory(sub.slug)}
+                                                                        className={`text-left py-2 px-4 rounded-lg transition-all text-sm ${activeCategory === sub.slug
+                                                                                ? "text-white bg-neutral-800/80"
+                                                                                : "text-neutral-400 hover:text-white hover:bg-neutral-800/40"
+                                                                            }`}
+                                                                    >
+                                                                        {sub.name}
+                                                                    </button>
+                                                                ))}
+                                                            </div>
+                                                        </motion.div>
+                                                    )}
+                                                </AnimatePresence>
+                                            </div>
+                                        );
+                                    })}
+                                </div>
+                            </div>
+
                         </div>
-                    </div>
-
-                    {/* Add more filter groups here later (e.g., Colors, Sizes, Price Range) */}
-
-                </div>
-                <div className="p-6 border-t border-zinc-800 flex gap-4 shrink-0 bg-[#0a0a0a]">
-                    <button
-                        onClick={() => setActiveType("All")}
-                        className="flex-1 py-3.5 text-[11px] font-semibold tracking-widest uppercase text-zinc-400 hover:text-white transition-colors border border-zinc-800 rounded-md hover:border-zinc-600"
-                    >
-                        Clear
-                    </button>
-                    <button
-                        onClick={onClose}
-                        className="flex-1 py-3.5 bg-white text-black text-[11px] font-semibold tracking-widest uppercase rounded-md hover:bg-zinc-200 transition-colors"
-                    >
-                        Apply
-                    </button>
-                </div>
-            </aside>
+                    </motion.div>
+                )}
+            </AnimatePresence>
         </>
     );
 }

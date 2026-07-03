@@ -209,6 +209,10 @@ export default function ProductsClient({ userId }: ProductsClientProps) {
                 productTypes={productTypes}
                 activeType={activeType}
                 setActiveType={setActiveType}
+                // ADD THESE THREE LINES:
+                categoryTree={categoryTree}
+                activeCategory={activeCategory}
+                setActiveCategory={setActiveCategory}
             />
         </div>
     );

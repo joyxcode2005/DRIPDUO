@@ -69,7 +69,7 @@ export default function Lookbook({ product }: { product: LookbookProps }) {
                         Also increased border radius for a smoother look.
                     */}
                     <div 
-                        className="relative w-full h-full rounded-[1.5rem] md:rounded-[2rem] overflow-hidden"
+                        className="relative w-full h-full rounded-3xl md:rounded-4xl overflow-hidden"
                         style={{ 
                             WebkitMaskImage: "-webkit-radial-gradient(white, black)", 
                             transform: "translateZ(0)" 

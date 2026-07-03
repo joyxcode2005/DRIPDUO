@@ -42,14 +42,14 @@ export const Navbar = () => {
 
   return (
     <>
-      <div className="fixed top-0 left-0 right-0 z-[150] flex flex-col items-center pointer-events-none">
+      <div className="fixed top-0 left-0 right-0 z-150 flex flex-col items-center pointer-events-none">
         <motion.header
           layout
           transition={smoothTransition}
           className={cn(
             "pointer-events-auto flex items-center justify-between origin-top",
             scrolled
-              ? "mt-3 md:mt-5 bg-[#1A1A1A]/85 backdrop-blur-3xl border border-white/10 rounded-full w-[95%] md:w-auto md:min-w-[800px] px-6 md:px-10 py-3 shadow-[0_8px_32px_0_rgba(0,0,0,0.5)]"
+              ? "mt-3 md:mt-5 bg-[#1A1A1A]/85 backdrop-blur-3xl border border-white/10 rounded-full w-[95%] md:w-auto md:min-w-200 px-6 md:px-10 py-3 shadow-[0_8px_32px_0_rgba(0,0,0,0.5)]"
               : "mt-0 w-full px-6 md:px-12 py-5 md:py-8 bg-transparent border-transparent rounded-none"
           )}
         >
