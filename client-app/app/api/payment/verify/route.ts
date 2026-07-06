@@ -1,7 +1,8 @@
 // app/api/payment/verify/route.ts
 import { NextResponse } from "next/server";
 import crypto from "crypto";
-import { createClient } from "@supabase/supabase-js"; 
+import { createClient } from "@supabase/supabase-js";
+import { createShiprocketOrder } from "@/lib/shiprocket";
 
 export async function POST(req: Request) {
     try {
@@ -40,10 +41,39 @@ export async function POST(req: Request) {
                 })
                 .eq('id', localOrderId);
 
+            const { data: items } = await supabaseAdmin
+                .from('order_items')
+                .select('*')
+                .eq('order_id', localOrderId);
+
+            const { data: orderRow } = await supabaseAdmin
+                .from('orders')
+                .select('*')
+                .eq('id', localOrderId)
+                .single();
+
+            const shiprocketRes = await createShiprocketOrder(orderRow, items || []);
+
+            await supabaseAdmin
+                .from('orders')
+                .update({
+                    shiprocket_order_id: shiprocketRes.order_id,
+                    shiprocket_shipment_id: shiprocketRes.shipment_id,
+                    order_status: 'PROCESSING', // or whatever your enum value is
+                })
+                .eq('id', localOrderId);
+
             if (updateError) {
                 console.error("Supabase Update Error:", updateError);
                 return NextResponse.json({ success: false, message: "DB update failed" }, { status: 500 });
             }
+
+            // inside verify/route.ts, after marking payment SUCCESS
+            await fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/shiprocket/create-shipment`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ orderId: localOrderId }),
+            });
 
             return NextResponse.json({ success: true, message: "Payment verified successfully" });
 
