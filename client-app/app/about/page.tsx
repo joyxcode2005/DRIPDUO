@@ -1,6 +1,5 @@
 "use client";
 
-import React from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
@@ -151,7 +150,7 @@ export default function AboutPage() {
         <Reveal>
           <div className="w-full grid grid-cols-1 md:grid-cols-12 glass-panel border-y border-white/10 min-h-100">
             {/* Added explicit h-[400px] on mobile to prevent collapse */}
-            <div className="md:col-span-5 relative h-[400px] md:h-auto overflow-hidden">
+            <div className="md:col-span-5 relative h-100 md:h-auto overflow-hidden">
               <img
                 src="https://images.unsplash.com/photo-1523381210434-271e8be1f52b?q=80&w=1200&auto=format&fit=crop"
                 alt="Craftsmanship"
