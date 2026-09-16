@@ -7,14 +7,13 @@ import { ArrowLeft, Check, ChevronLeft, ChevronRight, Star, Plus } from "lucide-
 import { useCart } from "@/lib/CartContext";
 import { getProductById, getAllProducts } from "@/services/products";
 import { motion, AnimatePresence } from "framer-motion";
-import ProductCard from "@/components/product/ProductCard";
+import ProductCard, { type Product as ProductCardProduct } from "@/components/product/ProductCard";
 
 interface Category { name: string; }
 interface ProductImage { url: string; }
 interface Variant { id: string; size: string; gsm: string | number; stock: number; }
-interface Product {
-  id: string; name: string; description?: string; price: number; final_price?: number; discount?: number;
-  categories?: Category[]; variants?: Variant[]; images?: ProductImage[]; product_images?: ProductImage[]; total_stock?: number;
+interface Product extends ProductCardProduct {
+  categories?: Category[]; variants?: Variant[]; images?: ProductImage[];
 }
 
 const SIZES_ORDER = ["XS", "S", "M", "L", "XL", "XXL", "XXXL"];
@@ -109,7 +108,6 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
   const [openFaq, setOpenFaq] = useState<number | null>(null);
   
   const [relatedProducts, setRelatedProducts] = useState<Product[]>([]);
-  const [wishlist, setWishlist] = useState<string[]>([]);
   const [quickAddStatus, setQuickAddStatus] = useState<Record<string, boolean>>({});
 
   useEffect(() => {
@@ -147,11 +145,6 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
       openCart();
       setTimeout(() => setAdded(false), 2000);
     } catch (error) { console.error("Error adding item to cart:", error); }
-  };
-
-  const toggleWishlist = (e: React.MouseEvent, productId: string) => {
-    e.preventDefault(); e.stopPropagation();
-    setWishlist(prev => prev.includes(productId) ? prev.filter(item => item !== productId) : [...prev, productId]);
   };
 
   const handleQuickAdd = async (e: React.MouseEvent, relatedProduct: Product) => {
@@ -541,8 +534,6 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
                         key={relatedProduct.id}
                         product={relatedProduct}
                         onQuickAdd={(e: React.MouseEvent) => handleQuickAdd(e, relatedProduct)}
-                        onToggleWishlist={(e: React.MouseEvent) => toggleWishlist(e, relatedProduct.id)}
-                        isWishlisted={wishlist.includes(relatedProduct.id)}
                         isAdded={quickAddStatus[relatedProduct.id]}
                     />
                 ))
@@ -557,7 +548,7 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
 
       {/* ── SECTION 05: REVIEWS ── */}
       <section className="mb-24 w-full">
-        <div className="w-full max-w-[2000px] mx-auto px-4 sm:px-8 md:px-12 lg:px-16 xl:px-24">
+        <div className="w-full max-w-500 mx-auto px-4 sm:px-8 md:px-12 lg:px-16 xl:px-24">
           <div className="flex items-center gap-5 mb-10">
             <span className="font-sans text-[10px] md:text-[11px] uppercase tracking-[0.25em] text-[#EE3C24]">Community Voice</span>
             <div className="flex-1 h-px bg-white/10" />

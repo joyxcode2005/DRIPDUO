@@ -22,7 +22,9 @@ export default async function RootLayout({
   children: React.ReactNode;
 }>) {
   const supabase = getSupabaseClient();
-  const user = await supabase.auth.getUser().then(({ data: { user } }) => user);
+  const { data } = await supabase.auth.getUser();
+  const user = data.user;
+  
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
