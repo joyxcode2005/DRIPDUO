@@ -5,13 +5,13 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useCart } from "@/lib/CartContext";
 import { ShoppingBag, User } from "lucide-react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence, type Transition } from "framer-motion";
 import Image from "next/image";
 import { cn } from "@/lib/utils";
 import { Menu, MenuItem, HoveredLink, ProductItem } from "../ui/NavigationMenu";
 import { MobileMenu } from "./mobile-menu";
 
-const smoothTransition = {
+const smoothTransition: Transition = {
   type: "spring",
   bounce: 0, 
   duration: 0.6, 
@@ -38,8 +38,7 @@ export const Navbar = () => {
 
   // Hide Navbar on auth pages AND individual product detail pages
   const isProductDetailPage = /^\/products\/[a-zA-Z0-9_-]+$/.test(pathname);
-  if (pathname === "/auth" || pathname === "/reset-password" || isProductDetailPage) return null;
-
+  if (pathname === "/auth" || pathname === "/reset-password" || isProductDetailPage) return null
   return (
     <>
       <div className="fixed top-0 left-0 right-0 z-150 flex flex-col items-center pointer-events-none">
@@ -83,7 +82,7 @@ export const Navbar = () => {
                   <p className="cursor-pointer font-sans text-[11px] font-bold uppercase tracking-[0.2em] text-white/80 hover:text-white transition-colors">Home</p>
                 </Link>
                 <MenuItem setActive={setActive} active={active} item="Shop">
-                  <div className="grid grid-cols-2 gap-8 p-4 w-[550px]">
+                  <div className="grid grid-cols-2 gap-8 p-4 w-137.5">
                     <ProductItem title="FW26 Archive" href="/products" src="https://images.unsplash.com/photo-1523381210434-271e8be1f52b?q=80&w=800&auto=format&fit=crop" description="Explore the complete drop. Uncompromising quality." />
                     <ProductItem title="Menswear" href="/products?category=men" src="https://images.unsplash.com/photo-1550614000-4b95d4ebf6eb?q=80&w=800&auto=format&fit=crop" description="Heavyweight basics engineered for men." />
                     <ProductItem title="Womenswear" href="/products?category=women" src="https://images.unsplash.com/photo-1617137984095-74e4e5e3613f?q=80&w=800&auto=format&fit=crop" description="Silhouettes redefined for the modern woman." />
@@ -91,7 +90,7 @@ export const Navbar = () => {
                   </div>
                 </MenuItem>
                 <MenuItem setActive={setActive} active={active} item="Studio">
-                  <div className="flex flex-col space-y-3 p-4 w-[220px]">
+                  <div className="flex flex-col space-y-3 p-4 w-55">
                     <HoveredLink href="/about">Our Story</HoveredLink>
                     <HoveredLink href="/bts">Behind the Scenes</HoveredLink>
                   </div>
