@@ -130,7 +130,8 @@ export const getProductById = async (id: string) => {
             product_images (
                 id,
                 url,
-                is_primary
+                is_primary,
+                type
             ),
             product_variants (
                 id,
@@ -166,6 +167,7 @@ export const getProductById = async (id: string) => {
 // To fetch all the categories
 export async function getAllCategories() {
     const { data, error } = await supabase.from("categories").select("id, name, slug, is_active, parent_id");
+    console.log("Fetched categories:", data); // Debugging log
     if (error) {
         console.error("Error fetching categories:", error);
         throw error;

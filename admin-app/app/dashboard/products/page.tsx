@@ -18,6 +18,10 @@ import {
 } from "@/services/admin";
 import { ProductCategoryRow, ProductImageRow, ProductRow, ProductTypeRow } from "@/types";
 
+// Define our specific image types
+export type ImageType = 'FRONT' | 'BACK' | 'FABRIC' | 'DETAIL';
+const IMAGE_TYPES: ImageType[] = ['FRONT', 'BACK', 'FABRIC', 'DETAIL'];
+
 const emptyForm = {
   id: "",
   name: "",
@@ -27,7 +31,6 @@ const emptyForm = {
   discount: "0",
   isActive: true,
   categoryIds: [] as string[],
-  imageText: "",
 };
 
 export default function ProductsPage() {
@@ -87,6 +90,7 @@ export default function ProductsPage() {
     }, {});
   }, [productCategoryLinks]);
 
+  // Group images by product ID, and then by their Type
   const imagesByProduct = useMemo(() => {
     return productImages.reduce<Record<string, string[]>>((accumulator, image) => {
       if (!accumulator[image.product_id]) accumulator[image.product_id] = [];
@@ -105,7 +109,6 @@ export default function ProductsPage() {
       discount: String(product.discount ?? 0),
       isActive: product.is_active ?? true,
       categoryIds: categoriesByProduct[product.id] ?? [],
-      imageText: (imagesByProduct[product.id] ?? []).join("\n"),
     });
     setActiveTab("form");
     window.scrollTo({ top: 0, behavior: "smooth" });
@@ -113,7 +116,8 @@ export default function ProductsPage() {
 
   const resetForm = () => {
     setForm(emptyForm);
-    setImageFiles([]);
+    setNewImageFiles({});
+    setExistingImages({});
   };
 
   const handleCancelEdit = () => {
@@ -137,7 +141,7 @@ export default function ProductsPage() {
           const uploadRes = await fetch("/api/upload", { method: "POST", body: formData });
           if (!uploadRes.ok) throw new Error("Image upload failed for " + file.name);
           const data = await uploadRes.json();
-          uploadedUrls.push(data.url);
+          finalImages.push({ url: data.url, type });
         }
       }
       
@@ -153,11 +157,13 @@ export default function ProductsPage() {
         discount: Number(form.discount || 0),
         isActive: form.isActive,
         categoryIds: form.categoryIds,
-        imageUrls: finalImageUrls,
+        // Passing the typed object array instead of just an array of URL strings
+        images: finalImages, 
       });
 
       toast.success(form.id ? "Product updated" : "Product created");
       resetForm();
+      setActiveTab("list");
       setActiveTab("list");
       await reload();
     } catch (error) {
@@ -186,7 +192,7 @@ export default function ProductsPage() {
   const productCards = products.map((product) => ({
     ...product,
     categories: (categoriesByProduct[product.id] ?? []).map((categoryId) => categoryMap[categoryId]).filter(Boolean),
-    images: imagesByProduct[product.id] ?? [],
+    imagesCount: Object.keys(imagesByProduct[product.id] || {}).length,
     typeName: product.product_type_id ? typeMap[product.product_type_id] ?? "Unknown" : "Unassigned",
   }));
 
@@ -224,11 +230,12 @@ export default function ProductsPage() {
       </div>
 
       <div className="grid gap-6">
-        {/* --- FORM TAB --- */}
         {activeTab === "form" && (
           <AdminPanel>
             <div className="flex items-center justify-between gap-3 mb-6">
               <div>
+                <h3 className="text-lg font-semibold text-black">{form.id ? "Edit product details" : "Add new product"}</h3>
+                <p className="mt-1 text-sm text-black/60">Fill out the details below. Inventory is managed separately.</p>
                 <h3 className="text-lg font-semibold text-black">{form.id ? "Edit product details" : "Add new product"}</h3>
                 <p className="mt-1 text-sm text-black/60">Fill out the details below. Inventory is managed separately.</p>
               </div>
@@ -243,6 +250,7 @@ export default function ProductsPage() {
                     <div className="space-y-2 sm:col-span-2">
                       <label htmlFor="name" className="text-sm font-medium text-black">Name</label>
                       <Input id="name" name="name" type="text" value={form.name} placeholder="Vintage washed tee" required onChange={(e) => setForm((c) => ({ ...c, name: e.target.value }))} />
+                      <Input id="name" name="name" type="text" value={form.name} placeholder="Vintage washed tee" required onChange={(e) => setForm((c) => ({ ...c, name: e.target.value }))} />
                     </div>
                     <div className="space-y-2 sm:col-span-2">
                       <label htmlFor="description" className="text-sm font-medium text-black">Description</label>
@@ -251,6 +259,7 @@ export default function ProductsPage() {
                   </div>
                 </div>
 
+                {/* 2. Organization */}
                 {/* 2. Organization */}
                 <div className="space-y-4">
                   <h4 className="text-xs font-bold text-black/40 border-b border-black/5 pb-2 uppercase tracking-[0.24em]">2. Organization</h4>
@@ -261,11 +270,11 @@ export default function ProductsPage() {
                         <select id="product_type_id" name="product_type_id" value={form.product_type_id} onChange={(e) => setForm((c) => ({ ...c, product_type_id: e.target.value }))} className="w-full appearance-none rounded-lg border border-black/10 bg-white px-3 py-2.5 pr-10 text-sm text-black outline-none transition-all focus:border-black focus:ring-2 focus:ring-black/10 cursor-pointer">
                           <option value="">Select a product type</option>
                           {productTypes.map((type) => (<option key={type.id} value={type.id}>{type.name}</option>))}
+                          {productTypes.map((type) => (<option key={type.id} value={type.id}>{type.name}</option>))}
                         </select>
                         <ChevronDown className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-black/50" />
                       </div>
                     </div>
-
                     <div className="space-y-2 relative">
                       <label className="text-sm font-medium text-black">Categories</label>
                       <details className="group">
@@ -294,24 +303,29 @@ export default function ProductsPage() {
                 </div>
 
                 {/* 3. Pricing */}
+                {/* 3. Pricing */}
                 <div className="space-y-4">
                   <h4 className="text-xs font-bold text-black/40 border-b border-black/5 pb-2 uppercase tracking-[0.24em]">3. Pricing</h4>
                   <div className="grid gap-4 sm:grid-cols-3">
                     <div className="space-y-2">
                       <label htmlFor="price" className="text-sm font-medium text-black">Base Price</label>
                       <Input id="price" name="price" type="number" min="0" step="0.01" value={form.price} onChange={(e) => setForm((c) => ({ ...c, price: e.target.value }))} />
+                      <Input id="price" name="price" type="number" min="0" step="0.01" value={form.price} onChange={(e) => setForm((c) => ({ ...c, price: e.target.value }))} />
                     </div>
                     <div className="space-y-2">
                       <label htmlFor="discount" className="text-sm font-medium text-black">Discount Amount</label>
+                      <Input id="discount" name="discount" type="number" min="0" step="0.01" value={form.discount} onChange={(e) => setForm((c) => ({ ...c, discount: e.target.value }))} />
                       <Input id="discount" name="discount" type="number" min="0" step="0.01" value={form.discount} onChange={(e) => setForm((c) => ({ ...c, discount: e.target.value }))} />
                     </div>
                     <div className="space-y-2">
                       <label htmlFor="finalPrice" className="text-sm font-medium text-black">Final Price</label>
                       <Input id="finalPrice" name="finalPrice" type="text" value={formatCurrency(Math.max(0, Number(form.price || 0) - Number(form.discount || 0)))} readOnly className="bg-black/5 cursor-not-allowed font-semibold text-emerald-600" tabIndex={-1} />
+                      <Input id="finalPrice" name="finalPrice" type="text" value={formatCurrency(Math.max(0, Number(form.price || 0) - Number(form.discount || 0)))} readOnly className="bg-black/5 cursor-not-allowed font-semibold text-emerald-600" tabIndex={-1} />
                     </div>
                   </div>
                 </div>
 
+                {/* 4. Media & Visibility */}
                 {/* 4. Media & Visibility */}
                 <div className="space-y-4">
                   <h4 className="text-xs font-bold text-black/40 border-b border-black/5 pb-2 uppercase tracking-[0.24em]">4. Media & Visibility</h4>
@@ -361,7 +375,7 @@ export default function ProductsPage() {
           </AdminPanel>
         )}
 
-        {/* --- LIST TAB --- */}
+        {/* List Tab Logic (unchanged except for image count logic mapping) */}
         {activeTab === "list" && (
           <AdminPanel>
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-5">
@@ -446,13 +460,10 @@ export default function ProductsPage() {
                           </td>
                           <td className="px-4 py-4 text-right">
                             <span className="font-medium text-black">{formatCurrency(Number(product.final_price ?? product.price ?? 0))}</span>
-                            {(product.discount ?? 0) > 0 && (
-                              <div className="mt-1 text-xs text-black/40 line-through">
-                                {formatCurrency(Number(product.price ?? 0))}
-                              </div>
-                            )}
+                            {(product.discount ?? 0) > 0 && <div className="mt-1 text-xs text-black/40 line-through">{formatCurrency(Number(product.price ?? 0))}</div>}
                           </td>
                           <td className="px-4 py-4">
+                            <div className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${product.is_active ? 'bg-emerald-100 text-emerald-700' : 'bg-black/10 text-black/60'}`}>
                             <div className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${product.is_active ? 'bg-emerald-100 text-emerald-700' : 'bg-black/10 text-black/60'}`}>
                               {product.is_active ? 'Active' : 'Draft'}
                             </div>

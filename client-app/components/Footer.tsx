@@ -23,7 +23,7 @@ const MobileFooterCard = ({ section, idx }: { section: typeof FOOTER_SECTIONS[0]
   const [isOpen, setIsOpen] = useState(false);
 
   return (
-    <div className="border border-[#050505]/15 rounded-[1.5rem] overflow-hidden bg-[#050505]/5 backdrop-blur-md">
+    <div className="border border-[#050505]/15 rounded-3xl overflow-hidden bg-[#050505]/5 backdrop-blur-md">
       <button
         onClick={() => setIsOpen(!isOpen)}
         className="w-full p-6 flex items-center justify-between text-[#050505]"
@@ -103,7 +103,7 @@ export function Footer() {
             
             {/* Newsletter Column */}
             <div className="col-span-5 p-12 lg:p-16 flex flex-col justify-between relative group overflow-hidden">
-              <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-[#ECE7D1]/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none" />
+              <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,var(--tw-gradient-stops))] from-[#ECE7D1]/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none" />
               
               <div className="relative z-10">
                 <div className="flex items-center gap-3 mb-8">
@@ -154,7 +154,7 @@ export function Footer() {
             ))}
 
             {/* Socials Column (Vertical Layout) */}
-            <div className="col-span-1 p-12 flex flex-col items-center justify-between bg-[#050505]/[0.02]">
+            <div className="col-span-1 p-12 flex flex-col items-center justify-between bg-[#050505]/2">
               <h4 className="font-sans text-[9px] font-bold uppercase tracking-[0.3em] text-[#050505]/40 [writing-mode:vertical-lr] rotate-180 mb-8">
                 Connect
               </h4>
@@ -200,7 +200,7 @@ export function Footer() {
         <div className="flex md:hidden flex-col w-full px-4 pt-16 pb-8 border-t border-[#050505]/20">
           
           {/* Newsletter Bento Block */}
-          <div className="mb-10 bg-[#050505]/5 border border-[#050505]/15 rounded-[1.5rem] p-8">
+          <div className="mb-10 bg-[#050505]/5 border border-[#050505]/15 rounded-3xl p-8">
             <div className="flex items-center gap-3 mb-6">
               <div className="w-4 h-px bg-[#ECE7D1]" />
               <span className="font-sans text-[8px] uppercase tracking-[0.3em] font-bold text-[#ECE7D1]">Dispatch</span>

@@ -2,10 +2,10 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
-import Script from "next/script";
 import { ArrowLeft, Lock, CheckCircle2, ShieldCheck } from "lucide-react";
 import { useCart } from "@/lib/CartContext";
 import Image from "next/image";
+import Script from "next/script";
 
 
 declare global {
