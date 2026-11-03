@@ -51,14 +51,14 @@ export default function DashboardPage() {
             actions={
                 <Link
                     href="/dashboard/products"
-                    className="inline-flex items-center gap-2 rounded-xl border border-black bg-black px-4 py-3 text-sm text-white transition-colors hover:bg-black/90"
+                    className="flex w-full items-center justify-center gap-2 rounded-xl border border-black bg-black px-4 py-3 text-sm text-white transition-colors hover:bg-black/90 sm:inline-flex sm:w-auto"
                 >
                     Open products
                     <ArrowRight className="h-4 w-4" />
                 </Link>
             }
         >
-            <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+            <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
                 <AdminMetricCard label="Products" value={productCount} helper="Active catalog entries" />
                 <AdminMetricCard label="Categories" value={categoryCount} helper="Collection structure" />
                 <AdminMetricCard label="Variants" value={variantCount} helper="Inventory rows" />

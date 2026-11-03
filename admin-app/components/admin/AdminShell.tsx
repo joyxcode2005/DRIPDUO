@@ -1,119 +1,129 @@
 "use client";
 
-import { DASHBOARD_NAV } from "@/constants";
-import { createClient } from "@/utils/supabse";
-import { Boxes, LayoutDashboard, LogOut, Package, ReceiptText, Tags } from "lucide-react";
+import { useState } from "react";
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
-import type { ReactNode } from "react";
-import { toast } from "react-toastify";
+import { usePathname } from "next/navigation";
+import { Menu, X, LayoutDashboard, ShoppingBag, Box, Tags, ReceiptText } from "lucide-react";
 
-const navIcons: Record<string, ReactNode> = {
-  "/dashboard": <LayoutDashboard className="h-4 w-4" />,
-  "/dashboard/products": <Package className="h-4 w-4" />,
-  "/dashboard/inventory": <Boxes className="h-4 w-4" />,
-  "/dashboard/categories": <Tags className="h-4 w-4" />,
-  "/dashboard/orders": <ReceiptText className="h-4 w-4" />,
-};
+const navItems = [
+    { name: "Overview", href: "/dashboard", icon: LayoutDashboard },
+    { name: "Orders", href: "/dashboard/orders", icon: ReceiptText },
+    { name: "Products", href: "/dashboard/products", icon: ShoppingBag },
+    { name: "Inventory", href: "/dashboard/inventory", icon: Box },
+    { name: "Categories", href: "/dashboard/categories", icon: Tags },
+];
 
-type AdminShellProps = {
-  title: string;
-  description?: string;
-  actions?: ReactNode;
-  children: ReactNode;
-};
-
-export function AdminPanel({ children, className = "" }: { children: ReactNode; className?: string }) {
-  return <section className={`rounded-2xl border border-black/10 bg-white p-5 ${className}`}>{children}</section>;
+export function AdminMetricCard({ label, value, helper }: { label: string; value: string | number; helper?: string }) {
+    return (
+        <div className="rounded-xl border border-black/10 bg-white p-5 shadow-sm">
+            <p className="text-sm font-medium text-black/60">{label}</p>
+            <p className="mt-2 text-3xl font-semibold tracking-tight text-black">{value}</p>
+            {helper && <p className="mt-2 text-xs text-black/50">{helper}</p>}
+        </div>
+    );
 }
 
-export function AdminMetricCard({
-  label,
-  value,
-  helper,
+export function AdminPanel({ children }: { children: React.ReactNode }) {
+    return (
+        <div className="rounded-xl border border-black/10 bg-white p-5 sm:p-6 shadow-sm">
+            {children}
+        </div>
+    );
+}
+
+export default function AdminShell({
+    children,
+    title,
+    description,
+    actions
 }: {
-  label: string;
-  value: string | number;
-  helper?: string;
+    children: React.ReactNode;
+    title?: string;
+    description?: string;
+    actions?: React.ReactNode;
 }) {
-  return (
-    <div className="rounded-2xl border border-black/10 bg-white p-5">
-      <p className="text-[11px] uppercase tracking-[0.28em] text-black/50">{label}</p>
-      <div className="mt-3 text-3xl font-semibold tracking-tight text-black">{value}</div>
-      {helper ? <p className="mt-2 text-sm text-black/60">{helper}</p> : null}
-    </div>
-  );
-}
+    const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+    const pathname = usePathname();
 
-export function AdminBadge({ children }: { children: ReactNode }) {
-  return <span className="inline-flex items-center rounded-full border border-black/10 bg-white px-3 py-1 text-[10px] font-medium uppercase tracking-[0.24em] text-black/60">{children}</span>;
-}
+    return (
+        <div className="flex h-screen bg-[#F9F9F9] overflow-hidden">
+            {/* Mobile Sidebar Overlay */}
+            {isMobileMenuOpen && (
+                <div
+                    className="fixed inset-0 z-40 bg-black/20 backdrop-blur-sm md:hidden transition-opacity"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                />
+            )}
 
-export default function AdminShell({ title, description, actions, children }: AdminShellProps) {
-  const pathname = usePathname();
-  const router = useRouter();
-
-  const handleLogout = async () => {
-    const supabase = createClient();
-    await supabase.auth.signOut();
-    toast.success("Logged out successfully");
-    router.push("/login");
-  };
-
-  return (
-    <div className="min-h-screen bg-white text-black">
-      <div className="mx-auto flex min-h-screen w-full max-w-screen-2xl flex-col lg:flex-row">
-        <aside className="border-b border-black/10 bg-white px-5 py-6 lg:min-h-screen lg:w-80 lg:border-b-0 lg:border-r lg:px-6">
-          <div className="rounded-2xl border border-black/10 bg-white p-5">
-            <p className="text-[11px] uppercase tracking-[0.36em] text-black/50">DRIPDUO Admin</p>
-            <h1 className="mt-3 text-2xl font-semibold tracking-tight text-black">Catalog control center</h1>
-            <p className="mt-2 text-sm leading-6 text-black/60">Manage products, inventory, categories, and placed orders from one workspace.</p>
-
-            <nav className="mt-8 grid gap-2">
-              {DASHBOARD_NAV.map((item) => {
-                const active = pathname === item.href;
-
-                return (
-                  <Link
-                    key={item.href}
-                    href={item.href}
-                    className={`flex items-center justify-between rounded-xl border px-4 py-3 text-sm transition-colors ${active ? "border-black bg-black text-white" : "border-black/10 bg-white text-black hover:bg-black/5"}`}
-                  >
-                    <span className="flex items-center gap-3">
-                      <span>{navIcons[item.href]}</span>
-                      {item.label}
-                    </span>
-                  </Link>
-                );
-              })}
-            </nav>
-
-            <button
-              type="button"
-              onClick={handleLogout}
-              className="mt-8 inline-flex w-full items-center justify-center gap-2 rounded-xl border border-black bg-black px-4 py-3 text-sm text-white transition-colors hover:bg-black/90"
+            {/* Sidebar */}
+            <aside
+                className={`fixed inset-y-0 left-0 z-50 w-64 bg-white border-r border-black/10 transition-transform duration-300 ease-in-out md:translate-x-0 md:static md:flex md:flex-col ${
+                    isMobileMenuOpen ? "translate-x-0" : "-translate-x-full"
+                }`}
             >
-              <LogOut className="h-4 w-4" />
-              Sign out
-            </button>
-          </div>
-        </aside>
+                <div className="flex items-center justify-between p-5 border-b border-black/10 h-16">
+                    <span className="text-lg font-bold tracking-tight text-black">DripDuo Admin</span>
+                    <button
+                        className="md:hidden rounded-md p-2 text-black/50 hover:bg-black/5"
+                        onClick={() => setIsMobileMenuOpen(false)}
+                    >
+                        <X className="h-5 w-5" />
+                    </button>
+                </div>
+                <nav className="flex-1 space-y-1 overflow-y-auto p-4">
+                    {navItems.map((item) => {
+                        const isActive = pathname === item.href || (pathname.startsWith(item.href) && item.href !== '/dashboard');
+                        const Icon = item.icon;
+                        return (
+                            <Link
+                                key={item.name}
+                                href={item.href}
+                                onClick={() => setIsMobileMenuOpen(false)}
+                                className={`flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors ${
+                                    isActive
+                                        ? "bg-black text-white"
+                                        : "text-black/60 hover:bg-black/5 hover:text-black"
+                                }`}
+                            >
+                                <Icon className="h-4 w-4" />
+                                {item.name}
+                            </Link>
+                        );
+                    })}
+                </nav>
+            </aside>
 
-        <main className="flex-1 px-4 py-6 sm:px-6 lg:px-8 lg:py-8">
-          <div className="rounded-2xl border border-black/10 bg-white p-5 sm:p-7 lg:p-8">
-            <div className="flex flex-col gap-4 border-b border-black/10 pb-6 sm:flex-row sm:items-end sm:justify-between">
-              <div className="space-y-2">
-                <AdminBadge>Workspace</AdminBadge>
-                <h2 className="text-3xl font-semibold tracking-tight text-black sm:text-4xl">{title}</h2>
-                {description ? <p className="max-w-3xl text-sm leading-6 text-black/60 sm:text-base">{description}</p> : null}
-              </div>
-              {actions ? <div className="flex flex-wrap items-center gap-3">{actions}</div> : null}
+            {/* Main Content Area */}
+            <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
+                {/* Mobile Header */}
+                <header className="flex h-16 items-center justify-between border-b border-black/10 bg-white p-4 md:hidden">
+                    <button
+                        className="-ml-2 rounded-md p-2 text-black/60 hover:bg-black/5"
+                        onClick={() => setIsMobileMenuOpen(true)}
+                    >
+                        <Menu className="h-6 w-6" />
+                    </button>
+                    <span className="font-bold tracking-tight text-black">DripDuo</span>
+                    <div className="w-10" /> {/* Spacer for centering */}
+                </header>
+
+                {/* Dynamic Content */}
+                <main className="flex-1 overflow-y-auto p-4 sm:p-6 md:p-8">
+                    <div className="mx-auto max-w-7xl space-y-6">
+                        {/* Page Header integrated into Shell */}
+                        {(title || description || actions) && (
+                            <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+                                <div>
+                                    {title && <h1 className="text-2xl font-bold text-black">{title}</h1>}
+                                    {description && <p className="mt-1 text-sm text-black/60">{description}</p>}
+                                </div>
+                                {actions && <div className="mt-2 w-full sm:mt-0 sm:w-auto">{actions}</div>}
+                            </div>
+                        )}
+                        {children}
+                    </div>
+                </main>
             </div>
-
-            <div className="pt-6">{children}</div>
-          </div>
-        </main>
-      </div>
-    </div>
-  );
+        </div>
+    );
 }

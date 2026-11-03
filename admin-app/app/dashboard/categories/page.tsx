@@ -9,13 +9,11 @@ import Input from "@/components/Input";
 import AdminShell, { AdminPanel } from "@/components/admin/AdminShell";
 import { slugify } from "@/utils/admin";
 
-// --- EXISTING CATEGORY SERVICES ---
 import { deleteCategory, getCategories, upsertCategory, upsertProductType, getProductTypes } from "@/services/admin";
 import { CategoryRow, ProductTypeRow } from "@/types";
 
 const deleteProductType = async (id: string) => { };
 
-// Added parentId to the empty form state
 const emptyCategoryForm = { id: "", name: "", slug: "", isActive: true, parentId: "" };
 const emptyTypeForm = { id: "", name: "", slug: "", isActive: true };
 
@@ -76,7 +74,6 @@ export default function TaxonomyPage() {
         name: catForm.name.trim(),
         slug: catForm.slug.trim() || slugify(catForm.name),
         isActive: catForm.isActive,
-        // Send parent_id to the backend (null if empty string)
         parentId: catForm.parentId || null, 
       });
       toast.success(catForm.id ? "Category updated" : "Category created");
@@ -141,43 +138,33 @@ export default function TaxonomyPage() {
       title="Taxonomy & Structure"
       description="Keep your collection categories and product types tidy and ready to assign."
       actions={
-        <div className="flex bg-black/5 p-1 rounded-lg">
+        <div className="flex w-full sm:w-auto bg-black/5 p-1 rounded-lg">
           <button
             onClick={() => setActiveTab("categories")}
-            className={`flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-md transition-colors ${activeTab === "categories" ? "bg-white text-black shadow-sm" : "text-black/60 hover:text-black"}`}
+            className={`flex-1 sm:flex-none flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium rounded-md transition-colors ${activeTab === "categories" ? "bg-white text-black shadow-sm" : "text-black/60 hover:text-black"}`}
           >
-            <FolderTree className="h-4 w-4" />
-            Categories
+            <FolderTree className="h-4 w-4" /> Categories
           </button>
           <button
             onClick={() => setActiveTab("types")}
-            className={`flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-md transition-colors ${activeTab === "types" ? "bg-white text-black shadow-sm" : "text-black/60 hover:text-black"}`}
+            className={`flex-1 sm:flex-none flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium rounded-md transition-colors ${activeTab === "types" ? "bg-white text-black shadow-sm" : "text-black/60 hover:text-black"}`}
           >
-            <Tags className="h-4 w-4" />
-            Product Types
+            <Tags className="h-4 w-4" /> Types
           </button>
         </div>
       }
     >
       {activeTab === "categories" && (
-        <div className="grid gap-6 xl:grid-cols-[0.92fr_1.08fr]">
+        <div className="grid gap-6 lg:grid-cols-[1fr_1.2fr] xl:grid-cols-[0.92fr_1.08fr]">
           <AdminPanel>
-            <div className="flex items-center justify-between gap-3">
+            <div className="flex items-start sm:items-center justify-between gap-3 mb-6">
               <div>
                 <h3 className="text-lg font-semibold text-black">Category form</h3>
                 <p className="mt-1 text-sm text-black/60">Maintain names, slugs, and hierarchy.</p>
               </div>
-              <button
-                type="button"
-                onClick={() => void reloadCategories()}
-                className="inline-flex items-center gap-2 rounded-xl border border-black/10 bg-white px-3 py-2 text-xs text-black transition-colors hover:bg-black/5"
-              >
-                <RefreshCw className="h-3.5 w-3.5" />
-                Refresh
-              </button>
             </div>
 
-            <form className="mt-6 space-y-4" onSubmit={handleCatSubmit}>
+            <form className="space-y-4" onSubmit={handleCatSubmit}>
               <div className="space-y-2">
                 <label htmlFor="cat-name" className="text-sm font-medium text-black">Name</label>
                 <Input
@@ -209,7 +196,6 @@ export default function TaxonomyPage() {
                 />
               </div>
 
-              {/* NEW PARENT CATEGORY DROPDOWN */}
               <div className="space-y-2">
                 <label htmlFor="cat-parent" className="text-sm font-medium text-black">Parent Category (Optional)</label>
                 <select
@@ -220,7 +206,6 @@ export default function TaxonomyPage() {
                 >
                   <option value="">None (Top-level Category)</option>
                   {categories
-                    // Filter out the current category so it can't be its own parent
                     .filter((c) => c.id !== catForm.id) 
                     .map((c) => (
                       <option key={c.id} value={c.id}>
@@ -236,40 +221,87 @@ export default function TaxonomyPage() {
                   type="checkbox"
                   checked={catForm.isActive}
                   onChange={(e) => setCatForm((prev) => ({ ...prev, isActive: e.target.checked }))}
-                  className="h-4 w-4 rounded border-border text-emerald-400 focus:ring-emerald-400/30"
+                  className="h-5 w-5 rounded border-border text-emerald-400 focus:ring-emerald-400/30 cursor-pointer"
                 />
-                <label htmlFor="cat-isActive" className="text-sm text-black">Active category</label>
+                <label htmlFor="cat-isActive" className="text-sm font-medium text-black cursor-pointer select-none">Active category</label>
               </div>
 
-              <div className="flex flex-wrap gap-3 pt-2">
-                <Button type="submit" disabled={savingCat} className="gap-2">
+              <div className="flex flex-col-reverse sm:flex-row flex-wrap gap-3 pt-4 border-t border-black/5 mt-4">
+                <Button type="button" onClick={resetCatForm} className="w-full sm:w-auto bg-white text-black border border-black/10 hover:bg-black/5 shadow-none">
+                  Clear form
+                </Button>
+                <Button type="submit" disabled={savingCat} className="w-full sm:w-auto gap-2">
                   {catForm.id ? <Edit3 className="h-4 w-4" /> : <Plus className="h-4 w-4" />}
                   {savingCat ? "Saving..." : catForm.id ? "Update category" : "Create category"}
-                </Button>
-                <Button type="button" onClick={resetCatForm} className="bg-white/10 hover:bg-white/15">
-                  Clear form
                 </Button>
               </div>
             </form>
           </AdminPanel>
 
           <AdminPanel>
-            <div className="flex items-center justify-between gap-3">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-5">
               <div>
                 <h3 className="text-lg font-semibold text-black">Category list</h3>
               </div>
-              <div className="text-sm text-black/60">{categories.length} items</div>
+              <div className="flex items-center gap-4">
+                <div className="hidden sm:inline-flex text-sm text-black/60 shrink-0">{categories.length} items</div>
+                <button
+                  type="button"
+                  onClick={() => void reloadCategories()}
+                  className="inline-flex w-full sm:w-auto justify-center items-center gap-2 rounded-xl border border-black/10 bg-white px-3 py-2 text-xs font-medium text-black transition-colors hover:bg-black/5"
+                >
+                  <RefreshCw className={`h-3.5 w-3.5 ${loadingCats ? "animate-spin opacity-50" : ""}`} />
+                  Refresh
+                </button>
+              </div>
             </div>
 
-            <div className="mt-5 overflow-hidden rounded-2xl border border-black/10">
+            {/* CATEGORY MOBILE VIEW: Cards */}
+            <div className="grid grid-cols-1 gap-3 md:hidden">
+              {loadingCats ? (
+                <div className="p-4 text-center text-sm text-black/60">Loading...</div>
+              ) : categories.length === 0 ? (
+                <div className="p-4 text-center text-sm text-black/60">No categories yet.</div>
+              ) : (
+                categories.map((category) => (
+                  <div key={category.id} className="p-4 bg-white border border-black/10 rounded-xl shadow-sm">
+                    <div className="font-bold text-black text-base">{category.name}</div>
+                    <div className="text-xs text-black/50 mt-1">Parent: {category.parent_id ? categories.find(c => c.id === category.parent_id)?.name || "Unknown" : "None"}</div>
+                    
+                    <div className="flex items-center justify-between mt-4 pt-3 border-t border-black/5">
+                      <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-[10px] uppercase font-bold tracking-wider ${category.is_active ? 'bg-emerald-100 text-emerald-700' : 'bg-black/10 text-black/60'}`}>
+                        {category.is_active ? 'Active' : 'Disabled'}
+                      </span>
+                      <div className="flex gap-2">
+                        <button
+                          onClick={() => setCatForm({ id: category.id, name: category.name, slug: category.slug, isActive: category.is_active, parentId: category.parent_id || "" })}
+                          className="p-2 border border-black/10 rounded-lg hover:bg-black/5"
+                        >
+                          <Edit3 className="h-4 w-4" />
+                        </button>
+                        <button
+                          onClick={() => handleCatDelete(category.id)}
+                          className="p-2 border border-red-100 text-red-600 rounded-lg bg-red-50 hover:bg-red-100"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+
+            {/* CATEGORY DESKTOP VIEW: Table */}
+            <div className="hidden md:block overflow-hidden rounded-2xl border border-black/10">
               <div className="overflow-x-auto">
-                <table className="min-w-full divide-y divide-black/10 text-left text-sm">
+                <table className="min-w-[600px] w-full divide-y divide-black/10 text-left text-sm">
                   <thead className="bg-black/5 text-black">
                     <tr>
                       <th className="px-4 py-3 font-medium">Category</th>
                       <th className="px-4 py-3 font-medium">Parent</th>
                       <th className="px-4 py-3 font-medium">Status</th>
-                      <th className="px-4 py-3 font-medium">Actions</th>
+                      <th className="px-4 py-3 font-medium text-center">Actions</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-black/10 bg-white">
@@ -279,17 +311,20 @@ export default function TaxonomyPage() {
                       <tr><td className="px-4 py-6 text-black/60 text-center" colSpan={4}>No categories yet.</td></tr>
                     ) : (
                       categories.map((category) => (
-                        <tr key={category.id}>
-                          <td className="px-4 py-4 text-black/60 font-medium">{category.name}</td>
-                          <td className="px-4 py-4 text-black/50 text-xs">
-                            {/* Find and display the parent name if a parent_id exists */}
+                        <tr key={category.id} className="transition-colors hover:bg-black/2 group">
+                          <td className="px-4 py-4 text-black font-medium">{category.name}</td>
+                          <td className="px-4 py-4 text-black/60 text-xs">
                             {category.parent_id 
                               ? categories.find(c => c.id === category.parent_id)?.name || "Unknown"
                               : "—"}
                           </td>
-                          <td className="px-4 py-4 text-black">{category.is_active ? "Active" : "Disabled"}</td>
                           <td className="px-4 py-4">
-                            <div className="flex flex-wrap gap-2">
+                            <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${category.is_active ? 'bg-emerald-100 text-emerald-700' : 'bg-black/10 text-black/60'}`}>
+                                {category.is_active ? 'Active' : 'Disabled'}
+                            </span>
+                          </td>
+                          <td className="px-4 py-4">
+                            <div className="flex items-center justify-center gap-2">
                               <button
                                 onClick={() =>
                                   setCatForm({
@@ -297,14 +332,14 @@ export default function TaxonomyPage() {
                                     name: category.name,
                                     slug: category.slug,
                                     isActive: category.is_active,
-                                    parentId: category.parent_id || "", // Ensure empty string if null
+                                    parentId: category.parent_id || "", 
                                   })
                                 }
-                                className="p-2 border rounded-xl hover:bg-black/5 transition-colors"
+                                className="p-2 border border-black/10 rounded-xl hover:bg-black/5 transition-colors focus:ring-2 focus:ring-black/10 outline-none"
                               >
                                 <Edit3 className="h-3.5 w-3.5" />
                               </button>
-                              <button onClick={() => handleCatDelete(category.id)} className="p-2 border rounded-xl hover:bg-black/5 transition-colors text-red-600">
+                              <button onClick={() => handleCatDelete(category.id)} className="p-2 border border-transparent rounded-xl hover:bg-red-50 text-red-600 transition-colors focus:ring-2 focus:ring-red-100 outline-none">
                                 <Trash2 className="h-3.5 w-3.5" />
                               </button>
                             </div>
@@ -321,24 +356,16 @@ export default function TaxonomyPage() {
       )}
 
       {activeTab === "types" && (
-        <div className="grid gap-6 xl:grid-cols-[0.92fr_1.08fr]">
+        <div className="grid gap-6 lg:grid-cols-[1fr_1.2fr] xl:grid-cols-[0.92fr_1.08fr]">
           <AdminPanel>
-            <div className="flex items-center justify-between gap-3">
+            <div className="flex items-start sm:items-center justify-between gap-3 mb-6">
               <div>
                 <h3 className="text-lg font-semibold text-black">Product Type form</h3>
-                <p className="mt-1 text-sm text-black/60">Manage base product types (e.g. T-Shirt, Mug).</p>
+                <p className="mt-1 text-sm text-black/60">Manage base product types.</p>
               </div>
-              <button
-                type="button"
-                onClick={() => void reloadTypes()}
-                className="inline-flex items-center gap-2 rounded-xl border border-black/10 bg-white px-3 py-2 text-xs text-black transition-colors hover:bg-black/5"
-              >
-                <RefreshCw className="h-3.5 w-3.5" />
-                Refresh
-              </button>
             </div>
 
-            <form className="mt-6 space-y-4" onSubmit={handleTypeSubmit}>
+            <form className="space-y-4" onSubmit={handleTypeSubmit}>
               <div className="space-y-2">
                 <label htmlFor="type-name" className="text-sm font-medium text-black">Name</label>
                 <Input
@@ -368,46 +395,94 @@ export default function TaxonomyPage() {
                   onChange={(e) => setTypeForm((prev) => ({ ...prev, slug: e.target.value }))}
                 />
               </div>
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-3 pt-2">
                 <input
                   id="type-isActive"
                   type="checkbox"
                   checked={typeForm.isActive}
                   onChange={(e) => setTypeForm((prev) => ({ ...prev, isActive: e.target.checked }))}
-                  className="h-4 w-4 rounded border-border text-emerald-400 focus:ring-emerald-400/30"
+                  className="h-5 w-5 rounded border-border text-emerald-400 focus:ring-emerald-400/30 cursor-pointer"
                 />
-                <label htmlFor="type-isActive" className="text-sm text-black">Active Type</label>
+                <label htmlFor="type-isActive" className="text-sm font-medium text-black cursor-pointer select-none">Active Type</label>
               </div>
 
-              <div className="flex flex-wrap gap-3 pt-2">
-                <Button type="submit" disabled={savingType} className="gap-2">
+              <div className="flex flex-col-reverse sm:flex-row flex-wrap gap-3 pt-4 border-t border-black/5 mt-4">
+                <Button type="button" onClick={resetTypeForm} className="w-full sm:w-auto bg-white text-black border border-black/10 hover:bg-black/5 shadow-none">
+                  Clear form
+                </Button>
+                <Button type="submit" disabled={savingType} className="w-full sm:w-auto gap-2">
                   {typeForm.id ? <Edit3 className="h-4 w-4" /> : <Plus className="h-4 w-4" />}
                   {savingType ? "Saving..." : typeForm.id ? "Update Type" : "Create Type"}
-                </Button>
-                <Button type="button" onClick={resetTypeForm} className="bg-white/10 hover:bg-white/15">
-                  Clear form
                 </Button>
               </div>
             </form>
           </AdminPanel>
 
           <AdminPanel>
-            <div className="flex items-center justify-between gap-3">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-5">
               <div>
                 <h3 className="text-lg font-semibold text-black">Product Type list</h3>
               </div>
-              <div className="text-sm text-black/60">{productTypes.length} items</div>
+              <div className="flex items-center gap-4">
+                <div className="hidden sm:inline-flex text-sm text-black/60 shrink-0">{productTypes.length} items</div>
+                <button
+                  type="button"
+                  onClick={() => void reloadTypes()}
+                  className="inline-flex w-full sm:w-auto justify-center items-center gap-2 rounded-xl border border-black/10 bg-white px-3 py-2 text-xs font-medium text-black transition-colors hover:bg-black/5"
+                  disabled={loadingTypes}
+                >
+                  <RefreshCw className={`h-3.5 w-3.5 ${loadingTypes ? "animate-spin opacity-50" : ""}`} />
+                  Refresh
+                </button>
+              </div>
             </div>
 
-            <div className="mt-5 overflow-hidden rounded-2xl border border-black/10">
+            {/* TYPES MOBILE VIEW: Cards */}
+            <div className="grid grid-cols-1 gap-3 md:hidden">
+              {loadingTypes ? (
+                <div className="p-4 text-center text-sm text-black/60">Loading...</div>
+              ) : productTypes.length === 0 ? (
+                <div className="p-4 text-center text-sm text-black/60">No product types yet.</div>
+              ) : (
+                productTypes.map((type) => (
+                  <div key={type.id} className="p-4 bg-white border border-black/10 rounded-xl shadow-sm">
+                    <div className="font-bold text-black text-base">{type.name}</div>
+                    <div className="text-xs text-black/50 mt-1">Slug: {type.slug}</div>
+                    
+                    <div className="flex items-center justify-between mt-4 pt-3 border-t border-black/5">
+                      <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-[10px] uppercase font-bold tracking-wider ${type.is_active ? 'bg-emerald-100 text-emerald-700' : 'bg-black/10 text-black/60'}`}>
+                        {type.is_active ? 'Active' : 'Disabled'}
+                      </span>
+                      <div className="flex gap-2">
+                        <button
+                          onClick={() => setTypeForm({ id: type.id, name: type.name, slug: type.slug, isActive: type.is_active })}
+                          className="p-2 border border-black/10 rounded-lg hover:bg-black/5"
+                        >
+                          <Edit3 className="h-4 w-4" />
+                        </button>
+                        <button
+                          onClick={() => handleTypeDelete(type.id)}
+                          className="p-2 border border-red-100 text-red-600 rounded-lg bg-red-50 hover:bg-red-100"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+
+            {/* TYPES DESKTOP VIEW: Table */}
+            <div className="hidden md:block overflow-hidden rounded-2xl border border-black/10">
               <div className="overflow-x-auto">
-                <table className="min-w-full divide-y divide-black/10 text-left text-sm">
+                <table className="min-w-[500px] w-full divide-y divide-black/10 text-left text-sm">
                   <thead className="bg-black/5 text-black">
                     <tr>
                       <th className="px-4 py-3 font-medium">Type</th>
                       <th className="px-4 py-3 font-medium">Slug</th>
                       <th className="px-4 py-3 font-medium">Status</th>
-                      <th className="px-4 py-3 font-medium">Actions</th>
+                      <th className="px-4 py-3 font-medium text-center">Actions</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-black/10 bg-white">
@@ -417,16 +492,20 @@ export default function TaxonomyPage() {
                       <tr><td className="px-4 py-6 text-black/60 text-center" colSpan={4}>No product types yet.</td></tr>
                     ) : (
                       productTypes.map((type) => (
-                        <tr key={type.id}>
-                          <td className="px-4 py-4 text-black/60">{type.name}</td>
+                        <tr key={type.id} className="transition-colors hover:bg-black/2 group">
+                          <td className="px-4 py-4 text-black font-medium">{type.name}</td>
                           <td className="px-4 py-4 text-black/60">{type.slug}</td>
-                          <td className="px-4 py-4 text-black">{type.is_active ? "Active" : "Disabled"}</td>
                           <td className="px-4 py-4">
-                            <div className="flex flex-wrap gap-2">
-                              <button onClick={() => setTypeForm({ id: type.id, name: type.name, slug: type.slug, isActive: type.is_active })} className="p-2 border rounded-xl hover:bg-black/5 transition-colors">
+                             <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${type.is_active ? 'bg-emerald-100 text-emerald-700' : 'bg-black/10 text-black/60'}`}>
+                                {type.is_active ? 'Active' : 'Disabled'}
+                            </span>
+                          </td>
+                          <td className="px-4 py-4">
+                            <div className="flex flex-wrap items-center justify-center gap-2">
+                              <button onClick={() => setTypeForm({ id: type.id, name: type.name, slug: type.slug, isActive: type.is_active })} className="p-2 border border-black/10 rounded-xl hover:bg-black/5 transition-colors focus:ring-2 focus:ring-black/10 outline-none">
                                 <Edit3 className="h-3.5 w-3.5" />
                               </button>
-                              <button onClick={() => handleTypeDelete(type.id)} className="p-2 border rounded-xl hover:bg-black/5 transition-colors text-red-600">
+                              <button onClick={() => handleTypeDelete(type.id)} className="p-2 border border-transparent rounded-xl hover:bg-red-50 text-red-600 transition-colors focus:ring-2 focus:ring-red-100 outline-none">
                                 <Trash2 className="h-3.5 w-3.5" />
                               </button>
                             </div>
